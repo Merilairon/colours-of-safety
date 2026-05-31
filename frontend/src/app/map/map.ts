@@ -81,7 +81,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.addDrawControls();
     }
 
-    this.map.on(L.Draw.Event.CREATED, (e) =>
+    this.map.on('draw:created', (e) =>
       this.onShapeCreated(e as L.DrawEvents.Created),
     );
 
