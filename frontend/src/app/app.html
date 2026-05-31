@@ -1,0 +1,33 @@
+<header class="topbar">
+  <a class="brand" routerLink="/">
+    <span class="brand-mark">🏳️‍🌈</span>
+    <span class="brand-name">Colours of Safety</span>
+  </a>
+
+  <nav class="nav">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Map</a>
+    @if (isLoggedIn()) {
+      <a routerLink="/mine" routerLinkActive="active">My submissions</a>
+    }
+    @if (isReviewer()) {
+      <a routerLink="/review" routerLinkActive="active">Review queue</a>
+    }
+  </nav>
+
+  <div class="account">
+    @if (isLoggedIn()) {
+      <span class="who">{{ user()?.displayName }}</span>
+      @if (isReviewer()) {
+        <span class="badge">reviewer</span>
+      }
+      <button type="button" class="link-btn" (click)="logout()">Log out</button>
+    } @else {
+      <a routerLink="/login" routerLinkActive="active">Log in</a>
+      <a routerLink="/register" class="cta">Sign up</a>
+    }
+  </div>
+</header>
+
+<main class="content">
+  <router-outlet />
+</main>

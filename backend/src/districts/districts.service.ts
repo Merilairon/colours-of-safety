@@ -1,0 +1,65 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ReviewDto } from '../common/review.dto';
+import { ReviewStatus } from '../common/review-status.enum';
+import { District } from './district.entity';
+import { CreateDistrictDto } from './dto/create-district.dto';
+
+@Injectable()
+export class DistrictsService {
+  constructor(
+    @InjectRepository(District)
+    private readonly districts: Repository<District>,
+  ) {}
+
+  create(dto: CreateDistrictDto, userId: string): Promise<District> {
+    const district = this.districts.create({
+      name: dto.name,
+      description: dto.description ?? '',
+      safetyRating: dto.safetyRating,
+      area: { type: 'Polygon', coordinates: dto.area.coordinates },
+      status: ReviewStatus.PENDING,
+      createdById: userId,
+    });
+    return this.districts.save(district);
+  }
+
+  findApproved(): Promise<District[]> {
+    return this.districts.find({
+      where: { status: ReviewStatus.APPROVED },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  findByStatus(status: ReviewStatus): Promise<District[]> {
+    return this.districts.find({
+      where: { status },
+      order: { createdAt: 'ASC' },
+    });
+  }
+
+  findMine(userId: string): Promise<District[]> {
+    return this.districts.find({
+      where: { createdById: userId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async review(
+    id: string,
+    dto: ReviewDto,
+    reviewerId: string,
+  ): Promise<District> {
+    const district = await this.districts.findOne({ where: { id } });
+    if (!district) {
+      throw new NotFoundException('District not found');
+    }
+    await this.districts.update(id, {
+      status: dto.status,
+      reviewNote: dto.reviewNote ?? null,
+      reviewedById: reviewerId,
+    });
+    return this.districts.findOneOrFail({ where: { id } });
+  }
+}

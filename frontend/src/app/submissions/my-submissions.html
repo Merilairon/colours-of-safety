@@ -1,0 +1,37 @@
+<div class="page">
+  <h1>My submissions</h1>
+  <p class="sub">Track the review status of places and districts you've contributed.</p>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else if (rows().length === 0) {
+    <p class="muted">
+      You haven't added anything yet. Head to the <a routerLink="/">map</a> to mark a safe place.
+    </p>
+  } @else {
+    <ul class="list">
+      @for (row of rows(); track row.id) {
+        <li class="row">
+          <span class="kind">{{ row.kind === 'poi' ? 'Place' : 'District' }}</span>
+          <div class="main">
+            <div class="name">{{ row.name }}</div>
+            <div class="meta">
+              @if (row.category) {
+                <span>{{ row.category }}</span> ·
+              }
+              <span [style.color]="colorFor(row.safetyRating)">{{ safetyLabel(row.safetyRating) }}</span>
+            </div>
+            @if (row.reviewNote) {
+              <div class="note">Reviewer: “{{ row.reviewNote }}”</div>
+            }
+          </div>
+          <span class="status" [class]="row.status">{{ row.status }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>
