@@ -1,0 +1,84 @@
+<div class="map-wrap">
+  <div #mapEl class="map"></div>
+
+  <div class="legend">
+    <h3>Safety rating</h3>
+    @for (r of [5, 4, 3, 2, 1]; track r) {
+      <div class="legend-row">
+        <span class="swatch" [style.background]="colorFor(r)"></span>
+        {{ safetyLabel(r) }}
+      </div>
+    }
+    <p class="legend-note">Markers = places · Shaded areas = districts</p>
+  </div>
+
+  @if (!isLoggedIn()) {
+    <div class="hint">
+      <a routerLink="/login">Log in</a> to mark a queer-friendly place or district.
+    </div>
+  } @else if (!draft()) {
+    <div class="hint">
+      Use the tools in the top-right to drop a place (◯) or draw a district (▱).
+    </div>
+  }
+
+  @if (loadError()) {
+    <div class="hint error">{{ loadError() }}</div>
+  }
+
+  @if (toast()) {
+    <div class="toast">{{ toast() }}</div>
+  }
+
+  @if (draft(); as d) {
+    <div class="draft-panel">
+      <h2>{{ d.kind === 'poi' ? 'New place' : 'New district' }}</h2>
+      <p class="sub">It will be visible publicly once a reviewer approves it.</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <label>
+          Name
+          <input type="text" formControlName="name" placeholder="e.g. Rainbow Cafe" />
+        </label>
+
+        @if (d.kind === 'poi') {
+          <label>
+            Category
+            <select formControlName="category">
+              @for (c of categories; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          </label>
+        }
+
+        <label>
+          Safety rating: <strong>{{ safetyLabel(form.controls.safetyRating.value) }}</strong>
+          <input
+            type="range"
+            min="1"
+            max="5"
+            step="1"
+            formControlName="safetyRating"
+          />
+        </label>
+
+        <label>
+          Notes (optional)
+          <textarea
+            rows="3"
+            formControlName="description"
+            placeholder="Why is this place safe / welcoming?"
+          ></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="button" class="secondary" (click)="cancelDraft()">Cancel</button>
+          <button type="submit" [disabled]="submitting()">
+            {{ submitting() ? 'Submitting…' : 'Submit for review' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>
