@@ -42,7 +42,6 @@ export class MySubmissionsComponent implements OnInit {
   protected readonly success = signal<string | null>(null);
   protected readonly safetyLabel = safetyLabel;
   protected readonly colorFor = safetyColor;
-  protected readonly ReviewStatus = ReviewStatus;
 
   protected readonly editingRow = signal<SubmissionRow | null>(null);
   protected readonly deletingId = signal<string | null>(null);
@@ -98,7 +97,7 @@ export class MySubmissionsComponent implements OnInit {
   }
 
   protected startEdit(row: SubmissionRow): void {
-    if (row.status !== ReviewStatus.PENDING) return;
+    if (row.status !== 'pending') return;
     this.editingRow.set(row);
     this.editForm.patchValue({
       name: row.name,
@@ -127,7 +126,7 @@ export class MySubmissionsComponent implements OnInit {
       area: row.area,
     };
 
-    const update$ =
+    const update$: Observable<void> =
       row.kind === 'poi'
         ? this.markings.updatePoi(row.id, payload as CreatePoiPayload)
         : this.markings.updateDistrict(row.id, payload as CreateDistrictPayload);
@@ -155,9 +154,9 @@ export class MySubmissionsComponent implements OnInit {
   }
 
   protected confirmDelete(row: SubmissionRow): void {
-    if (row.status !== ReviewStatus.PENDING) return;
+    if (row.status !== 'pending') return;
 
-    const delete$ =
+    const delete$: Observable<void> =
       row.kind === 'poi' ? this.markings.deletePoi(row.id) : this.markings.deleteDistrict(row.id);
 
     delete$.subscribe({
