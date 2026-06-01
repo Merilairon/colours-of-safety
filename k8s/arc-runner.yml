@@ -9,20 +9,24 @@ kind: ClusterRole
 metadata:
   name: colours-of-safety-deployer
 rules:
-  - apiGroups: ["", "apps", "networking.k8s.io"]
+  - apiGroups: [""]
     resources:
       - namespaces
       - configmaps
       - secrets
       - services
       - persistentvolumeclaims
-      - deployments
-      - ingresses
-    verbs: ["get", "list", "create", "update", "patch", "apply"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
   - apiGroups: ["apps"]
     resources:
+      - deployments
       - deployments/status
-    verbs: ["get"]
+      - replicasets
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - ingresses
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
