@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: colours-of-safety-ingress
+  namespace: colours-of-safety
+spec:
+  ingressClassName: cloudflare-tunnel
+  rules:
+    - host: coloursofsafety.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

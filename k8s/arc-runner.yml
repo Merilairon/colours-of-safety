@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: colours-of-safety-runner
+  namespace: actions-runner-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: colours-of-safety-deployer
+rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources:
+      - namespaces
+      - configmaps
+      - secrets
+      - services
+      - persistentvolumeclaims
+      - deployments
+      - ingresses
+    verbs: ["get", "list", "create", "update", "patch", "apply"]
+  - apiGroups: ["apps"]
+    resources:
+      - deployments/status
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: colours-of-safety-deployer-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: colours-of-safety-deployer
+subjects:
+  - kind: ServiceAccount
+    name: colours-of-safety-runner
+    namespace: actions-runner-system
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: colours-of-safety-runner
+  namespace: actions-runner-system
+spec:
+  replicas: 1
+  template:
+    spec:
+      repository: Merilairon/colours-of-safety
+      serviceAccountName: colours-of-safety-runner
+      labels:
+        - colours-of-safety
