@@ -62,4 +62,42 @@ export class DistrictsService {
     });
     return this.districts.findOneOrFail({ where: { id } });
   }
+
+  async update(
+    id: string,
+    dto: CreateDistrictDto,
+    userId: string,
+  ): Promise<District> {
+    const district = await this.districts.findOne({ where: { id } });
+    if (!district) {
+      throw new NotFoundException('District not found');
+    }
+    if (district.createdById !== userId) {
+      throw new NotFoundException('District not found');
+    }
+    if (district.status !== ReviewStatus.PENDING) {
+      throw new NotFoundException('Only pending submissions can be edited');
+    }
+    await this.districts.update(id, {
+      name: dto.name,
+      description: dto.description ?? '',
+      safetyRating: dto.safetyRating,
+      area: { type: 'Polygon', coordinates: dto.area.coordinates },
+    });
+    return this.districts.findOneOrFail({ where: { id } });
+  }
+
+  async delete(id: string, userId: string): Promise<void> {
+    const district = await this.districts.findOne({ where: { id } });
+    if (!district) {
+      throw new NotFoundException('District not found');
+    }
+    if (district.createdById !== userId) {
+      throw new NotFoundException('District not found');
+    }
+    if (district.status !== ReviewStatus.PENDING) {
+      throw new NotFoundException('Only pending submissions can be deleted');
+    }
+    await this.districts.delete(id);
+  }
 }

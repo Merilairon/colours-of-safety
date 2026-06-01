@@ -1,8 +1,15 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { MarkingsService } from '../core/markings.service';
-import { District, Poi, ReviewStatus } from '../core/models';
+import {
+  CreateDistrictPayload,
+  CreatePoiPayload,
+  District,
+  Poi,
+  ReviewStatus,
+} from '../core/models';
 import { safetyColor, safetyLabel } from '../core/safety';
 
 interface SubmissionRow {
@@ -14,22 +21,38 @@ interface SubmissionRow {
   status: ReviewStatus;
   reviewNote: string | null;
   createdAt: string;
+  description?: string;
+  location?: Poi['location'];
+  area?: District['area'];
 }
 
 @Component({
   selector: 'app-my-submissions',
-  imports: [RouterLink],
+  imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './my-submissions.html',
   styleUrl: './my-submissions.scss',
 })
 export class MySubmissionsComponent implements OnInit {
   private readonly markings = inject(MarkingsService);
+  private readonly fb = inject(FormBuilder);
 
   protected readonly rows = signal<SubmissionRow[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
+  protected readonly success = signal<string | null>(null);
   protected readonly safetyLabel = safetyLabel;
   protected readonly colorFor = safetyColor;
+  protected readonly ReviewStatus = ReviewStatus;
+
+  protected readonly editingRow = signal<SubmissionRow | null>(null);
+  protected readonly deletingId = signal<string | null>(null);
+
+  protected readonly editForm = this.fb.group({
+    name: ['', Validators.required],
+    category: ['other'],
+    safetyRating: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
+    description: [''],
+  });
 
   ngOnInit(): void {
     Promise.all([
@@ -37,9 +60,7 @@ export class MySubmissionsComponent implements OnInit {
       this.toRows(this.markings.getMyDistricts(), 'district'),
     ])
       .then(([pois, districts]) => {
-        const all = [...pois, ...districts].sort((a, b) =>
-          b.createdAt.localeCompare(a.createdAt),
-        );
+        const all = [...pois, ...districts].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
         this.rows.set(all);
         this.loading.set(false);
       })
@@ -66,10 +87,110 @@ export class MySubmissionsComponent implements OnInit {
               status: item.status,
               reviewNote: item.reviewNote,
               createdAt: item.createdAt,
+              description: item.description,
+              location: kind === 'poi' ? (item as Poi).location : undefined,
+              area: kind === 'district' ? (item as District).area : undefined,
             })),
           ),
         error: reject,
       });
     });
   }
+
+  protected startEdit(row: SubmissionRow): void {
+    if (row.status !== ReviewStatus.PENDING) return;
+    this.editingRow.set(row);
+    this.editForm.patchValue({
+      name: row.name,
+      category: row.category || 'other',
+      safetyRating: row.safetyRating,
+      description: row.description || '',
+    });
+  }
+
+  protected cancelEdit(): void {
+    this.editingRow.set(null);
+    this.editForm.reset();
+  }
+
+  protected saveEdit(): void {
+    const row = this.editingRow();
+    if (!row || this.editForm.invalid) return;
+
+    const formValue = this.editForm.value;
+    const payload = {
+      name: formValue.name!,
+      description: formValue.description || '',
+      category: row.kind === 'poi' ? formValue.category! : undefined,
+      safetyRating: formValue.safetyRating!,
+      location: row.location!,
+      area: row.area,
+    };
+
+    const update$ =
+      row.kind === 'poi'
+        ? this.markings.updatePoi(row.id, payload as CreatePoiPayload)
+        : this.markings.updateDistrict(row.id, payload as CreateDistrictPayload);
+
+    update$.subscribe({
+      next: () => {
+        this.success.set(`${row.kind === 'poi' ? 'Place' : 'District'} updated successfully`);
+        this.editingRow.set(null);
+        this.reload();
+        setTimeout(() => this.success.set(null), 3000);
+      },
+      error: () => {
+        this.error.set('Failed to update. Only pending submissions can be edited.');
+        setTimeout(() => this.error.set(null), 3000);
+      },
+    });
+  }
+
+  protected startDelete(id: string): void {
+    this.deletingId.set(id);
+  }
+
+  protected cancelDelete(): void {
+    this.deletingId.set(null);
+  }
+
+  protected confirmDelete(row: SubmissionRow): void {
+    if (row.status !== ReviewStatus.PENDING) return;
+
+    const delete$ =
+      row.kind === 'poi' ? this.markings.deletePoi(row.id) : this.markings.deleteDistrict(row.id);
+
+    delete$.subscribe({
+      next: () => {
+        this.success.set(`${row.kind === 'poi' ? 'Place' : 'District'} deleted successfully`);
+        this.deletingId.set(null);
+        this.reload();
+        setTimeout(() => this.success.set(null), 3000);
+      },
+      error: () => {
+        this.error.set('Failed to delete. Only pending submissions can be deleted.');
+        this.deletingId.set(null);
+        setTimeout(() => this.error.set(null), 3000);
+      },
+    });
+  }
+
+  private reload(): void {
+    this.loading.set(true);
+    Promise.all([
+      this.toRows(this.markings.getMyPois(), 'poi'),
+      this.toRows(this.markings.getMyDistricts(), 'district'),
+    ])
+      .then(([pois, districts]) => {
+        const all = [...pois, ...districts].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        this.rows.set(all);
+        this.loading.set(false);
+      })
+      .catch(() => {
+        this.error.set('Could not load your submissions.');
+        this.loading.set(false);
+      });
+  }
+
+  protected readonly categories = ['bar', 'cafe', 'community', 'health', 'other', 'shop', 'venue'];
 }

@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -59,5 +61,24 @@ export class DistrictsController {
     @CurrentUser() user: AuthUser,
   ) {
     return this.districts.review(id, dto, user.id);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateDistrictDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.districts.update(id, dto, user.id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.districts.delete(id, user.id);
   }
 }

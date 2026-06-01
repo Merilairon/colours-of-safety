@@ -6,6 +6,10 @@
     <p class="error">{{ error() }}</p>
   }
 
+  @if (success()) {
+    <p class="success">{{ success() }}</p>
+  }
+
   @if (loading()) {
     <p class="muted">Loading…</p>
   } @else if (rows().length === 0) {
@@ -23,15 +27,93 @@
               @if (row.category) {
                 <span>{{ row.category }}</span> ·
               }
-              <span [style.color]="colorFor(row.safetyRating)">{{ safetyLabel(row.safetyRating) }}</span>
+              <span [style.color]="colorFor(row.safetyRating)">{{
+                safetyLabel(row.safetyRating)
+              }}</span>
             </div>
             @if (row.reviewNote) {
               <div class="note">Reviewer: “{{ row.reviewNote }}”</div>
             }
           </div>
-          <span class="status" [class]="row.status">{{ row.status }}</span>
+          <div class="actions-col">
+            <span class="status" [class]="row.status">{{ row.status }}</span>
+            @if (row.status === 'pending') {
+              <div class="row-actions">
+                <button type="button" class="icon-btn" (click)="startEdit(row)" title="Edit">
+                  ✎
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn danger"
+                  (click)="startDelete(row.id)"
+                  title="Delete"
+                >
+                  ✕
+                </button>
+              </div>
+            }
+          </div>
         </li>
       }
     </ul>
+  }
+
+  <!-- Edit Modal -->
+  @if (editingRow(); as editRow) {
+    <div class="modal-overlay" (click)="cancelEdit()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h3>Edit {{ editRow.kind === 'poi' ? 'Place' : 'District' }}</h3>
+        <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+          <label>
+            Name
+            <input type="text" formControlName="name" />
+          </label>
+
+          @if (editRow.kind === 'poi') {
+            <label>
+              Category
+              <select formControlName="category">
+                @for (c of categories; track c) {
+                  <option [value]="c">{{ c }}</option>
+                }
+              </select>
+            </label>
+          }
+
+          <label>
+            Safety: {{ safetyLabel(editForm.value.safetyRating || 3) }}
+            <input type="range" min="1" max="5" formControlName="safetyRating" />
+          </label>
+
+          <label>
+            Description
+            <textarea formControlName="description" rows="3"></textarea>
+          </label>
+
+          <div class="actions">
+            <button type="button" class="secondary" (click)="cancelEdit()">Cancel</button>
+            <button type="submit" [disabled]="editForm.invalid">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Delete Confirmation Modal -->
+  @if (deletingId(); as delId) {
+    <div class="modal-overlay" (click)="cancelDelete()">
+      <div class="modal confirm-modal" (click)="$event.stopPropagation()">
+        @for (row of rows(); track row.id) {
+          @if (row.id === delId) {
+            <h3>Delete {{ row.kind === 'poi' ? 'Place' : 'District' }}?</h3>
+            <p class="warn">"{{ row.name }}" will be permanently removed.</p>
+            <div class="actions">
+              <button type="button" class="secondary" (click)="cancelDelete()">Cancel</button>
+              <button type="button" class="danger" (click)="confirmDelete(row)">Delete</button>
+            </div>
+          }
+        }
+      </div>
+    </div>
   }
 </div>

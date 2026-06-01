@@ -59,4 +59,39 @@ export class PoisService {
     });
     return this.pois.findOneOrFail({ where: { id } });
   }
+
+  async update(id: string, dto: CreatePoiDto, userId: string): Promise<Poi> {
+    const poi = await this.pois.findOne({ where: { id } });
+    if (!poi) {
+      throw new NotFoundException('POI not found');
+    }
+    if (poi.createdById !== userId) {
+      throw new NotFoundException('POI not found');
+    }
+    if (poi.status !== ReviewStatus.PENDING) {
+      throw new NotFoundException('Only pending submissions can be edited');
+    }
+    await this.pois.update(id, {
+      name: dto.name,
+      description: dto.description ?? '',
+      category: dto.category ?? 'other',
+      safetyRating: dto.safetyRating,
+      location: { type: 'Point', coordinates: dto.location.coordinates },
+    });
+    return this.pois.findOneOrFail({ where: { id } });
+  }
+
+  async delete(id: string, userId: string): Promise<void> {
+    const poi = await this.pois.findOne({ where: { id } });
+    if (!poi) {
+      throw new NotFoundException('POI not found');
+    }
+    if (poi.createdById !== userId) {
+      throw new NotFoundException('POI not found');
+    }
+    if (poi.status !== ReviewStatus.PENDING) {
+      throw new NotFoundException('Only pending submissions can be deleted');
+    }
+    await this.pois.delete(id);
+  }
 }

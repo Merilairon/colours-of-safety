@@ -1,13 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import {
-  CreateDistrictPayload,
-  CreatePoiPayload,
-  District,
-  Poi,
-  ReviewPayload,
-} from './models';
+import { CreateDistrictPayload, CreatePoiPayload, District, Poi, ReviewPayload } from './models';
 
 @Injectable({ providedIn: 'root' })
 export class MarkingsService {
@@ -34,6 +28,14 @@ export class MarkingsService {
     return this.http.patch<Poi>(`/api/pois/${id}/review`, payload);
   }
 
+  updatePoi(id: string, payload: CreatePoiPayload): Observable<Poi> {
+    return this.http.put<Poi>(`/api/pois/${id}`, payload);
+  }
+
+  deletePoi(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/pois/${id}`);
+  }
+
   // ----- Districts -----
   getApprovedDistricts(): Observable<District[]> {
     return this.http.get<District[]>('/api/districts');
@@ -53,5 +55,13 @@ export class MarkingsService {
 
   reviewDistrict(id: string, payload: ReviewPayload): Observable<District> {
     return this.http.patch<District>(`/api/districts/${id}/review`, payload);
+  }
+
+  updateDistrict(id: string, payload: CreateDistrictPayload): Observable<District> {
+    return this.http.put<District>(`/api/districts/${id}`, payload);
+  }
+
+  deleteDistrict(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/districts/${id}`);
   }
 }

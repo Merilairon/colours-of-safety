@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -59,5 +61,24 @@ export class PoisController {
     @CurrentUser() user: AuthUser,
   ) {
     return this.pois.review(id, dto, user.id);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreatePoiDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.pois.update(id, dto, user.id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.pois.delete(id, user.id);
   }
 }
