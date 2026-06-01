@@ -52,6 +52,7 @@
           <textarea
             rows="2"
             placeholder="Optional review note…"
+            [attr.aria-label]="'Optional review note for ' + item.name"
             [value]="item.note"
             (input)="setNote(item, $any($event.target).value)"
           ></textarea>

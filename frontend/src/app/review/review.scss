@@ -47,6 +47,11 @@ h1 {
       border-color: #e84393;
       color: #fff;
     }
+
+    &:focus-visible {
+      outline: 2px solid #e84393;
+      outline-offset: 2px;
+    }
   }
 }
 
@@ -112,9 +117,14 @@ h1 {
     resize: vertical;
 
     &:focus {
-      outline: none;
+      outline: 2px solid #e84393;
+      outline-offset: 2px;
       border-color: #e84393;
       box-shadow: 0 0 0 3px rgba(232, 67, 147, 0.15);
+
+      @media (forced-colors: active) {
+        outline: 2px solid ButtonText;
+      }
     }
   }
 

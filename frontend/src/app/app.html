@@ -1,10 +1,23 @@
 <header class="topbar">
-  <a class="brand" routerLink="/">
-    <span class="brand-mark">🏳️‍🌈</span>
+  <a class="brand" routerLink="/" aria-label="Colours of Safety – home">
+    <span class="brand-mark" aria-hidden="true">🏳️‍🌈</span>
     <span class="brand-name">Colours of Safety</span>
   </a>
 
-  <nav class="nav">
+  <button
+    type="button"
+    class="nav-toggle"
+    [attr.aria-expanded]="navOpen()"
+    aria-controls="main-nav"
+    aria-label="Toggle navigation"
+    (click)="navOpen.set(!navOpen())"
+  >
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <nav id="main-nav" class="nav" [class.open]="navOpen()" aria-label="Main navigation">
     <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Map</a>
     @if (isLoggedIn()) {
       <a routerLink="/mine" routerLinkActive="active">My submissions</a>
@@ -33,7 +46,7 @@
   </div>
 </header>
 
-<main class="content">
+<main class="content" id="main-content">
   <router-outlet />
 </main>
 

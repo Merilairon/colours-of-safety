@@ -3,18 +3,18 @@
 **Product:** Colours of Safety  
 **URL:** coloursofsafety.com  
 **Purpose:** Community map for LGBTQIA+ safe places and districts  
-**Last updated:** 2026-06-01
+**Last updated:** 2026-06-01 (rev 2)
 
 ---
 
 ## 1. Users & Goals
 
-| Persona | Goal |
-|---|---|
-| **Guest** | Browse the map to find safe places/districts without an account |
-| **Contributor** | Submit new safe places or districts and track their status |
-| **Reviewer** | Moderate community submissions before they go public |
-| **Admin** | Manage user accounts and roles |
+| Persona         | Goal                                                            |
+| --------------- | --------------------------------------------------------------- |
+| **Guest**       | Browse the map to find safe places/districts without an account |
+| **Contributor** | Submit new safe places or districts and track their status      |
+| **Reviewer**    | Moderate community submissions before they go public            |
+| **Admin**       | Manage user accounts and roles                                  |
 
 ---
 
@@ -59,6 +59,7 @@
 - Edit or delete my own pending submissions before a review decision, so I can fix mistakes
 - Receive a confirmation (toast/notification) after submitting, so I know the action succeeded
 - Filter the map by category (bar, healthcare, etc.) or minimum safety rating, so I find relevant places faster
+- See my pending submissions rendered on the map in a translucent style, so I know where they are while awaiting review
 
 **AS A reviewer, I want to:**
 
@@ -78,16 +79,21 @@
 
 - Search for a city, address, or place name, so I can navigate the map without knowing coordinates
 - Share a direct link to a specific place or district, so I can recommend it to others
+- See pending community submissions on the map in a translucent style, so I understand what's in the pipeline and can vote on them
 
 **AS A contributor, I want to:**
 
 - Receive an email notification when my submission is reviewed, so I'm not waiting blindly
 - Add photos to a submission, so the community has richer context
 - "Star" or bookmark places on the map, so I can revisit them later
+- Upvote or downvote a pending submission, so the community can signal its value before a reviewer acts
+- See the current vote tally on a pending marker/area popup, so I can gauge community sentiment
 
 **AS A reviewer, I want to:**
 
 - See a heat-map or summary of submission activity by area, so I can prioritise high-activity zones
+- Have highly-upvoted submissions surfaced at the top of my queue, so I can prioritise what the community endorses
+- Trust that a submission auto-approved by vote threshold has already passed basic community vetting, so I can focus my time on contested items
 
 **AS ANY user, I want to:**
 
@@ -98,7 +104,7 @@
 
 ### P3 — Exploratory (Future Consideration)
 
-- Community voting / upvotes on submitted markings
+- ~~Community voting~~ → promoted to P2 (see above)
 - Mobile app (PWA or native) with GPS-based "near me" view
 - Public API for third-party integrations
 - Gamification: contribution badges / leaderboard
@@ -108,15 +114,18 @@
 
 ## 3. Acceptance Criteria — P0 Stories
 
-| Story | Acceptance Criteria |
-|---|---|
-| Browse map (guest) | Approved POIs and districts load within 3 s on a standard connection; colour-coded by safety rating |
-| Register | Email uniqueness enforced; password min 8 chars; inline error on duplicate email |
-| Submit POI | Name required (min 2 chars); category required; rating 1–5; submission created with `pending` status; not visible on public map |
-| Submit district | Polygon drawn on map; same form fields as POI minus category |
-| Review approval | Reviewer can approve/reject from queue; optional note saved; approved marking appears on map; contributor sees updated status in "My submissions" |
-| My submissions | Lists all own POIs and districts with status badge and reviewer note if present; newest-first |
-| Admin user management | Admin can list users and change roles via `/admin` route |
+| Story                        | Acceptance Criteria                                                                                                                                                                                                                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Browse map (guest)           | Approved POIs and districts load within 3 s on a standard connection; colour-coded by safety rating                                                                                                                                                                                              |
+| Register                     | Email uniqueness enforced; password min 8 chars; inline error on duplicate email                                                                                                                                                                                                                 |
+| Submit POI                   | Name required (min 2 chars); category required; rating 1–5; submission created with `pending` status; not visible on public map                                                                                                                                                                  |
+| Submit district              | Polygon drawn on map; same form fields as POI minus category                                                                                                                                                                                                                                     |
+| Review approval              | Reviewer can approve/reject from queue; optional note saved; approved marking appears on map; contributor sees updated status in "My submissions"                                                                                                                                                |
+| My submissions               | Lists all own POIs and districts with status badge and reviewer note if present; newest-first                                                                                                                                                                                                    |
+| Admin user management        | Admin can list users and change roles via `/admin` route                                                                                                                                                                                                                                         |
+| Pending on map (contributor) | Own `pending` POIs render on map at 40% opacity; own `pending` districts render with hatched/translucent fill; popup labels them "Pending — awaiting review"; not visible to other logged-out users or other contributors                                                                        |
+| Pending on map (public)      | All `pending` submissions visible to logged-in users at 40% opacity; guests see none; popup shows vote tally + upvote/downvote buttons (logged-in only)                                                                                                                                          |
+| Community voting             | Each logged-in user casts ≤1 vote (up or down) per submission; vote count stored on entity; reaching configurable threshold (default: **10 net upvotes**) triggers auto-approval and sets `status = approved`; submission then renders at full opacity; reviewer queue shows vote score per item |
 
 ---
 
@@ -138,3 +147,7 @@
 3. **Spam / abuse** — what rate-limiting or reporting mechanism is needed before launch?
 4. **Geographic scope** — is the default map centre (Brussels) permanent, or should it auto-locate?
 5. **Data ownership** — are submissions licensed for reuse (e.g. ODbL for OSM compatibility)?
+6. **Pending visibility scope** — should all pending submissions be visible to all logged-in users, or only to the submitter? (affects vote gaming risk)
+7. **Auto-accept threshold** — what is the configurable net-upvote threshold for auto-approval? Who can change it (admin only)? Does a downvote cancel an upvote 1-for-1?
+8. **Vote manipulation** — how to prevent sock-puppet voting? (account age minimum, verified email requirement, 1 vote per IP per submission?)
+9. **Auto-accept reviewability** — should auto-approved submissions still appear in the reviewer queue for post-hoc audit, or are they silently approved?

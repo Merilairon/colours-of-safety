@@ -4,6 +4,35 @@
   height: 100vh;
 }
 
+.skip-link {
+  position: absolute;
+  top: -9999px;
+  left: 0;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: #e84393;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 6px 0;
+
+  &:focus {
+    top: 0;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -23,10 +52,40 @@
   text-decoration: none;
   color: #fff;
   font-weight: 700;
+
+  &:focus-visible {
+    outline: 2px solid #e84393;
+    outline-offset: 2px;
+  }
 }
 
 .brand-mark {
   font-size: 1.4rem;
+}
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  order: 3;
+
+  span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e84393;
+    outline-offset: 2px;
+  }
 }
 
 .nav {
@@ -46,6 +105,11 @@
       color: #fff;
       border-bottom-color: #e84393;
     }
+
+    &:focus-visible {
+      outline: 2px solid #e84393;
+      outline-offset: 2px;
+    }
   }
 }
 
@@ -60,6 +124,11 @@
 
     &:hover {
       color: #fff;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #e84393;
+      outline-offset: 2px;
     }
   }
 
@@ -114,23 +183,58 @@
     padding: 0 0.75rem;
     gap: 0.75rem;
     height: 52px;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 52px;
+    padding-block: 0.5rem;
   }
 
   .brand-name {
-    display: none;
+    // M10: keep in accessibility tree via parent aria-label; visually hide on small screens
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .nav-toggle {
+    display: flex;
   }
 
   .nav {
-    gap: 0.5rem;
+    // M11: hidden by default on mobile, shown when open
+    display: none;
+    width: 100%;
+    order: 4;
+    flex-direction: column;
+    gap: 0;
+    padding: 0.25rem 0 0.5rem;
+
+    &.open {
+      display: flex;
+    }
 
     a {
-      font-size: 0.85rem;
-      padding: 0.25rem 0;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+      &:last-child {
+        border-bottom: none;
+      }
     }
   }
 
   .account {
     gap: 0.5rem;
+    order: 2;
+    flex: 1;
+    justify-content: flex-end;
 
     .who {
       display: none;
@@ -143,15 +247,13 @@
   }
 }
 
-@media (max-width: 480px) {
-  .nav {
-    a:not(.active) {
-      display: none;
-    }
+@media (min-width: 769px) {
+  .nav-toggle {
+    display: none;
+  }
 
-    a.active {
-      display: block;
-    }
+  .nav {
+    display: flex !important;
   }
 }
 
@@ -172,6 +274,11 @@
 
     &:hover {
       color: #fff;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #e84393;
+      outline-offset: 2px;
     }
   }
 

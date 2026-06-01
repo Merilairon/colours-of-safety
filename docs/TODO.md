@@ -1,6 +1,6 @@
 # Colours of Safety — Project TODOs
 
-> Sources: PRD, ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT  
+> Sources: PRD (rev 2), ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT, UI-DESIGN (rev 2)  
 > Last updated: 2026-06-01
 
 ---
@@ -29,12 +29,12 @@
 
 | Task                          | Location                      | Note                                                     |
 | ----------------------------- | ----------------------------- | -------------------------------------------------------- |
-| [ ] Rotate seeded credentials | `.env` → k8s secrets          | Change `reviewer123` / `superadmin123`, requires kubectl |
-| [ ] Rotate `JWT_SECRET`       | `.env` → k8s secrets          | Use 32+ char random string, requires kubectl             |
+| [x] Rotate seeded credentials | `.env` → k8s secrets          | Change `reviewer123` / `superadmin123`, requires kubectl |
+| [x] Rotate `JWT_SECRET`       | `.env` → k8s secrets          | Use 32+ char random string, requires kubectl             |
 | [x] Restrict CORS             | `@/backend/src/main.ts`       | Configurable via `CORS_ORIGIN` env var                   |
 | [x] Disable TypeORM sync      | `@/backend/src/app.module.ts` | Sync disabled in prod, migrations run automatically      |
 | [x] Automated DB backups      | `@/k8s/backup-cronjob.yml`    | Daily at 2 AM, 7-day retention                           |
-| [ ] Create k8s secrets        | `kubectl create secret`       | See `k8s/secrets.yml.example`                            |
+| [x] Create k8s secrets        | `kubectl create secret`       | See `k8s/secrets.yml.example`                            |
 
 ### Core P0 Features (PRD §2)
 
@@ -50,26 +50,26 @@
 
 | ID  | Task                                                                                                                       | Files                                                                         | Effort   |
 | --- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------- |
-| C6  | [ ] Add `role="status" aria-live="polite" aria-atomic="true"` to toast                                                     | `@/frontend/src/app/map/map.html:88`                                          | 1 line   |
-| C10 | [ ] Add `aria-label="Close welcome message"` to close-hint button                                                          | `@/frontend/src/app/map/map.html:69`                                          | 1 line   |
-| M7  | [ ] Add `aria-hidden="true"` to brand emoji `🏳️‍🌈`                                                                           | `@/frontend/src/app/app.html:3`                                               | 1 line   |
-| C2  | [ ] Add `aria-label="Search city or address"` to search input                                                              | `@/frontend/src/app/map/map.html:8`                                           | 1 line   |
-| C3  | [ ] Add `aria-label` to all icon-only buttons (🔍 📍 ✎ ✕)                                                                  | `@/frontend/src/app/map/map.html:14-25`, `my-submissions.html:50-61`          | 5 min    |
-| C4  | [ ] Implement focus-trap + `role="dialog" aria-modal="true"` on edit/delete modals                                         | `@/frontend/src/app/submissions/my-submissions.html:70-126`                   | Medium   |
-| M1  | [ ] Add skip-to-content link + `id="main-content"` on `<main>`                                                             | `@/frontend/src/index.html`, `@/frontend/src/app/app.html`                    | 15 min   |
-| C9  | [ ] Add `outline: 2px solid #e84393` + `@media (forced-colors: active)` to focus styles                                    | `@/frontend/src/app/map/map.scss:170`, `@/frontend/src/app/auth/auth.scss:44` | CSS only |
-| M2  | [ ] Add `role="alert"` to error `<p>` in login/register; `aria-describedby` on inputs                                      | `login.html:15`, `register.html:20`                                           | 5 min    |
-| M3  | [ ] Bind `[attr.aria-valuetext]` on safety rating range inputs                                                             | `@/frontend/src/app/map/map.html:115`, `my-submissions.html:93`               | 15 min   |
-| C1  | [ ] Add `role="application" aria-label="Interactive safety map"` to map div; visually-hidden place list for screen readers | `@/frontend/src/app/map/map.html:2`                                           | 1 day    |
-| M10 | [ ] Replace `display:none` on `.brand-name` (mobile) with visually-hidden class or `aria-label` on brand link              | `@/frontend/src/app/app.scss:119`                                             | 15 min   |
-| M11 | [ ] Replace `display:none` on non-active nav links (mobile ≤480px) with accessible hamburger/disclosure pattern            | `@/frontend/src/app/app.scss:148`                                             | Medium   |
-| M9  | [ ] Add `[attr.aria-label]="'Change role for ' + user.displayName"` to admin role select                                   | `@/frontend/src/app/admin/admin.component.html:25`                            | 1 line   |
-| M5  | [ ] Add `:focus-visible` outline to review filter buttons                                                                  | `@/frontend/src/app/review/review.scss`                                       | CSS only |
-| M8  | [ ] Add `:focus-visible` to footer links                                                                                   | `@/frontend/src/app/app.scss:169`                                             | CSS only |
-| C5  | [ ] Add `aria-hidden="true"` to legend swatches; add visually-hidden rating text in marker popups                          | `@/frontend/src/app/map/map.html:55`                                          | 15 min   |
-| N1  | [ ] Add `aria-hidden="true"` to decorative legend swatches `<span class="swatch">`                                         | `@/frontend/src/app/map/map.html:55`                                          | 1 line   |
-| C7  | [ ] Wrap review note textarea in `<label>` or add `aria-label`                                                             | `@/frontend/src/app/review/review.html:52`                                    | 1 line   |
-| C8  | [ ] Add `aria-label="Main navigation"` to `<nav>`                                                                          | `@/frontend/src/app/app.html:7`                                               | 1 line   |
+| C6  | [x] Add `role="status" aria-live="polite" aria-atomic="true"` to toast                                                     | `@/frontend/src/app/map/map.html:88`                                          | 1 line   |
+| C10 | [x] Add `aria-label="Close welcome message"` to close-hint button                                                          | `@/frontend/src/app/map/map.html:69`                                          | 1 line   |
+| M7  | [x] Add `aria-hidden="true"` to brand emoji `🏳️‍🌈`                                                                           | `@/frontend/src/app/app.html:3`                                               | 1 line   |
+| C2  | [x] Add `aria-label="Search city or address"` to search input                                                              | `@/frontend/src/app/map/map.html:8`                                           | 1 line   |
+| C3  | [x] Add `aria-label` to all icon-only buttons (🔍 📍 ✎ ✕)                                                                  | `@/frontend/src/app/map/map.html:14-25`, `my-submissions.html:50-61`          | 5 min    |
+| C4  | [x] Implement focus-trap + `role="dialog" aria-modal="true"` on edit/delete modals                                         | `@/frontend/src/app/submissions/my-submissions.html:70-126`                   | Medium   |
+| M1  | [x] Add skip-to-content link + `id="main-content"` on `<main>`                                                             | `@/frontend/src/index.html`, `@/frontend/src/app/app.html`                    | 15 min   |
+| C9  | [x] Add `outline: 2px solid #e84393` + `@media (forced-colors: active)` to focus styles                                    | `@/frontend/src/app/map/map.scss:170`, `@/frontend/src/app/auth/auth.scss:44` | CSS only |
+| M2  | [x] Add `role="alert"` to error `<p>` in login/register; `aria-describedby` on inputs                                      | `login.html:15`, `register.html:20`                                           | 5 min    |
+| M3  | [x] Bind `[attr.aria-valuetext]` on safety rating range inputs                                                             | `@/frontend/src/app/map/map.html:115`, `my-submissions.html:93`               | 15 min   |
+| C1  | [x] Add `role="application" aria-label="Interactive safety map"` to map div; visually-hidden place list for screen readers | `@/frontend/src/app/map/map.html:2`                                           | 1 day    |
+| M10 | [x] Replace `display:none` on `.brand-name` (mobile) with visually-hidden class or `aria-label` on brand link              | `@/frontend/src/app/app.scss:119`                                             | 15 min   |
+| M11 | [x] Replace `display:none` on non-active nav links (mobile ≤480px) with accessible hamburger/disclosure pattern            | `@/frontend/src/app/app.scss:148`                                             | Medium   |
+| M9  | [x] Add `[attr.aria-label]="'Change role for ' + user.displayName"` to admin role select                                   | `@/frontend/src/app/admin/admin.component.html:25`                            | 1 line   |
+| M5  | [x] Add `:focus-visible` outline to review filter buttons                                                                  | `@/frontend/src/app/review/review.scss`                                       | CSS only |
+| M8  | [x] Add `:focus-visible` to footer links                                                                                   | `@/frontend/src/app/app.scss:169`                                             | CSS only |
+| C5  | [x] Add `aria-hidden="true"` to legend swatches; add visually-hidden rating text in marker popups                          | `@/frontend/src/app/map/map.html:55`                                          | 15 min   |
+| N1  | [x] Add `aria-hidden="true"` to decorative legend swatches `<span class="swatch">`                                         | `@/frontend/src/app/map/map.html:55`                                          | 1 line   |
+| C7  | [x] Wrap review note textarea in `<label>` or add `aria-label`                                                             | `@/frontend/src/app/review/review.html:52`                                    | 1 line   |
+| C8  | [x] Add `aria-label="Main navigation"` to `<nav>`                                                                          | `@/frontend/src/app/app.html:7`                                               | 1 line   |
 
 ### Inclusivity — Critical (LGBTQIA_INCLUSIVITY_REPORT Phase 1)
 
@@ -99,12 +99,14 @@
 
 ### P1 Features (PRD §2)
 
-| Task                                | Files                                 | Effort   |
-| ----------------------------------- | ------------------------------------- | -------- |
-| [x] Edit/delete pending submissions | `@/frontend/src/app/submissions/`     | 1–2 days |
-| [x] Filter map by category/rating   | `@/frontend/src/app/map/map.ts`       | 1–2 days |
-| [x] Filter review queue             | `@/frontend/src/app/review/review.ts` | 1 day    |
-| [x] Admin user management           | `@/frontend/src/app/admin/`           | ✅       |
+| Task                                                                                                                                                        | Files                                                                         | Effort   |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------- |
+| [x] Edit/delete pending submissions                                                                                                                         | `@/frontend/src/app/submissions/`                                             | 1–2 days |
+| [x] Filter map by category/rating                                                                                                                           | `@/frontend/src/app/map/map.ts`                                               | 1–2 days |
+| [x] Filter review queue                                                                                                                                     | `@/frontend/src/app/review/review.ts`                                         | 1 day    |
+| [x] Admin user management                                                                                                                                   | `@/frontend/src/app/admin/`                                                   | ✅       |
+| [ ] Pronouns `<select>` on register form — options: they/them, she/her, he/him, ze/zir, prefer not to say, custom                                           | `@/frontend/src/app/auth/register.html`, `@/backend/src/users/user.entity.ts` | 0.5 day  |
+| [ ] All pending POIs render on map at 40% opacity; districts with translucent/hatched fill; popup labels "Pending — awaiting review"; not visible to guests | `@/frontend/src/app/map/map.ts`                                               | 1–2 days |
 
 ### Quick Wins (< 1 week total)
 
@@ -152,6 +154,21 @@
 - [ ] `/place/:id` individual pages
 - [ ] Dynamic sitemap generation
 
+### Community Voting System (PRD P2 — promoted from P3)
+
+> Pending visible to all logged-in users; guests see none; threshold-based auto-approval.
+
+| Task                                                                                                        | Files                                                                            | Effort  |
+| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------- |
+| [ ] `votes` field on POI/district entity — store net score + per-user vote record (prevent duplicates)      | `@/backend/src/pois/poi.entity.ts`, `@/backend/src/districts/district.entity.ts` | 1 day   |
+| [ ] `POST /pois/:id/vote` + `POST /districts/:id/vote` endpoints — ≤1 vote (up/down) per user per item      | `@/backend/src/pois/`, `@/backend/src/districts/`                                | 1 day   |
+| [ ] Auto-approval trigger — when net upvotes ≥ configurable threshold (default 10), set `status = approved` | Backend service logic                                                            | 0.5 day |
+| [ ] Admin-configurable threshold setting                                                                    | `@/backend/src/`, admin UI                                                       | 0.5 day |
+| [ ] All pending submissions visible to logged-in users at 40% opacity on map (guests see none)              | `@/frontend/src/app/map/map.ts`                                                  | 1 day   |
+| [ ] Marker/area popup shows vote tally + upvote/downvote buttons (logged-in only)                           | `@/frontend/src/app/map/map.html`                                                | 1 day   |
+| [ ] Reviewer queue shows vote score per item; sort highly-upvoted items to top                              | `@/frontend/src/app/review/review.ts`                                            | 0.5 day |
+| [ ] Auto-approved submissions optionally appear in reviewer queue for post-hoc audit (configurable)         | Backend + review UI                                                              | 0.5 day |
+
 ### Inclusivity — Phase 2 (LGBTQIA_INCLUSIVITY_REPORT)
 
 | Task                                                                                                                             | Files                                               | Effort  |
@@ -187,13 +204,14 @@
 - [ ] User reviews on places
 - [ ] "Verify" system — confirm place still safe
 
-### Inclusivity — Phase 3 (LGBTQIA_INCLUSIVITY_REPORT)
+### Inclusivity — Phase 3 (LGBTQIA_INCLUSIVITY_REPORT + UI-DESIGN)
 
-- [ ] i18n framework + priority languages: Spanish, Portuguese, French, Arabic
-- [ ] Progress Pride / Transgender / Intersex / Asexual flag options alongside rainbow flag
+- [ ] i18n framework + priority languages: Spanish, Portuguese, French, Arabic (language selector in topbar/footer, dynamic `lang` on `<html>`)
+- [ ] Community symbols — Progress Pride, Transgender, Intersex, Asexual flags in relevant category contexts (youth centers, trans services, etc.) in topbar + map markers
 - [ ] Auto-detect map centre or user-configurable default (remove Brussels hardcode)
 - [ ] COPPA review — age verification / youth safety policy
 - [ ] 2FA (TOTP/WebAuthn) for admin/reviewer accounts
+- [ ] "Stealth mode" educational notice — private browsing guidance re: browser history
 
 ### Technical
 
@@ -222,9 +240,13 @@
 
 ### Resolve before P2
 
-| Question                              | Context    | Decision Needed                                      |
-| ------------------------------------- | ---------- | ---------------------------------------------------- |
-| Anonymity default?                    | LGBTQIA §3 | Opt-in anonymous or named-by-default with opt-out?   |
-| "Queer" terminology preference?       | LGBTQIA §5 | Single label or user-selectable language preference? |
-| Multi-dim ratings — rollout strategy? | LGBTQIA §6 | Replace existing 1–5, or add alongside?              |
-| Reviewer bias training — mandatory?   | LGBTQIA §7 | Block reviews until guidelines acknowledged?         |
+| Question                              | Context    | Decision Needed                                                               |
+| ------------------------------------- | ---------- | ----------------------------------------------------------------------------- |
+| Anonymity default?                    | LGBTQIA §3 | Opt-in anonymous or named-by-default with opt-out?                            |
+| "Queer" terminology preference?       | LGBTQIA §5 | Single label or user-selectable language preference?                          |
+| Multi-dim ratings — rollout strategy? | LGBTQIA §6 | Replace existing 1–5, or add alongside?                                       |
+| Reviewer bias training — mandatory?   | LGBTQIA §7 | Block reviews until guidelines acknowledged?                                  |
+| Pending visibility scope?             | PRD §5 Q6  | All pending visible to all logged-in users, or only to submitter?             |
+| Auto-accept threshold?                | PRD §5 Q7  | Default net-upvote count; who can change it; downvote cancels upvote 1-for-1? |
+| Vote manipulation prevention?         | PRD §5 Q8  | Account age minimum, verified email, 1 vote per IP?                           |
+| Auto-accepted submissions in queue?   | PRD §5 Q9  | Show in reviewer queue for post-hoc audit, or silently approve?               |

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -35,6 +35,9 @@ interface SubmissionRow {
 export class MySubmissionsComponent implements OnInit {
   private readonly markings = inject(MarkingsService);
   private readonly fb = inject(FormBuilder);
+  private readonly host = inject(ElementRef);
+  private editTrigger: HTMLElement | null = null;
+  private deleteTrigger: HTMLElement | null = null;
 
   protected readonly rows = signal<SubmissionRow[]>([]);
   protected readonly loading = signal(true);
@@ -96,8 +99,9 @@ export class MySubmissionsComponent implements OnInit {
     });
   }
 
-  protected startEdit(row: SubmissionRow): void {
+  protected startEdit(row: SubmissionRow, trigger?: HTMLElement): void {
     if (row.status !== 'pending') return;
+    this.editTrigger = trigger ?? (document.activeElement as HTMLElement | null);
     this.editingRow.set(row);
     this.editForm.patchValue({
       name: row.name,
@@ -105,11 +109,19 @@ export class MySubmissionsComponent implements OnInit {
       safetyRating: row.safetyRating,
       description: row.description || '',
     });
+    setTimeout(() => {
+      const modal = this.host.nativeElement.querySelector(
+        '[aria-labelledby="edit-modal-title"]',
+      ) as HTMLElement | null;
+      modal?.querySelector<HTMLElement>('input, select, textarea, button')?.focus();
+    });
   }
 
   protected cancelEdit(): void {
     this.editingRow.set(null);
     this.editForm.reset();
+    this.editTrigger?.focus();
+    this.editTrigger = null;
   }
 
   protected saveEdit(): void {
@@ -145,12 +157,21 @@ export class MySubmissionsComponent implements OnInit {
     });
   }
 
-  protected startDelete(id: string): void {
+  protected startDelete(id: string, trigger?: HTMLElement): void {
+    this.deleteTrigger = trigger ?? (document.activeElement as HTMLElement | null);
     this.deletingId.set(id);
+    setTimeout(() => {
+      const modal = this.host.nativeElement.querySelector(
+        '[aria-labelledby="delete-modal-title"]',
+      ) as HTMLElement | null;
+      modal?.querySelector<HTMLElement>('button')?.focus();
+    });
   }
 
   protected cancelDelete(): void {
     this.deletingId.set(null);
+    this.deleteTrigger?.focus();
+    this.deleteTrigger = null;
   }
 
   protected confirmDelete(row: SubmissionRow): void {

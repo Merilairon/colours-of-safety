@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from './core/auth.service';
 
@@ -16,6 +16,7 @@ export class App {
   protected readonly isLoggedIn = this.auth.isLoggedIn;
   protected readonly isReviewer = this.auth.isReviewer;
   protected readonly isAdmin = this.auth.isAdmin;
+  protected readonly navOpen = signal(false);
 
   logout(): void {
     this.auth.logout();

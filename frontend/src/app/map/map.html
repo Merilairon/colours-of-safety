@@ -1,5 +1,5 @@
 <div class="map-wrap">
-  <div #mapEl class="map"></div>
+  <div #mapEl class="map" role="application" aria-label="Interactive safety map"></div>
 
   <!-- Search + Filters Panel -->
   <div class="search-panel">
@@ -8,16 +8,18 @@
         <input
           type="text"
           placeholder="Search city or address..."
+          aria-label="Search city or address"
           [value]="searchQuery()"
           (input)="searchQuery.set($any($event).target.value)"
         />
-        <button type="submit" [disabled]="searching()">
+        <button type="submit" aria-label="Search" [disabled]="searching()">
           {{ searching() ? '...' : '🔍' }}
         </button>
       </form>
       <button
         type="button"
         class="locate-btn"
+        aria-label="Find my location"
         (click)="detectUserLocation()"
         title="Find my location"
       >
@@ -52,7 +54,7 @@
     <h3>Safety rating</h3>
     @for (r of [5, 4, 3, 2, 1]; track r) {
       <div class="legend-row">
-        <span class="swatch" [style.background]="colorFor(r)"></span>
+        <span class="swatch" aria-hidden="true" [style.background]="colorFor(r)"></span>
         {{ safetyLabel(r) }}
       </div>
     }
@@ -66,7 +68,14 @@
   @if (showWelcome()) {
     <div class="hint welcome">
       <strong>Welcome! 🎉</strong> Add your first queer-friendly place to help the community.
-      <button type="button" class="close-hint" (click)="showWelcome.set(false)">✕</button>
+      <button
+        type="button"
+        class="close-hint"
+        aria-label="Close welcome message"
+        (click)="showWelcome.set(false)"
+      >
+        ✕
+      </button>
     </div>
   }
 
@@ -85,7 +94,7 @@
   }
 
   @if (toast()) {
-    <div class="toast">{{ toast() }}</div>
+    <div class="toast" role="status" aria-live="polite" aria-atomic="true">{{ toast() }}</div>
   }
 
   @if (draft(); as d) {
@@ -112,7 +121,14 @@
 
         <label>
           Safety rating: <strong>{{ safetyLabel(form.controls.safetyRating.value) }}</strong>
-          <input type="range" min="1" max="5" step="1" formControlName="safetyRating" />
+          <input
+            type="range"
+            min="1"
+            max="5"
+            step="1"
+            formControlName="safetyRating"
+            [attr.aria-valuetext]="safetyLabel(form.controls.safetyRating.value)"
+          />
         </label>
 
         <label>

@@ -25,6 +25,7 @@
             <select
               [value]="user.role"
               [disabled]="user.busy"
+              [attr.aria-label]="'Change role for ' + user.displayName"
               (change)="setRole(user, $any($event.target).value)"
             >
               @for (role of roles; track role) {
