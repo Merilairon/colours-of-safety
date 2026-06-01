@@ -13,6 +13,7 @@
 **Priority:** High - Community-driven platform needs discoverability for LGBTQIA+ users seeking safe spaces.
 
 **Critical Issues:**
+
 - No meta descriptions
 - No Open Graph / Twitter Cards
 - No structured data
@@ -26,16 +27,18 @@
 ## 2. Keyword Strategy
 
 ### Primary Keywords
-| Keyword | Intent | Priority |
-|---------|--------|----------|
-| queer friendly places | Informational | High |
-| LGBTQ safe spaces | Informational | High |
-| gay friendly map | Navigational | High |
-| safe queer spaces near me | Local | High |
-| LGBTQ friendly bars | Commercial | Medium |
-| queer community resources | Informational | Medium |
+
+| Keyword                   | Intent        | Priority |
+| ------------------------- | ------------- | -------- |
+| queer friendly places     | Informational | High     |
+| LGBTQ safe spaces         | Informational | High     |
+| gay friendly map          | Navigational  | High     |
+| safe queer spaces near me | Local         | High     |
+| LGBTQ friendly bars       | Commercial    | Medium   |
+| queer community resources | Informational | Medium   |
 
 ### Long-Tail Keywords
+
 - "trans friendly cafes in [city]"
 - "LGBTQ safe districts [location]"
 - "queer welcoming venues map"
@@ -43,8 +46,9 @@
 - "community moderated queer map"
 
 ### Brand Keywords
+
 - "Colours of Safety"
-- "colours-of-safety.org"
+- "coloursofsafety.com"
 
 ---
 
@@ -55,40 +59,65 @@
 ```html
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Colours of Safety | Find Queer-Friendly Safe Spaces Near You</title>
-  <meta name="description" content="Community-driven map of LGBTQIA+ friendly places and safe districts. Browse, submit, and discover queer-welcoming venues, bars, cafes, and community spaces.">
-  <meta name="keywords" content="queer friendly, LGBTQ safe spaces, gay friendly map, trans friendly places, safe queer venues">
-  <meta name="author" content="Colours of Safety Community">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://colours-of-safety.org/">
-  
-  <!-- Open Graph -->
-  <meta property="og:title" content="Colours of Safety | Find Queer-Friendly Safe Spaces">
-  <meta property="og:description" content="Community-driven map of LGBTQIA+ friendly places. Discover and share safe spaces worldwide.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://colours-of-safety.org/">
-  <meta property="og:image" content="https://colours-of-safety.org/assets/og-image.jpg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:site_name" content="Colours of Safety">
-  
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Colours of Safety | Queer-Friendly Safe Spaces Map">
-  <meta name="twitter:description" content="Discover LGBTQIA+ friendly places and safe districts in your area. Community-moderated for accuracy.">
-  <meta name="twitter:image" content="https://colours-of-safety.org/assets/og-image.jpg">
-  
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  
-  <!-- Theme Color -->
-  <meta name="theme-color" content="#e84393">
-</head>
+  <head>
+    <meta charset="utf-8" />
+    <title>Colours of Safety | Find Queer-Friendly Safe Spaces Near You</title>
+    <meta
+      name="description"
+      content="Community-driven map of LGBTQIA+ friendly places and safe districts. Browse, submit, and discover queer-welcoming venues, bars, cafes, and community spaces."
+    />
+    <meta
+      name="keywords"
+      content="queer friendly, LGBTQ safe spaces, gay friendly map, trans friendly places, safe queer venues"
+    />
+    <meta name="author" content="Colours of Safety Community" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://coloursofsafety.com/" />
+
+    <!-- Open Graph -->
+    <meta
+      property="og:title"
+      content="Colours of Safety | Find Queer-Friendly Safe Spaces"
+    />
+    <meta
+      property="og:description"
+      content="Community-driven map of LGBTQIA+ friendly places. Discover and share safe spaces worldwide."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://coloursofsafety.com/" />
+    <meta
+      property="og:image"
+      content="https://coloursofsafety.com/assets/og-image.jpg"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Colours of Safety" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Colours of Safety | Queer-Friendly Safe Spaces Map"
+    />
+    <meta
+      name="twitter:description"
+      content="Discover LGBTQIA+ friendly places and safe districts in your area. Community-moderated for accuracy."
+    />
+    <meta
+      name="twitter:image"
+      content="https://coloursofsafety.com/assets/og-image.jpg"
+    />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#e84393" />
+  </head>
+</html>
 ```
 
 ### 3.2 robots.txt
@@ -102,7 +131,7 @@ Disallow: /mine
 Disallow: /review
 Disallow: /api/
 
-Sitemap: https://colours-of-safety.org/sitemap.xml
+Sitemap: https://coloursofsafety.com/sitemap.xml
 
 # Crawl-delay for rate limiting
 Crawl-delay: 1
@@ -116,17 +145,17 @@ Create `/frontend/public/sitemap.xml`:
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://colours-of-safety.org/</loc>
+    <loc>https://coloursofsafety.com/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://colours-of-safety.org/login</loc>
+    <loc>https://coloursofsafety.com/login</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://colours-of-safety.org/register</loc>
+    <loc>https://coloursofsafety.com/register</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -148,12 +177,10 @@ Add to homepage via Angular Meta service or static HTML:
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Colours of Safety",
-  "url": "https://colours-of-safety.org",
-  "logo": "https://colours-of-safety.org/assets/logo.png",
+  "url": "https://coloursofsafety.com",
+  "logo": "https://coloursofsafety.com/assets/logo.png",
   "description": "Community-driven map platform for LGBTQIA+ safe spaces",
-  "sameAs": [
-    "https://github.com/Merilairon/colours-of-safety"
-  ],
+  "sameAs": ["https://github.com/Merilairon/colours-of-safety"],
   "contactPoint": {
     "@type": "ContactPoint",
     "contactType": "community support",
@@ -207,7 +234,7 @@ When individual place pages are implemented:
       "value": "[1-5]"
     },
     {
-      "@type": "PropertyValue", 
+      "@type": "PropertyValue",
       "name": "queerFriendly",
       "value": "true"
     }
@@ -221,14 +248,14 @@ When individual place pages are implemented:
 
 ### Route Meta Data Map
 
-| Route | Title | Description | Robots | Priority |
-|-------|-------|-------------|--------|----------|
-| `/` | Colours of Safety \| Find Queer-Friendly Safe Spaces | Community-driven map of LGBTQIA+ friendly places and safe districts. Browse approved safe spaces worldwide. | index,follow | 1.0 |
-| `/login` | Login \| Colours of Safety | Sign in to submit queer-friendly places and track your contributions. | index,follow | 0.5 |
-| `/register` | Join \| Colours of Safety | Create an account to contribute safe space locations to our community map. | index,follow | 0.5 |
-| `/mine` | My Submissions \| Colours of Safety | Track your submitted queer-friendly places and review status. | noindex,nofollow | 0.0 |
-| `/review` | Review Queue \| Colours of Safety | Moderator review queue for community submissions. | noindex,nofollow | 0.0 |
-| `/**` | Page Not Found \| Colours of Safety | The requested page could not be found. | noindex | 0.0 |
+| Route       | Title                                                | Description                                                                                                 | Robots           | Priority |
+| ----------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------- | -------- |
+| `/`         | Colours of Safety \| Find Queer-Friendly Safe Spaces | Community-driven map of LGBTQIA+ friendly places and safe districts. Browse approved safe spaces worldwide. | index,follow     | 1.0      |
+| `/login`    | Login \| Colours of Safety                           | Sign in to submit queer-friendly places and track your contributions.                                       | index,follow     | 0.5      |
+| `/register` | Join \| Colours of Safety                            | Create an account to contribute safe space locations to our community map.                                  | index,follow     | 0.5      |
+| `/mine`     | My Submissions \| Colours of Safety                  | Track your submitted queer-friendly places and review status.                                               | noindex,nofollow | 0.0      |
+| `/review`   | Review Queue \| Colours of Safety                    | Moderator review queue for community submissions.                                                           | noindex,nofollow | 0.0      |
+| `/**`       | Page Not Found \| Colours of Safety                  | The requested page could not be found.                                                                      | noindex          | 0.0      |
 
 ---
 
@@ -248,8 +275,8 @@ ng add @angular/ssr
 Create `src/app/core/seo.service.ts`:
 
 ```typescript
-import { Injectable, inject } from '@angular/core';
-import { Meta, Title } from '@angular/platform-browser';
+import { Injectable, inject } from "@angular/core";
+import { Meta, Title } from "@angular/platform-browser";
 
 interface SeoConfig {
   title: string;
@@ -262,40 +289,55 @@ interface SeoConfig {
   robots?: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class SeoService {
   private readonly meta = inject(Meta);
   private readonly title = inject(Title);
-  private readonly baseUrl = 'https://colours-of-safety.org';
+  private readonly baseUrl = "https://coloursofsafety.com";
 
   updateSeo(config: SeoConfig): void {
     // Title
     this.title.setTitle(config.title);
-    
+
     // Standard meta
-    this.meta.updateTag({ name: 'description', content: config.description });
-    
+    this.meta.updateTag({ name: "description", content: config.description });
+
     if (config.keywords) {
-      this.meta.updateTag({ name: 'keywords', content: config.keywords });
+      this.meta.updateTag({ name: "keywords", content: config.keywords });
     }
-    
+
     if (config.robots) {
-      this.meta.updateTag({ name: 'robots', content: config.robots });
+      this.meta.updateTag({ name: "robots", content: config.robots });
     }
-    
+
     // Open Graph
-    this.meta.updateTag({ property: 'og:title', content: config.ogTitle || config.title });
-    this.meta.updateTag({ property: 'og:description', content: config.ogDescription || config.description });
-    this.meta.updateTag({ property: 'og:url', content: config.canonicalUrl || this.baseUrl });
-    
+    this.meta.updateTag({
+      property: "og:title",
+      content: config.ogTitle || config.title,
+    });
+    this.meta.updateTag({
+      property: "og:description",
+      content: config.ogDescription || config.description,
+    });
+    this.meta.updateTag({
+      property: "og:url",
+      content: config.canonicalUrl || this.baseUrl,
+    });
+
     if (config.ogImage) {
-      this.meta.updateTag({ property: 'og:image', content: config.ogImage });
+      this.meta.updateTag({ property: "og:image", content: config.ogImage });
     }
-    
+
     // Twitter
-    this.meta.updateTag({ name: 'twitter:title', content: config.ogTitle || config.title });
-    this.meta.updateTag({ name: 'twitter:description', content: config.ogDescription || config.description });
-    
+    this.meta.updateTag({
+      name: "twitter:title",
+      content: config.ogTitle || config.title,
+    });
+    this.meta.updateTag({
+      name: "twitter:description",
+      content: config.ogDescription || config.description,
+    });
+
     // Canonical
     if (config.canonicalUrl) {
       this.updateCanonicalUrl(config.canonicalUrl);
@@ -303,20 +345,22 @@ export class SeoService {
   }
 
   private updateCanonicalUrl(url: string): void {
-    const canonicalUrl = url.startsWith('http') ? url : `${this.baseUrl}${url}`;
-    let link: HTMLLinkElement | null = document.querySelector('link[rel="canonical"]');
-    
+    const canonicalUrl = url.startsWith("http") ? url : `${this.baseUrl}${url}`;
+    let link: HTMLLinkElement | null = document.querySelector(
+      'link[rel="canonical"]',
+    );
+
     if (!link) {
-      link = document.createElement('link');
-      link.setAttribute('rel', 'canonical');
+      link = document.createElement("link");
+      link.setAttribute("rel", "canonical");
       document.head.appendChild(link);
     }
-    
-    link.setAttribute('href', canonicalUrl);
+
+    link.setAttribute("href", canonicalUrl);
   }
 
   setNoIndex(): void {
-    this.meta.updateTag({ name: 'robots', content: 'noindex,nofollow' });
+    this.meta.updateTag({ name: "robots", content: "noindex,nofollow" });
   }
 }
 ```
@@ -326,9 +370,9 @@ export class SeoService {
 Create `src/app/core/seo.resolver.ts`:
 
 ```typescript
-import { ResolveFn } from '@angular/router';
-import { SeoService } from './seo.service';
-import { inject } from '@angular/core';
+import { ResolveFn } from "@angular/router";
+import { SeoService } from "./seo.service";
+import { inject } from "@angular/core";
 
 interface SeoData {
   title: string;
@@ -339,13 +383,13 @@ interface SeoData {
 export const seoResolver: ResolveFn<void> = (route) => {
   const seo = inject(SeoService);
   const seoData = route.data as SeoData;
-  
+
   if (seoData) {
     seo.updateSeo({
       title: seoData.title,
       description: seoData.description,
-      robots: seoData.robots || 'index,follow',
-      canonicalUrl: `https://colours-of-safety.org${route.url.join('/')}`
+      robots: seoData.robots || "index,follow",
+      canonicalUrl: `https://coloursofsafety.com${route.url.join("/")}`,
     });
   }
 };
@@ -354,62 +398,72 @@ export const seoResolver: ResolveFn<void> = (route) => {
 ### 6.4 Update Routes with SEO Data
 
 ```typescript
-import { Routes } from '@angular/router';
-import { authGuard, reviewerGuard } from './core/guards';
-import { seoResolver } from './core/seo.resolver';
+import { Routes } from "@angular/router";
+import { authGuard, reviewerGuard } from "./core/guards";
+import { seoResolver } from "./core/seo.resolver";
 
 export const routes: Routes = [
   {
-    path: '',
-    loadComponent: () => import('./map/map').then((m) => m.MapComponent),
+    path: "",
+    loadComponent: () => import("./map/map").then((m) => m.MapComponent),
     resolve: { seo: seoResolver },
     data: {
-      title: 'Colours of Safety | Find Queer-Friendly Safe Spaces',
-      description: 'Community-driven map of LGBTQIA+ friendly places and safe districts. Browse approved safe spaces worldwide.',
-      keywords: 'queer friendly, LGBTQ safe spaces, gay friendly map, trans friendly places'
-    }
+      title: "Colours of Safety | Find Queer-Friendly Safe Spaces",
+      description:
+        "Community-driven map of LGBTQIA+ friendly places and safe districts. Browse approved safe spaces worldwide.",
+      keywords:
+        "queer friendly, LGBTQ safe spaces, gay friendly map, trans friendly places",
+    },
   },
   {
-    path: 'login',
-    loadComponent: () => import('./auth/login').then((m) => m.LoginComponent),
+    path: "login",
+    loadComponent: () => import("./auth/login").then((m) => m.LoginComponent),
     resolve: { seo: seoResolver },
     data: {
-      title: 'Login | Colours of Safety',
-      description: 'Sign in to submit queer-friendly places and track your contributions.'
-    }
+      title: "Login | Colours of Safety",
+      description:
+        "Sign in to submit queer-friendly places and track your contributions.",
+    },
   },
   {
-    path: 'register',
-    loadComponent: () => import('./auth/register').then((m) => m.RegisterComponent),
+    path: "register",
+    loadComponent: () =>
+      import("./auth/register").then((m) => m.RegisterComponent),
     resolve: { seo: seoResolver },
     data: {
-      title: 'Join | Colours of Safety',
-      description: 'Create an account to contribute safe space locations to our community map.'
-    }
+      title: "Join | Colours of Safety",
+      description:
+        "Create an account to contribute safe space locations to our community map.",
+    },
   },
   {
-    path: 'mine',
+    path: "mine",
     canActivate: [authGuard],
-    loadComponent: () => import('./submissions/my-submissions').then((m) => m.MySubmissionsComponent),
+    loadComponent: () =>
+      import("./submissions/my-submissions").then(
+        (m) => m.MySubmissionsComponent,
+      ),
     resolve: { seo: seoResolver },
     data: {
-      title: 'My Submissions | Colours of Safety',
-      description: 'Track your submitted queer-friendly places and review status.',
-      robots: 'noindex,nofollow'
-    }
+      title: "My Submissions | Colours of Safety",
+      description:
+        "Track your submitted queer-friendly places and review status.",
+      robots: "noindex,nofollow",
+    },
   },
   {
-    path: 'review',
+    path: "review",
     canActivate: [reviewerGuard],
-    loadComponent: () => import('./review/review').then((m) => m.ReviewComponent),
+    loadComponent: () =>
+      import("./review/review").then((m) => m.ReviewComponent),
     resolve: { seo: seoResolver },
     data: {
-      title: 'Review Queue | Colours of Safety',
-      description: 'Moderator review queue for community submissions.',
-      robots: 'noindex,nofollow'
-    }
+      title: "Review Queue | Colours of Safety",
+      description: "Moderator review queue for community submissions.",
+      robots: "noindex,nofollow",
+    },
   },
-  { path: '**', redirectTo: '' }
+  { path: "**", redirectTo: "" },
 ];
 ```
 
@@ -420,6 +474,7 @@ export const routes: Routes = [
 ### 7.1 On-Page Content Recommendations
 
 **Map Page (`/`)** - Currently minimal. Add:
+
 - H1: "Find Queer-Friendly Safe Spaces Near You"
 - Intro paragraph (2-3 sentences) with primary keywords
 - Feature highlights with H2 sections:
@@ -429,6 +484,7 @@ export const routes: Routes = [
 - FAQ section (structured data ready)
 
 **Login/Register Pages** - Add:
+
 - Value proposition text (why join?)
 - Community stats (if available): "X places marked", "Y cities covered"
 
@@ -445,19 +501,19 @@ export const routes: Routes = [
 
 ### Core Web Vitals Targets
 
-| Metric | Target | Current Assessment |
-|--------|--------|-------------------|
-| LCP (Largest Contentful Paint) | < 2.5s | Map tiles may delay - lazy load below fold |
-| INP (Interaction to Next Paint) | < 200ms | OK - minimal JS on initial load |
-| CLS (Cumulative Layout Shift) | < 0.1 | OK - fixed map container |
-| TTFB (Time to First Byte) | < 800ms | SSR will improve significantly |
+| Metric                          | Target  | Current Assessment                         |
+| ------------------------------- | ------- | ------------------------------------------ |
+| LCP (Largest Contentful Paint)  | < 2.5s  | Map tiles may delay - lazy load below fold |
+| INP (Interaction to Next Paint) | < 200ms | OK - minimal JS on initial load            |
+| CLS (Cumulative Layout Shift)   | < 0.1   | OK - fixed map container                   |
+| TTFB (Time to First Byte)       | < 800ms | SSR will improve significantly             |
 
 ### Recommendations
 
 1. **Lazy load Leaflet** - Defer map library loading
 2. **Preconnect to tile server**:
    ```html
-   <link rel="preconnect" href="https://tile.openstreetmap.org">
+   <link rel="preconnect" href="https://tile.openstreetmap.org" />
    ```
 3. **Optimize favicon** - Currently 15KB, use SVG if possible
 4. **Add resource hints** for API endpoints
@@ -471,6 +527,7 @@ export const routes: Routes = [
 Current default: Brussels `[50.8503, 4.3517]`
 
 **Recommendations:**
+
 - Detect user location for initial map center (with permission)
 - Add geo meta tags for regional pages (future feature)
 - Encourage location-specific keywords in submissions
@@ -478,6 +535,7 @@ Current default: Brussels `[50.8503, 4.3517]`
 ### Google Business Profile
 
 Not applicable (no physical location), but consider:
+
 - Create as "Online Service" category
 - Use "LGBTQ+ Service" additional category
 
@@ -501,31 +559,34 @@ Not applicable (no physical location), but consider:
 
 ### Key SEO Metrics to Track
 
-| Metric | Tool | Target |
-|--------|------|--------|
-| Indexed pages | GSC | 3+ pages |
-| Average position | GSC | Top 20 for brand terms |
-| Organic clicks | GSC | Growth month-over-month |
-| Bounce rate | GA4 | < 50% |
-| Pages per session | GA4 | > 2 |
+| Metric            | Tool | Target                  |
+| ----------------- | ---- | ----------------------- |
+| Indexed pages     | GSC  | 3+ pages                |
+| Average position  | GSC  | Top 20 for brand terms  |
+| Organic clicks    | GSC  | Growth month-over-month |
+| Bounce rate       | GA4  | < 50%                   |
+| Pages per session | GA4  | > 2                     |
 
 ---
 
 ## 11. Implementation Priority
 
 ### Phase 1: Critical (Week 1)
+
 - [ ] Update `index.html` with full meta tags (Section 3.1)
 - [ ] Create `robots.txt` (Section 3.2)
 - [ ] Create `sitemap.xml` (Section 3.3)
 - [ ] Add Open Graph image asset (1200x630px)
 
 ### Phase 2: High Impact (Week 2)
+
 - [ ] Install Angular SSR (`ng add @angular/ssr`)
 - [ ] Implement SeoService (Section 6.2)
 - [ ] Add route-level SEO data (Section 6.4)
 - [ ] Add JSON-LD structured data (Section 4)
 
 ### Phase 3: Optimization (Week 3-4)
+
 - [ ] Performance audit and fixes (Section 8)
 - [ ] Content enhancements (Section 7.1)
 - [ ] Google Search Console setup
@@ -535,13 +596,13 @@ Not applicable (no physical location), but consider:
 
 ## 12. Assets Checklist
 
-| Asset | Size | Purpose | Status |
-|-------|------|---------|--------|
-| `og-image.jpg` | 1200x630px | Social sharing | Missing |
-| `logo.png` | 512x512px | Schema.org | Missing |
-| `apple-touch-icon.png` | 180x180px | iOS bookmarks | Missing |
-| `favicon.svg` | Vector | Modern browsers | Missing |
-| `favicon.ico` | 32x32px | Legacy | Exists |
+| Asset                  | Size       | Purpose         | Status  |
+| ---------------------- | ---------- | --------------- | ------- |
+| `og-image.jpg`         | 1200x630px | Social sharing  | Missing |
+| `logo.png`             | 512x512px  | Schema.org      | Missing |
+| `apple-touch-icon.png` | 180x180px  | iOS bookmarks   | Missing |
+| `favicon.svg`          | Vector     | Modern browsers | Missing |
+| `favicon.ico`          | 32x32px    | Legacy          | Exists  |
 
 ---
 
@@ -556,12 +617,12 @@ Not applicable (no physical location), but consider:
 
 ## 14. Competitor Analysis
 
-| Competitor | Strengths | Our Differentiation |
-|------------|-----------|---------------------|
-| GeoSure | Mobile app, AI scores | Community-driven, free, open data |
-| Equaldex | Global laws data | Focus on local safe spaces, crowdsourced |
-| Purple Roofs | Accommodation focus | All venue types, safety ratings |
-| Local LGBTQ guides | Curated content | Real-time community moderation |
+| Competitor         | Strengths             | Our Differentiation                      |
+| ------------------ | --------------------- | ---------------------------------------- |
+| GeoSure            | Mobile app, AI scores | Community-driven, free, open data        |
+| Equaldex           | Global laws data      | Focus on local safe spaces, crowdsourced |
+| Purple Roofs       | Accommodation focus   | All venue types, safety ratings          |
+| Local LGBTQ guides | Curated content       | Real-time community moderation           |
 
 ---
 
@@ -571,14 +632,17 @@ Not applicable (no physical location), but consider:
 
 ```html
 <title>[Page Title] | Colours of Safety</title>
-<meta name="description" content="[Unique description, 150-160 chars]">
-<meta name="robots" content="index,follow">
-<link rel="canonical" href="https://colours-of-safety.org[route]">
-<meta property="og:title" content="[Title]">
-<meta property="og:description" content="[Description]">
-<meta property="og:url" content="[URL]">
-<meta property="og:image" content="https://colours-of-safety.org/assets/og-image.jpg">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="[Unique description, 150-160 chars]" />
+<meta name="robots" content="index,follow" />
+<link rel="canonical" href="https://coloursofsafety.com[route]" />
+<meta property="og:title" content="[Title]" />
+<meta property="og:description" content="[Description]" />
+<meta property="og:url" content="[URL]" />
+<meta
+  property="og:image"
+  content="https://coloursofsafety.com/assets/og-image.jpg"
+/>
+<meta name="twitter:card" content="summary_large_image" />
 ```
 
 ### File Locations
@@ -601,5 +665,5 @@ Not applicable (no physical location), but consider:
 
 ---
 
-*Document Version: 1.0*  
-*Next Review: Post-SSR implementation*
+_Document Version: 1.0_  
+_Next Review: Post-SSR implementation_

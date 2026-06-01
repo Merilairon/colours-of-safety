@@ -12,15 +12,14 @@ export class AuthService {
 
   readonly user = this._user.asReadonly();
   readonly isLoggedIn = computed(() => this._user() !== null);
-  readonly isReviewer = computed(() => this._user()?.role === 'reviewer');
+  readonly isReviewer = computed(() =>
+    ['reviewer', 'admin', 'super_admin'].includes(this._user()?.role ?? ''),
+  );
+  readonly isAdmin = computed(() => ['admin', 'super_admin'].includes(this._user()?.role ?? ''));
 
   constructor(private readonly http: HttpClient) {}
 
-  register(
-    email: string,
-    displayName: string,
-    password: string,
-  ): Observable<AuthResult> {
+  register(email: string, displayName: string, password: string): Observable<AuthResult> {
     return this.http
       .post<AuthResult>('/api/auth/register', { email, displayName, password })
       .pipe(tap((res) => this.persist(res)));

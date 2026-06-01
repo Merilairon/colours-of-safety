@@ -19,10 +19,7 @@ export class SeedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await this.seedAccount(
-      this.config.get<string>(
-        'REVIEWER_EMAIL',
-        'reviewer@colours-of-safety.org',
-      ),
+      this.config.get<string>('REVIEWER_EMAIL', 'reviewer@coloursofsafety.com'),
       this.config.get<string>('REVIEWER_PASSWORD', 'reviewer123'),
       'Default Reviewer',
       UserRole.REVIEWER,
@@ -31,7 +28,7 @@ export class SeedService implements OnModuleInit {
     await this.seedAccount(
       this.config.get<string>(
         'SUPER_ADMIN_EMAIL',
-        'superadmin@colours-of-safety.org',
+        'superadmin@coloursofsafety.com',
       ),
       this.config.get<string>('SUPER_ADMIN_PASSWORD', 'superadmin123'),
       'Default Super Admin',

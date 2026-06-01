@@ -12,12 +12,17 @@
     @if (isReviewer()) {
       <a routerLink="/review" routerLinkActive="active">Review queue</a>
     }
+    @if (isAdmin()) {
+      <a routerLink="/admin" routerLinkActive="active">Admin</a>
+    }
   </nav>
 
   <div class="account">
     @if (isLoggedIn()) {
       <span class="who">{{ user()?.displayName }}</span>
-      @if (isReviewer()) {
+      @if (isAdmin()) {
+        <span class="badge admin">admin</span>
+      } @else if (isReviewer()) {
         <span class="badge">reviewer</span>
       }
       <button type="button" class="link-btn" (click)="logout()">Log out</button>

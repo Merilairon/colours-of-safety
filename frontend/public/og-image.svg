@@ -1,0 +1,45 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="rainbow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e40303"/>
+      <stop offset="16%" style="stop-color:#ff8c00"/>
+      <stop offset="33%" style="stop-color:#ffed00"/>
+      <stop offset="50%" style="stop-color:#008026"/>
+      <stop offset="66%" style="stop-color:#244d9e"/>
+      <stop offset="83%" style="stop-color:#732982"/>
+      <stop offset="100%" style="stop-color:#e40303"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="150" cy="150" r="80" fill="#e84393" opacity="0.1"/>
+  <circle cx="1050" cy="480" r="120" fill="#00b894" opacity="0.1"/>
+  <circle cx="900" cy="100" r="60" fill="#fdcb6e" opacity="0.1"/>
+
+  <!-- Rainbow stripe -->
+  <rect x="0" y="40" width="1200" height="12" fill="url(#rainbow)"/>
+  <rect x="0" y="578" width="1200" height="12" fill="url(#rainbow)"/>
+
+  <!-- Map pin icon -->
+  <g transform="translate(600, 200)">
+    <path d="M0,-60 C-33,-60 -60,-33 -60,0 C-60,40 0,100 0,100 C0,100 60,40 60,0 C60,-33 33,-60 0,-60 Z" fill="#e84393" stroke="#fff" stroke-width="4"/>
+    <circle cx="0" cy="-10" r="20" fill="#fff"/>
+    <path d="M-8,-10 L0,-2 L8,-18" fill="none" stroke="#e84393" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="360" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="700" fill="#fff">Colours of Safety</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#ddd">Find Queer-Friendly Safe Spaces Near You</text>
+
+  <!-- Community tagline -->
+  <text x="600" y="500" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#aaa">Community-driven map of LGBTQIA+ friendly places</text>
+</svg>

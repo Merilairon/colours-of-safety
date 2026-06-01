@@ -1,13 +1,94 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Colours of Safety</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-</head>
-<body>
-  <app-root></app-root>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>Colours of Safety | Find Queer-Friendly Safe Spaces Near You</title>
+    <meta
+      name="description"
+      content="Community-driven map of LGBTQIA+ friendly places and safe districts. Browse, submit, and discover queer-welcoming venues, bars, cafes, and community spaces."
+    />
+    <meta
+      name="keywords"
+      content="queer friendly, LGBTQ safe spaces, gay friendly map, trans friendly places, safe queer venues"
+    />
+    <meta name="author" content="Colours of Safety Community" />
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://coloursofsafety.com/" />
+
+    <!-- Preconnect to tile server for performance -->
+    <link rel="preconnect" href="https://tile.openstreetmap.org" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Colours of Safety | Find Queer-Friendly Safe Spaces" />
+    <meta
+      property="og:description"
+      content="Community-driven map of LGBTQIA+ friendly places. Discover and share safe spaces worldwide."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://coloursofsafety.com/" />
+    <meta property="og:image" content="https://coloursofsafety.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Colours of Safety" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Colours of Safety | Queer-Friendly Safe Spaces Map" />
+    <meta
+      name="twitter:description"
+      content="Discover LGBTQIA+ friendly places and safe districts in your area. Community-moderated for accuracy."
+    />
+    <meta name="twitter:image" content="https://coloursofsafety.com/og-image.jpg" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#e84393" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Colours of Safety",
+        "url": "https://coloursofsafety.com",
+        "logo": "https://coloursofsafety.com/logo.png",
+        "description": "Community-driven map platform for LGBTQIA+ safe spaces",
+        "sameAs": ["https://github.com/Merilairon/colours-of-safety"],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "community support",
+          "availableLanguage": ["English"]
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Colours of Safety",
+        "applicationCategory": "TravelApplication",
+        "operatingSystem": "Any",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Interactive map of queer-friendly places",
+          "Community moderation system",
+          "Safety ratings and reviews",
+          "District boundary mapping"
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
 </html>

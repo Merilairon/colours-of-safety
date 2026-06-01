@@ -16,11 +16,11 @@ and **reviewers** moderate submissions before they appear publicly.
 
 ## Tech stack
 
-| Layer    | Tech                                            |
-| -------- | ----------------------------------------------- |
-| Frontend | Angular 21, Leaflet + leaflet-draw, TypeScript  |
-| Backend  | NestJS 11, TypeORM, Passport JWT                 |
-| Database | PostgreSQL 16 + PostGIS 3.4                      |
+| Layer    | Tech                                                   |
+| -------- | ------------------------------------------------------ |
+| Frontend | Angular 21, Leaflet + leaflet-draw, TypeScript         |
+| Backend  | NestJS 11, TypeORM, Passport JWT                       |
+| Database | PostgreSQL 16 + PostGIS 3.4                            |
 | Deploy   | Docker Compose (nginx serves the SPA + proxies `/api`) |
 
 ## Quick start (Docker Compose)
@@ -34,7 +34,7 @@ Then open **http://localhost:8080**.
 
 A default reviewer account is seeded on first boot (configurable in `.env`):
 
-- **Email:** `reviewer@colours-of-safety.org`
+- **Email:** `reviewer@coloursofsafety.com`
 - **Password:** `reviewer123`
 
 > Change `JWT_SECRET` and the reviewer credentials before deploying anywhere real.
@@ -52,16 +52,16 @@ A default reviewer account is seeded on first boot (configurable in `.env`):
 
 All routes are prefixed with `/api`.
 
-| Method | Route                     | Auth      | Description                          |
-| ------ | ------------------------- | --------- | ------------------------------------ |
-| POST   | `/auth/register`          | –         | Create an account                    |
-| POST   | `/auth/login`             | –         | Log in, returns a JWT                |
-| GET    | `/auth/me`                | user      | Current user                         |
-| GET    | `/pois` · `/districts`    | –         | Public: **approved** markings        |
-| GET    | `/pois/mine` · `/districts/mine` | user | Caller's own submissions          |
-| GET    | `/pois/pending` · `/districts/pending` | reviewer | Moderation queue        |
-| POST   | `/pois` · `/districts`    | user      | Submit a new marking (`pending`)     |
-| PATCH  | `/pois/:id/review` · `/districts/:id/review` | reviewer | Approve / reject |
+| Method | Route                                        | Auth     | Description                      |
+| ------ | -------------------------------------------- | -------- | -------------------------------- |
+| POST   | `/auth/register`                             | –        | Create an account                |
+| POST   | `/auth/login`                                | –        | Log in, returns a JWT            |
+| GET    | `/auth/me`                                   | user     | Current user                     |
+| GET    | `/pois` · `/districts`                       | –        | Public: **approved** markings    |
+| GET    | `/pois/mine` · `/districts/mine`             | user     | Caller's own submissions         |
+| GET    | `/pois/pending` · `/districts/pending`       | reviewer | Moderation queue                 |
+| POST   | `/pois` · `/districts`                       | user     | Submit a new marking (`pending`) |
+| PATCH  | `/pois/:id/review` · `/districts/:id/review` | reviewer | Approve / reject                 |
 
 Geometries are exchanged as GeoJSON (`Point` for POIs, `Polygon` for districts, SRID 4326).
 

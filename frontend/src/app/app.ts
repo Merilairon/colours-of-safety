@@ -15,6 +15,7 @@ export class App {
   protected readonly user = this.auth.user;
   protected readonly isLoggedIn = this.auth.isLoggedIn;
   protected readonly isReviewer = this.auth.isReviewer;
+  protected readonly isAdmin = this.auth.isAdmin;
 
   logout(): void {
     this.auth.logout();

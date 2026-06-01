@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /mine
+Disallow: /review
+Disallow: /api/
+
+Sitemap: https://coloursofsafety.com/sitemap.xml
+
+# Crawl-delay for rate limiting
+Crawl-delay: 1

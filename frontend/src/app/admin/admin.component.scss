@@ -1,0 +1,84 @@
+@use '../app.scss' as *;
+
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+  }
+
+  .meta {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0 0 12px 0;
+  }
+}
+
+.role-badge {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+
+  &.user {
+    background: #e0e0e0;
+    color: #333;
+  }
+
+  &.reviewer {
+    background: #bbdefb;
+    color: #1565c0;
+  }
+
+  &.admin {
+    background: #ffe0b2;
+    color: #ef6c00;
+  }
+
+  &.super_admin {
+    background: #ffcdd2;
+    color: #c62828;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 0.9rem;
+
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+}
+
+.spinner {
+  color: #666;
+  font-size: 0.85rem;
+}

@@ -1,0 +1,42 @@
+<div class="page">
+  <h1>Admin panel</h1>
+  <p class="sub">Manage user roles. Only admins and super admins can access this page.</p>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else if (items().length === 0) {
+    <p class="muted">No users found.</p>
+  } @else {
+    <ul class="user-list">
+      @for (user of items(); track user.id) {
+        <li class="card">
+          <div class="card-head">
+            <h2>{{ user.displayName }}</h2>
+            <span class="role-badge" [class]="user.role">{{ user.role }}</span>
+          </div>
+
+          <p class="meta">{{ user.email }}</p>
+
+          <div class="actions">
+            <select
+              [value]="user.role"
+              [disabled]="user.busy"
+              (change)="setRole(user, $any($event.target).value)"
+            >
+              @for (role of roles; track role) {
+                <option [value]="role">{{ role }}</option>
+              }
+            </select>
+            @if (user.busy) {
+              <span class="spinner">Saving…</span>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

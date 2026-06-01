@@ -11,15 +11,15 @@ Public read, authenticated write, reviewer moderation.
 
 ## 2. Tech Stack
 
-| Layer      | Technology                                    |
-| ---------- | --------------------------------------------- |
-| Frontend   | Angular 21, Leaflet + leaflet-draw, SCSS      |
-| Backend    | NestJS 11, TypeORM, Passport-JWT              |
-| Database   | PostgreSQL 16 + PostGIS 3.4                   |
-| Container  | Docker / nginx (SPA + `/api` proxy)           |
-| Orchestration | Kubernetes (k3s), namespace `colours-of-safety` |
-| Ingress    | Cloudflare Tunnel (HTTP, no TLS termination at cluster) |
-| CI/CD      | GitHub Actions → GHCR → k3s via ARC runner   |
+| Layer         | Technology                                              |
+| ------------- | ------------------------------------------------------- |
+| Frontend      | Angular 21, Leaflet + leaflet-draw, SCSS                |
+| Backend       | NestJS 11, TypeORM, Passport-JWT                        |
+| Database      | PostgreSQL 16 + PostGIS 3.4                             |
+| Container     | Docker / nginx (SPA + `/api` proxy)                     |
+| Orchestration | Kubernetes (k3s), namespace `colours-of-safety`         |
+| Ingress       | Cloudflare Tunnel (HTTP, no TLS termination at cluster) |
+| CI/CD         | GitHub Actions → GHCR → k3s via ARC runner              |
 
 ---
 
@@ -64,31 +64,31 @@ AppModule
 
 **`users`**
 
-| Column        | Type              | Notes                              |
-| ------------- | ----------------- | ---------------------------------- |
-| id            | uuid (PK)         |                                    |
-| email         | varchar (unique)  | Excluded from API responses        |
-| displayName   | varchar           |                                    |
-| passwordHash  | varchar           | Excluded from API responses        |
-| role          | enum              | `user`, `reviewer`, `admin`, `super_admin` |
-| createdAt     | timestamptz       |                                    |
+| Column       | Type             | Notes                                      |
+| ------------ | ---------------- | ------------------------------------------ |
+| id           | uuid (PK)        |                                            |
+| email        | varchar (unique) | Excluded from API responses                |
+| displayName  | varchar          |                                            |
+| passwordHash | varchar          | Excluded from API responses                |
+| role         | enum             | `user`, `reviewer`, `admin`, `super_admin` |
+| createdAt    | timestamptz      |                                            |
 
 **`pois`**
 
-| Column       | Type              | Notes                              |
-| ------------ | ----------------- | ---------------------------------- |
-| id           | uuid (PK)         |                                    |
-| name         | varchar           |                                    |
-| description  | text              |                                    |
-| category     | varchar           | default `other`                    |
-| safetyRating | int               | 1 (unsafe) – 5 (very safe)         |
-| location     | geometry(Point, 4326) | Spatial index                  |
-| status       | enum              | `pending`, `approved`, `rejected`  |
-| reviewNote   | text (nullable)   |                                    |
-| createdById  | uuid (FK → users) | CASCADE delete                     |
-| reviewedById | uuid (FK → users, nullable) | SET NULL on delete       |
-| createdAt    | timestamptz       |                                    |
-| updatedAt    | timestamptz       |                                    |
+| Column       | Type                        | Notes                             |
+| ------------ | --------------------------- | --------------------------------- |
+| id           | uuid (PK)                   |                                   |
+| name         | varchar                     |                                   |
+| description  | text                        |                                   |
+| category     | varchar                     | default `other`                   |
+| safetyRating | int                         | 1 (unsafe) – 5 (very safe)        |
+| location     | geometry(Point, 4326)       | Spatial index                     |
+| status       | enum                        | `pending`, `approved`, `rejected` |
+| reviewNote   | text (nullable)             |                                   |
+| createdById  | uuid (FK → users)           | CASCADE delete                    |
+| reviewedById | uuid (FK → users, nullable) | SET NULL on delete                |
+| createdAt    | timestamptz                 |                                   |
+| updatedAt    | timestamptz                 |                                   |
 
 **`districts`** — identical shape to `pois`, geometry column is `Polygon` named `area`.
 
@@ -103,23 +103,23 @@ AppModule
 
 Base prefix: `/api`
 
-| Method | Route                          | Auth      | Description                     |
-| ------ | ------------------------------ | --------- | ------------------------------- |
-| POST   | `/auth/register`               | public    | Create account                  |
-| POST   | `/auth/login`                  | public    | Returns `{ accessToken, user }` |
-| GET    | `/auth/me`                     | user      | Current user                    |
-| GET    | `/pois`                        | public    | Approved POIs                   |
-| GET    | `/pois/mine`                   | user      | Caller's own submissions        |
-| GET    | `/pois/pending`                | reviewer  | Moderation queue                |
-| POST   | `/pois`                        | user      | Submit new POI                  |
-| PATCH  | `/pois/:id/review`             | reviewer  | Approve / reject                |
-| GET    | `/districts`                   | public    | Approved districts              |
-| GET    | `/districts/mine`              | user      | Caller's own submissions        |
-| GET    | `/districts/pending`           | reviewer  | Moderation queue                |
-| POST   | `/districts`                   | user      | Submit new district             |
-| PATCH  | `/districts/:id/review`        | reviewer  | Approve / reject                |
-| GET    | `/users`                       | admin     | List users                      |
-| PATCH  | `/users/:id/role`              | admin     | Change user role                |
+| Method | Route                   | Auth     | Description                     |
+| ------ | ----------------------- | -------- | ------------------------------- |
+| POST   | `/auth/register`        | public   | Create account                  |
+| POST   | `/auth/login`           | public   | Returns `{ accessToken, user }` |
+| GET    | `/auth/me`              | user     | Current user                    |
+| GET    | `/pois`                 | public   | Approved POIs                   |
+| GET    | `/pois/mine`            | user     | Caller's own submissions        |
+| GET    | `/pois/pending`         | reviewer | Moderation queue                |
+| POST   | `/pois`                 | user     | Submit new POI                  |
+| PATCH  | `/pois/:id/review`      | reviewer | Approve / reject                |
+| GET    | `/districts`            | public   | Approved districts              |
+| GET    | `/districts/mine`       | user     | Caller's own submissions        |
+| GET    | `/districts/pending`    | reviewer | Moderation queue                |
+| POST   | `/districts`            | user     | Submit new district             |
+| PATCH  | `/districts/:id/review` | reviewer | Approve / reject                |
+| GET    | `/users`                | admin    | List users                      |
+| PATCH  | `/users/:id/role`       | admin    | Change user role                |
 
 Geometries: GeoJSON `Point` (POIs) / `Polygon` (districts), SRID 4326.
 
@@ -129,13 +129,13 @@ Geometries: GeoJSON `Point` (POIs) / `Polygon` (districts), SRID 4326.
 
 ### 5.1 Route Structure
 
-| Path      | Component            | Guard         |
-| --------- | -------------------- | ------------- |
-| `/`       | `MapComponent`       | none (public) |
-| `/login`  | `LoginComponent`     | none          |
-| `/register` | `RegisterComponent` | none         |
-| `/mine`   | `MySubmissionsComponent` | `authGuard` |
-| `/review` | `ReviewComponent`    | `reviewerGuard` |
+| Path        | Component                | Guard           |
+| ----------- | ------------------------ | --------------- |
+| `/`         | `MapComponent`           | none (public)   |
+| `/login`    | `LoginComponent`         | none            |
+| `/register` | `RegisterComponent`      | none            |
+| `/mine`     | `MySubmissionsComponent` | `authGuard`     |
+| `/review`   | `ReviewComponent`        | `reviewerGuard` |
 
 All lazy-loaded; wildcard → `/`.
 
@@ -155,16 +155,16 @@ All lazy-loaded; wildcard → `/`.
 
 All resources live in namespace `colours-of-safety`.
 
-| Manifest                        | Resource(s)                               |
-| ------------------------------- | ----------------------------------------- |
-| `namespace.yml`                 | Namespace                                 |
-| `postgres.yml`                  | PVC (5 Gi), Deployment, Service :5432     |
-| `backend.yml`                   | Deployment (1 replica), Service :3000     |
-| `frontend.yml`                  | Deployment (1 replica), Service :80       |
-| `frontend-nginx-configmap.yml`  | nginx config — SPA fallback + `/api` proxy |
+| Manifest                        | Resource(s)                                       |
+| ------------------------------- | ------------------------------------------------- |
+| `namespace.yml`                 | Namespace                                         |
+| `postgres.yml`                  | PVC (5 Gi), Deployment, Service :5432             |
+| `backend.yml`                   | Deployment (1 replica), Service :3000             |
+| `frontend.yml`                  | Deployment (1 replica), Service :80               |
+| `frontend-nginx-configmap.yml`  | nginx config — SPA fallback + `/api` proxy        |
 | `cloudflare-tunnel-ingress.yml` | Ingress → `frontend:80` for `coloursofsafety.com` |
-| `arc-runner.yml`                | ARC RunnerDeployment + RBAC for CI/CD     |
-| `secrets.yml.example`           | Template for `app-secrets` Secret         |
+| `arc-runner.yml`                | ARC RunnerDeployment + RBAC for CI/CD             |
+| `secrets.yml.example`           | Template for `app-secrets` Secret                 |
 
 Secrets (DB credentials, JWT secret, seeded account passwords) are stored as a Kubernetes `Secret` named `app-secrets`.
 
@@ -218,10 +218,10 @@ cd frontend && npm install && npm start
 
 ### Seeded Accounts
 
-| Role        | Email                               | Password       |
-| ----------- | ----------------------------------- | -------------- |
-| reviewer    | `reviewer@colours-of-safety.org`    | `reviewer123`  |
-| super_admin | `superadmin@colours-of-safety.org`  | `superadmin123` |
+| Role        | Email                            | Password        |
+| ----------- | -------------------------------- | --------------- |
+| reviewer    | `reviewer@coloursofsafety.com`   | `reviewer123`   |
+| super_admin | `superadmin@coloursofsafety.com` | `superadmin123` |
 
 > Change all credentials and `JWT_SECRET` before production use.
 
