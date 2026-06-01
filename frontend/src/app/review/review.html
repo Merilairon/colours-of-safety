@@ -2,24 +2,40 @@
   <h1>Review queue</h1>
   <p class="sub">Approve or reject submissions. Only approved markings appear on the public map.</p>
 
+  <!-- Filter buttons -->
+  <div class="filter-bar">
+    <button type="button" [class.active]="filterType() === 'all'" (click)="setFilter('all')">
+      All
+    </button>
+    <button type="button" [class.active]="filterType() === 'poi'" (click)="setFilter('poi')">
+      Places
+    </button>
+    <button
+      type="button"
+      [class.active]="filterType() === 'district'"
+      (click)="setFilter('district')"
+    >
+      Districts
+    </button>
+  </div>
+
   @if (error()) {
     <p class="error">{{ error() }}</p>
   }
 
   @if (loading()) {
     <p class="muted">Loading…</p>
-  } @else if (items().length === 0) {
+  } @else if (filteredItems().length === 0) {
     <p class="muted">Nothing to review right now. 🎉</p>
   } @else {
     <ul class="queue">
-      @for (item of items(); track item.id) {
+      @for (item of filteredItems(); track item.id) {
         <li class="card">
           <div class="card-head">
             <span class="kind">{{ item.kind === 'poi' ? 'Place' : 'District' }}</span>
-            <span
-              class="rating"
-              [style.background]="colorFor(item.safetyRating)"
-            >{{ safetyLabel(item.safetyRating) }}</span>
+            <span class="rating" [style.background]="colorFor(item.safetyRating)">{{
+              safetyLabel(item.safetyRating)
+            }}</span>
           </div>
 
           <h2>{{ item.name }}</h2>
@@ -46,13 +62,17 @@
               class="reject"
               [disabled]="item.busy"
               (click)="decide(item, 'rejected')"
-            >Reject</button>
+            >
+              Reject
+            </button>
             <button
               type="button"
               class="approve"
               [disabled]="item.busy"
               (click)="decide(item, 'approved')"
-            >Approve</button>
+            >
+              Approve
+            </button>
           </div>
         </li>
       }

@@ -1,6 +1,14 @@
 <div class="page">
   <h1>My submissions</h1>
-  <p class="sub">Track the review status of places and districts you've contributed.</p>
+  @if (rows().length > 0) {
+    <p class="sub">
+      You've contributed <strong>{{ rows().length }}</strong> safe space{{
+        rows().length === 1 ? '' : 's'
+      }}! Thanks for helping the community.
+    </p>
+  } @else {
+    <p class="sub">Track the review status of places and districts you've contributed.</p>
+  }
 
   @if (error()) {
     <p class="error">{{ error() }}</p>

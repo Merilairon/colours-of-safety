@@ -25,6 +25,31 @@ h1 {
   color: #d7263d;
 }
 
+.filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+
+  button {
+    padding: 0.4rem 0.9rem;
+    border: 1px solid #d4d6e0;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+
+    &:hover {
+      border-color: #e84393;
+    }
+
+    &.active {
+      background: #e84393;
+      border-color: #e84393;
+      color: #fff;
+    }
+  }
+}
+
 .queue {
   list-style: none;
   margin: 0;

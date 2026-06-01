@@ -4,6 +4,7 @@ import {
   ElementRef,
   OnDestroy,
   ViewChild,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -13,11 +14,7 @@ import * as L from 'leaflet';
 import 'leaflet-draw';
 import { AuthService } from '../core/auth.service';
 import { MarkingsService } from '../core/markings.service';
-import {
-  CreateDistrictPayload,
-  CreatePoiPayload,
-  GeoPolygon,
-} from '../core/models';
+import { CreateDistrictPayload, CreatePoiPayload, GeoPolygon, Poi, District } from '../core/models';
 import { POI_CATEGORIES, safetyColor, safetyLabel } from '../core/safety';
 
 type DraftKind = 'poi' | 'district';
@@ -52,6 +49,24 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   protected readonly loadError = signal<string | null>(null);
   protected readonly submitting = signal(false);
 
+  // Filters
+  protected readonly selectedCategory = signal<string>('all');
+  protected readonly minSafetyRating = signal<number>(1);
+
+  // Stats for social proof
+  protected readonly approvedCount = signal<{ pois: number; districts: number }>({
+    pois: 0,
+    districts: 0,
+  });
+
+  // Search
+  protected readonly searchQuery = signal<string>('');
+  protected readonly searching = signal<boolean>(false);
+
+  // Data storage for filtering
+  private allPois: Poi[] = [];
+  private allDistricts: District[] = [];
+
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     description: [''],
@@ -81,9 +96,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.addDrawControls();
     }
 
-    this.map.on('draw:created', (e) =>
-      this.onShapeCreated(e as L.DrawEvents.Created),
-    );
+    this.map.on('draw:created', (e) => this.onShapeCreated(e as L.DrawEvents.Created));
 
     this.loadData();
   }
@@ -181,7 +194,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private onSubmitted(): void {
     this.submitting.set(false);
     this.clearDraft();
-    this.showToast('Thanks! Your submission is pending reviewer approval.');
+    this.showSuccessToast(
+      'Thanks! Your submission helps the community. It will be visible once approved.',
+    );
+    this.reloadStats();
+  }
+
+  private reloadStats(): void {
+    this.markings.getApprovedPois().subscribe((pois) => {
+      this.allPois = pois;
+      this.approvedCount.update((c) => ({ ...c, pois: pois.length }));
+      this.applyFilters();
+    });
+    this.markings.getApprovedDistricts().subscribe((districts) => {
+      this.allDistricts = districts;
+      this.approvedCount.update((c) => ({ ...c, districts: districts.length }));
+      this.applyFilters();
+    });
   }
 
   private onSubmitError(): void {
@@ -207,9 +236,120 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private showToast(message: string): void {
+  private showToast(message: string, duration = 4000): void {
     this.toast.set(message);
-    setTimeout(() => this.toast.set(null), 4000);
+    setTimeout(() => this.toast.set(null), duration);
+  }
+
+  private showSuccessToast(message: string): void {
+    this.toast.set(message);
+    setTimeout(() => this.toast.set(null), 5000);
+  }
+
+  protected applyFilters(): void {
+    this.dataLayer.clearLayers();
+
+    const category = this.selectedCategory();
+    const minRating = this.minSafetyRating();
+
+    // Filter POIs
+    const filteredPois = this.allPois.filter((poi) => {
+      if (category !== 'all' && poi.category !== category) return false;
+      if (poi.safetyRating < minRating) return false;
+      return true;
+    });
+
+    for (const poi of filteredPois) {
+      const [lng, lat] = poi.location.coordinates;
+      const marker = L.circleMarker([lat, lng], {
+        radius: 9,
+        color: safetyColor(poi.safetyRating),
+        fillColor: safetyColor(poi.safetyRating),
+        fillOpacity: 0.85,
+        weight: 2,
+      });
+      marker.bindPopup(this.poiPopup(poi.name, poi));
+      this.dataLayer.addLayer(marker);
+    }
+
+    // Filter Districts
+    const filteredDistricts = this.allDistricts.filter((district) => {
+      if (district.safetyRating < minRating) return false;
+      return true;
+    });
+
+    for (const district of filteredDistricts) {
+      const ring = district.area.coordinates[0].map(([lng, lat]): [number, number] => [lat, lng]);
+      const polygon = L.polygon(ring, {
+        color: safetyColor(district.safetyRating),
+        fillColor: safetyColor(district.safetyRating),
+        fillOpacity: 0.25,
+        weight: 2,
+      });
+      polygon.bindPopup(
+        this.districtPopup(district.name, district.description, district.safetyRating),
+      );
+      this.dataLayer.addLayer(polygon);
+    }
+  }
+
+  protected onCategoryChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedCategory.set(value);
+    this.applyFilters();
+  }
+
+  protected onRatingChange(event: Event): void {
+    const value = parseInt((event.target as HTMLSelectElement).value, 10);
+    this.minSafetyRating.set(value);
+    this.applyFilters();
+  }
+
+  protected detectUserLocation(): void {
+    if (!navigator.geolocation) {
+      this.loadError.set('Geolocation is not supported by your browser.');
+      setTimeout(() => this.loadError.set(null), 3000);
+      return;
+    }
+
+    this.loadError.set('Detecting your location...');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        this.map.setView([latitude, longitude], 14);
+        this.loadError.set(null);
+      },
+      () => {
+        this.loadError.set('Could not detect your location.');
+        setTimeout(() => this.loadError.set(null), 3000);
+      },
+    );
+  }
+
+  protected onSearch(event: Event): void {
+    event.preventDefault();
+    const query = this.searchQuery().trim();
+    if (!query) return;
+
+    this.searching.set(true);
+    // Use Nominatim for geocoding
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        this.searching.set(false);
+        if (data && data.length > 0) {
+          const { lat, lon } = data[0];
+          this.map.setView([parseFloat(lat), parseFloat(lon)], 14);
+        } else {
+          this.loadError.set('Location not found.');
+          setTimeout(() => this.loadError.set(null), 3000);
+        }
+      })
+      .catch(() => {
+        this.searching.set(false);
+        this.loadError.set('Search failed. Please try again.');
+        setTimeout(() => this.loadError.set(null), 3000);
+      });
   }
 
   private loadData(): void {
@@ -234,9 +374,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.markings.getApprovedDistricts().subscribe({
       next: (districts) => {
         for (const district of districts) {
-          const ring = district.area.coordinates[0].map(
-            ([lng, lat]): [number, number] => [lat, lng],
-          );
+          const ring = district.area.coordinates[0].map(([lng, lat]): [number, number] => [
+            lat,
+            lng,
+          ]);
           const polygon = L.polygon(ring, {
             color: safetyColor(district.safetyRating),
             fillColor: safetyColor(district.safetyRating),
@@ -264,11 +405,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     `;
   }
 
-  private districtPopup(
-    name: string,
-    description: string,
-    rating: number,
-  ): string {
+  private districtPopup(name: string, description: string, rating: number): string {
     return `
       <strong>${this.escape(name)}</strong>
       <div class="pop-meta">District · ${safetyLabel(rating)}</div>

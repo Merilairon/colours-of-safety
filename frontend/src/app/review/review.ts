@@ -31,6 +31,10 @@ export class ReviewComponent implements OnInit {
   protected readonly safetyLabel = safetyLabel;
   protected readonly colorFor = safetyColor;
 
+  // Filter
+  protected readonly filterType = signal<'all' | 'poi' | 'district'>('all');
+  protected readonly filteredItems = signal<QueueItem[]>([]);
+
   ngOnInit(): void {
     this.load();
   }
@@ -42,13 +46,30 @@ export class ReviewComponent implements OnInit {
       this.fetch(this.markings.getPendingDistricts(), 'district'),
     ])
       .then(([pois, districts]) => {
-        this.items.set([...pois, ...districts]);
+        const all = [...pois, ...districts];
+        this.items.set(all);
+        this.applyFilter();
         this.loading.set(false);
       })
       .catch(() => {
         this.error.set('Could not load the review queue.');
         this.loading.set(false);
       });
+  }
+
+  protected setFilter(type: 'all' | 'poi' | 'district'): void {
+    this.filterType.set(type);
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    const type = this.filterType();
+    const all = this.items();
+    if (type === 'all') {
+      this.filteredItems.set(all);
+    } else {
+      this.filteredItems.set(all.filter((item) => item.kind === type));
+    }
   }
 
   private fetch(
@@ -94,8 +115,7 @@ export class ReviewComponent implements OnInit {
         : this.markings.reviewDistrict(item.id, payload);
 
     obs.subscribe({
-      next: () =>
-        this.items.update((list) => list.filter((it) => it.id !== item.id)),
+      next: () => this.items.update((list) => list.filter((it) => it.id !== item.id)),
       error: () => {
         this.setBusy(item, false);
         this.error.set('Could not save your decision. Please try again.');
@@ -104,8 +124,6 @@ export class ReviewComponent implements OnInit {
   }
 
   private setBusy(item: QueueItem, busy: boolean): void {
-    this.items.update((list) =>
-      list.map((it) => (it.id === item.id ? { ...it, busy } : it)),
-    );
+    this.items.update((list) => list.map((it) => (it.id === item.id ? { ...it, busy } : it)));
   }
 }
