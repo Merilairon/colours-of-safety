@@ -408,12 +408,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private poiPopup(
     name: string,
-    poi: { description: string; category: string; safetyRating: number },
+    poi: { id?: string; description: string; category: string; safetyRating: number },
   ): string {
     return `
       <strong>${this.escape(name)}</strong>
       <div class="pop-meta">${this.escape(poi.category)} · ${safetyLabel(poi.safetyRating)}</div>
       ${poi.description ? `<p>${this.escape(poi.description)}</p>` : ''}
+      ${this.reportLink()}
     `;
   }
 
@@ -422,7 +423,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       <strong>${this.escape(name)}</strong>
       <div class="pop-meta">District · ${safetyLabel(rating)}</div>
       ${description ? `<p>${this.escape(description)}</p>` : ''}
+      ${this.reportLink()}
     `;
+  }
+
+  private reportLink(): string {
+    return `<div class="pop-report"><a href="mailto:support@colours-of-safety.org?subject=Report inappropriate content">🚩 Flag</a></div>`;
   }
 
   private escape(value: string): string {

@@ -218,6 +218,23 @@
   margin: 0.25rem 0 0;
 }
 
+:host ::ng-deep .pop-report {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #eee;
+  font-size: 0.75rem;
+
+  a {
+    color: #6b6f80;
+    text-decoration: none;
+
+    &:hover {
+      color: #d7263d;
+      text-decoration: underline;
+    }
+  }
+}
+
 // Search bar
 .search-bar {
   position: absolute;
