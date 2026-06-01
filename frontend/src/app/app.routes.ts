@@ -67,5 +67,14 @@ export const routes: Routes = [
       robots: 'noindex,nofollow',
     },
   },
+  {
+    path: 'privacy',
+    loadComponent: () => import('./privacy/privacy.component').then((m) => m.PrivacyComponent),
+    resolve: { seo: seoResolver },
+    data: {
+      title: 'Privacy Policy | Colours of Safety',
+      description: 'Privacy Policy for Colours of Safety - how we handle your data.',
+    },
+  },
   { path: '**', redirectTo: '' },
 ];

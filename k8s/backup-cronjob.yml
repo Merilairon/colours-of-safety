@@ -1,0 +1,75 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: colours-of-safety
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: postgres:16-alpine
+              env:
+                - name: PGHOST
+                  value: postgres
+                - name: PGPORT
+                  value: "5432"
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: app-secrets
+                      key: DB_NAME
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: app-secrets
+                      key: DB_USERNAME
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: app-secrets
+                      key: DB_PASSWORD
+                - name: BACKUP_DIR
+                  value: /backups
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="${BACKUP_DIR}/colours_of_safety_${TIMESTAMP}.sql.gz"
+                  echo "Starting backup at $(date)"
+                  echo "Backup file: ${BACKUP_FILE}"
+                  pg_dump --clean --if-exists --verbose | gzip > "${BACKUP_FILE}"
+                  echo "Backup completed at $(date)"
+                  ls -lh "${BACKUP_FILE}"
+                  # Keep only last 7 backups
+                  ls -t ${BACKUP_DIR}/colours_of_safety_*.sql.gz | tail -n +8 | xargs -r rm -f
+                  echo "Cleanup completed. Remaining backups:"
+                  ls -lh ${BACKUP_DIR}/
+              volumeMounts:
+                - name: backup-volume
+                  mountPath: /backups
+          volumes:
+            - name: backup-volume
+              persistentVolumeClaim:
+                claimName: postgres-backup-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-backup-pvc
+  namespace: colours-of-safety
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

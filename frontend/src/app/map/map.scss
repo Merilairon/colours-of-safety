@@ -181,3 +181,54 @@
 :host ::ng-deep .leaflet-popup-content p {
   margin: 0.25rem 0 0;
 }
+
+// Mobile responsive styles
+@media (max-width: 768px) {
+  .legend {
+    bottom: 0.75rem;
+    left: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.75rem;
+
+    h3 {
+      font-size: 0.8rem;
+    }
+
+    .legend-note {
+      max-width: 140px;
+      font-size: 0.7rem;
+    }
+  }
+
+  .hint {
+    top: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    max-width: 90vw;
+    text-align: center;
+  }
+
+  .draft-panel {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 12px 12px 0 0;
+    padding: 1rem;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .legend {
+    bottom: 0.5rem;
+    left: 0.5rem;
+
+    .legend-note {
+      display: none;
+    }
+  }
+}
