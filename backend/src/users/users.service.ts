@@ -42,4 +42,13 @@ export class UsersService {
   count(): Promise<number> {
     return this.users.count();
   }
+
+  listAll(): Promise<User[]> {
+    return this.users.find();
+  }
+
+  async assignRole(id: string, role: UserRole): Promise<User> {
+    await this.users.update(id, { role });
+    return this.users.findOneOrFail({ where: { id } });
+  }
 }

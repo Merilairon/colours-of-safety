@@ -18,27 +18,44 @@ export class SeedService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    const email = this.config.get<string>(
-      'REVIEWER_EMAIL',
-      'reviewer@colours-of-safety.org',
-    );
-    const password = this.config.get<string>(
-      'REVIEWER_PASSWORD',
-      'reviewer123',
+    await this.seedAccount(
+      this.config.get<string>(
+        'REVIEWER_EMAIL',
+        'reviewer@colours-of-safety.org',
+      ),
+      this.config.get<string>('REVIEWER_PASSWORD', 'reviewer123'),
+      'Default Reviewer',
+      UserRole.REVIEWER,
     );
 
+    await this.seedAccount(
+      this.config.get<string>(
+        'SUPER_ADMIN_EMAIL',
+        'superadmin@colours-of-safety.org',
+      ),
+      this.config.get<string>('SUPER_ADMIN_PASSWORD', 'superadmin123'),
+      'Default Super Admin',
+      UserRole.SUPER_ADMIN,
+    );
+  }
+
+  private async seedAccount(
+    email: string,
+    password: string,
+    displayName: string,
+    role: UserRole,
+  ): Promise<void> {
     const existing = await this.users.findByEmail(email);
     if (existing) {
       return;
     }
-
     const passwordHash = await bcrypt.hash(password, 10);
-    const reviewer: User = await this.users.create({
+    const user: User = await this.users.create({
       email,
-      displayName: 'Default Reviewer',
+      displayName,
       passwordHash,
-      role: UserRole.REVIEWER,
+      role,
     });
-    this.logger.log(`Seeded default reviewer account: ${reviewer.email}`);
+    this.logger.log(`Seeded ${role} account: ${user.email}`);
   }
 }
