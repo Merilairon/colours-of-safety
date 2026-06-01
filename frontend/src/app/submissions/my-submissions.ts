@@ -126,7 +126,7 @@ export class MySubmissionsComponent implements OnInit {
       area: row.area,
     };
 
-    const update$: Observable<void> =
+    const update$: Observable<unknown> =
       row.kind === 'poi'
         ? this.markings.updatePoi(row.id, payload as CreatePoiPayload)
         : this.markings.updateDistrict(row.id, payload as CreateDistrictPayload);
@@ -156,7 +156,7 @@ export class MySubmissionsComponent implements OnInit {
   protected confirmDelete(row: SubmissionRow): void {
     if (row.status !== 'pending') return;
 
-    const delete$: Observable<void> =
+    const delete$: Observable<unknown> =
       row.kind === 'poi' ? this.markings.deletePoi(row.id) : this.markings.deleteDistrict(row.id);
 
     delete$.subscribe({
