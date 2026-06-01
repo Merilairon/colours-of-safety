@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/GITHUB_OWNER/colours-of-safety-backend:latest
+          image: ghcr.io/merilairon/colours-of-safety-backend:latest
           ports:
             - containerPort: 3000
           env:
