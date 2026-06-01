@@ -65,23 +65,23 @@
 
 | Task                                | Files                                 | Effort   |
 | ----------------------------------- | ------------------------------------- | -------- |
-| [ ] Edit/delete pending submissions | `@/frontend/src/app/submissions/`     | 1–2 days |
-| [ ] Filter map by category/rating   | `@/frontend/src/app/map/map.ts`       | 1–2 days |
-| [ ] Filter review queue             | `@/frontend/src/app/review/review.ts` | 1 day    |
+| [x] Edit/delete pending submissions | `@/frontend/src/app/submissions/`     | 1–2 days |
+| [x] Filter map by category/rating   | `@/frontend/src/app/map/map.ts`       | 1–2 days |
+| [x] Filter review queue             | `@/frontend/src/app/review/review.ts` | 1 day    |
 | [x] Admin user management           | `@/frontend/src/app/admin/`           | ✅       |
 
 ### Quick Wins (< 1 week total)
 
 | Task                                  | Source                 | Files                                                |
 | ------------------------------------- | ---------------------- | ---------------------------------------------------- |
-| [ ] Social proof counter on legend    | BEHAVIORAL_NUDGES §2.1 | `@/frontend/src/app/map/map.html`                    |
-| [ ] Enhanced submission toast         | BEHAVIORAL_NUDGES §2.2 | `@/frontend/src/app/map/map.ts`                      |
-| [ ] Post-reg "add first place" prompt | BEHAVIORAL_NUDGES §2.1 | `@/frontend/src/app/auth/register.ts`                |
-| [ ] Contribution count on `/mine`     | BEHAVIORAL_NUDGES §2.3 | `@/frontend/src/app/submissions/my-submissions.html` |
+| [x] Social proof counter on legend    | BEHAVIORAL_NUDGES §2.1 | `@/frontend/src/app/map/map.html`                    |
+| [x] Enhanced submission toast         | BEHAVIORAL_NUDGES §2.2 | `@/frontend/src/app/map/map.ts`                      |
+| [x] Post-reg "add first place" prompt | BEHAVIORAL_NUDGES §2.1 | `@/frontend/src/app/auth/register.ts`                |
+| [x] Contribution count on `/mine`     | BEHAVIORAL_NUDGES §2.3 | `@/frontend/src/app/submissions/my-submissions.html` |
 | [ ] Cluster markers                   | TREND_RESEARCH §1.2    | Add `leaflet.markercluster`                          |
-| [ ] User location detection           | TREND_RESEARCH §1.3    | Geolocation API in map component                     |
-| [ ] Report/flag button on popup       | TREND_RESEARCH §2.2    | Marker popup template                                |
-| [ ] Geographic search                 | TREND_RESEARCH §1.1    | Add search input to map                              |
+| [x] User location detection           | TREND_RESEARCH §1.3    | Geolocation API in map component                     |
+| [x] Report/flag button on popup       | TREND_RESEARCH §2.2    | Marker popup template                                |
+| [x] Geographic search                 | TREND_RESEARCH §1.1    | Add search input to map                              |
 
 ---
 
