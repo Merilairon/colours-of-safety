@@ -87,11 +87,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     safetyRating: [5, [Validators.required]],
     wheelchairAccessible: [false],
     isAnonymous: [false],
+    blendEdges: [false],
   });
 
   private map!: L.Map;
   private dataLayer!: L.LayerGroup;
   private draftLayer!: L.LayerGroup;
+  private blendedPane!: HTMLElement;
 
   ngAfterViewInit(): void {
     this.map = L.map(this.mapEl.nativeElement, {
@@ -106,6 +108,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     this.dataLayer = L.layerGroup().addTo(this.map);
     this.draftLayer = L.layerGroup().addTo(this.map);
+    this.initBlendedPane();
 
     if (this.isLoggedIn()) {
       this.addDrawControls();
@@ -126,6 +129,37 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.map?.remove();
+  }
+
+  private initBlendedPane(): void {
+    this.map.createPane('blendedDistricts');
+    this.blendedPane = this.map.getPane('blendedDistricts')!;
+    this.blendedPane.style.zIndex = '399';
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('xmlns', svgNS);
+    svg.style.cssText = 'position:absolute;width:0;height:0;overflow:visible;pointer-events:none';
+
+    const defs = document.createElementNS(svgNS, 'defs');
+    const filter = document.createElementNS(svgNS, 'filter');
+    filter.setAttribute('id', 'district-blend');
+    filter.setAttribute('x', '-20%');
+    filter.setAttribute('y', '-20%');
+    filter.setAttribute('width', '140%');
+    filter.setAttribute('height', '140%');
+    filter.setAttribute('color-interpolation-filters', 'sRGB');
+
+    const blur = document.createElementNS(svgNS, 'feGaussianBlur');
+    blur.setAttribute('in', 'SourceGraphic');
+    blur.setAttribute('stdDeviation', '8');
+
+    filter.appendChild(blur);
+    defs.appendChild(filter);
+    svg.appendChild(defs);
+    this.blendedPane.appendChild(svg);
+
+    this.blendedPane.style.filter = 'url(#district-blend)';
   }
 
   private addDrawControls(): void {
@@ -210,6 +244,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         wheelchairAccessible: value.wheelchairAccessible,
         area: draft.area,
         isAnonymous: value.isAnonymous,
+        blendEdges: value.blendEdges,
       };
       this.markings.createDistrict(payload).subscribe({
         next: () => this.onSubmitted(),
@@ -262,6 +297,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       safetyRating: 5,
       wheelchairAccessible: false,
       isAnonymous: false,
+      blendEdges: false,
     });
   }
 
@@ -315,8 +351,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       const polygon = L.polygon(ring, {
         color: safetyColor(district.safetyRating),
         fillColor: safetyColor(district.safetyRating),
-        fillOpacity: 0.25,
-        weight: 2,
+        fillOpacity: district.blendEdges ? 0.55 : 0.25,
+        weight: district.blendEdges ? 0 : 2,
+        pane: district.blendEdges ? 'blendedDistricts' : 'overlayPane',
       });
       polygon.bindPopup(
         this.districtPopup(
@@ -424,8 +461,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           const polygon = L.polygon(ring, {
             color: safetyColor(district.safetyRating),
             fillColor: safetyColor(district.safetyRating),
-            fillOpacity: 0.25,
-            weight: 2,
+            fillOpacity: district.blendEdges ? 0.55 : 0.25,
+            weight: district.blendEdges ? 0 : 2,
+            pane: district.blendEdges ? 'blendedDistricts' : 'overlayPane',
           });
           polygon.bindPopup(
             this.districtPopup(district.name, district.description, district.safetyRating),

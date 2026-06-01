@@ -7,19 +7,20 @@
 
 ## ✅ Recently Completed (2026-06-01)
 
-| Item                               | Files                                                                               |
-| ---------------------------------- | ----------------------------------------------------------------------------------- |
-| SEO meta tags, Open Graph, JSON-LD | `@/frontend/src/index.html`                                                         |
-| robots.txt + sitemap.xml           | `@/frontend/public/`                                                                |
-| Admin UI with role management      | `@/frontend/src/app/admin/`, `@/frontend/src/app/core/user.service.ts`              |
-| SeoService + SeoResolver           | `@/frontend/src/app/core/seo.service.ts`, `@/frontend/src/app/core/seo.resolver.ts` |
-| Route-level SEO data               | `@/frontend/src/app/app.routes.ts`                                                  |
-| CORS config via env var            | `@/backend/src/main.ts`, `.env.example`                                             |
-| TypeORM migrations (sync disabled) | `@/backend/src/app.module.ts`, `@/backend/src/migrations/`                          |
-| Rate limiting (100 req/min)        | `@/backend/src/app.module.ts` — `@nestjs/throttler`                                 |
-| Mobile-responsive layout           | `@/frontend/src/app/app.scss`, `@/frontend/src/app/map/map.scss`                    |
-| Privacy policy page                | `@/frontend/src/app/privacy/` + route + footer link                                 |
-| DB backup CronJob                  | `@/k8s/backup-cronjob.yml` — daily 2 AM, 7-day retention                            |
+| Item                               | Files                                                                                                        |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| SEO meta tags, Open Graph, JSON-LD | `@/frontend/src/index.html`                                                                                  |
+| robots.txt + sitemap.xml           | `@/frontend/public/`                                                                                         |
+| Admin UI with role management      | `@/frontend/src/app/admin/`, `@/frontend/src/app/core/user.service.ts`                                       |
+| SeoService + SeoResolver           | `@/frontend/src/app/core/seo.service.ts`, `@/frontend/src/app/core/seo.resolver.ts`                          |
+| Route-level SEO data               | `@/frontend/src/app/app.routes.ts`                                                                           |
+| CORS config via env var            | `@/backend/src/main.ts`, `.env.example`                                                                      |
+| TypeORM migrations (sync disabled) | `@/backend/src/app.module.ts`, `@/backend/src/migrations/`                                                   |
+| Rate limiting (100 req/min)        | `@/backend/src/app.module.ts` — `@nestjs/throttler`                                                          |
+| Mobile-responsive layout           | `@/frontend/src/app/app.scss`, `@/frontend/src/app/map/map.scss`                                             |
+| Privacy policy page                | `@/frontend/src/app/privacy/` + route + footer link                                                          |
+| DB backup CronJob                  | `@/k8s/backup-cronjob.yml` — daily 2 AM, 7-day retention                                                     |
+| District edge blending             | `@/frontend/src/app/map/map.ts` — SVG `feGaussianBlur` pane; `@/backend/src/districts/` — `blendEdges` field |
 
 ---
 

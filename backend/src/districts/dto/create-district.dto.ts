@@ -39,4 +39,8 @@ export class CreateDistrictDto {
   @IsOptional()
   @IsBoolean()
   isAnonymous?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  blendEdges?: boolean;
 }

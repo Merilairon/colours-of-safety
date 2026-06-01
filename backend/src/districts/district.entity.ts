@@ -33,6 +33,10 @@ export class District {
   @Column({ default: false })
   isAnonymous: boolean;
 
+  /** When true, the map renders this district with blurred/feathered edges to visually blend with adjacent districts. */
+  @Column({ default: false })
+  blendEdges: boolean;
+
   @Index({ spatial: true })
   @Column({
     type: 'geometry',

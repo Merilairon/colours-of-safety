@@ -51,6 +51,7 @@ export interface District {
   createdBy?: AuthUser;
   createdAt: string;
   isAnonymous: boolean;
+  blendEdges: boolean;
 }
 
 export interface CreatePoiPayload {
@@ -70,6 +71,7 @@ export interface CreateDistrictPayload {
   wheelchairAccessible?: boolean;
   area: GeoPolygon;
   isAnonymous?: boolean;
+  blendEdges?: boolean;
 }
 
 export interface ReviewPayload {

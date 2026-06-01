@@ -23,6 +23,7 @@ export class DistrictsService {
       status: ReviewStatus.PENDING,
       createdById: userId,
       isAnonymous: dto.isAnonymous ?? false,
+      blendEdges: dto.blendEdges ?? false,
     });
     return this.districts.save(district);
   }
@@ -87,6 +88,7 @@ export class DistrictsService {
       wheelchairAccessible: dto.wheelchairAccessible ?? false,
       area: { type: 'Polygon', coordinates: dto.area.coordinates },
       isAnonymous: dto.isAnonymous ?? false,
+      blendEdges: dto.blendEdges ?? false,
     });
     return this.districts.findOneOrFail({ where: { id } });
   }

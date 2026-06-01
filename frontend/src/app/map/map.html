@@ -161,6 +161,16 @@
           ></textarea>
         </label>
 
+        @if (d.kind === 'district') {
+          <label class="checkbox-label blend-toggle">
+            <input type="checkbox" formControlName="blendEdges" />
+            <span class="blend-icon">🌫️</span> Blend district edges
+          </label>
+          <p class="blend-hint">
+            Softens borders so neighbouring districts fade into each other on the map.
+          </p>
+        }
+
         <label class="checkbox-label anonymity-toggle">
           <input type="checkbox" formControlName="isAnonymous" />
           <span class="anon-icon">🕵️</span> Submit anonymously (hide my name)
