@@ -6,11 +6,16 @@ export class InitialMigration1717242000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Create users table
     await queryRunner.query(`
-      CREATE TYPE "public"."users_role_enum" AS ENUM ('user', 'reviewer', 'admin', 'super_admin');
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'users_role_enum') THEN
+          CREATE TYPE "public"."users_role_enum" AS ENUM ('user', 'reviewer', 'admin', 'super_admin');
+        END IF;
+      END$$;
     `);
 
     await queryRunner.query(`
-      CREATE TABLE "users" (
+      CREATE TABLE IF NOT EXISTS "users" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "email" character varying NOT NULL,
         "displayName" character varying NOT NULL,
@@ -24,12 +29,17 @@ export class InitialMigration1717242000000 implements MigrationInterface {
 
     // Create review status enum
     await queryRunner.query(`
-      CREATE TYPE "public"."review_status_enum" AS ENUM ('pending', 'approved', 'rejected');
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'review_status_enum') THEN
+          CREATE TYPE "public"."review_status_enum" AS ENUM ('pending', 'approved', 'rejected');
+        END IF;
+      END$$;
     `);
 
     // Create pois table
     await queryRunner.query(`
-      CREATE TABLE "pois" (
+      CREATE TABLE IF NOT EXISTS "pois" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "name" character varying NOT NULL,
         "description" text NOT NULL DEFAULT '',
@@ -53,7 +63,7 @@ export class InitialMigration1717242000000 implements MigrationInterface {
 
     // Create districts table
     await queryRunner.query(`
-      CREATE TABLE "districts" (
+      CREATE TABLE IF NOT EXISTS "districts" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "name" character varying NOT NULL,
         "description" text NOT NULL DEFAULT '',
@@ -120,10 +130,18 @@ export class InitialMigration1717242000000 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Drop foreign keys
-    await queryRunner.query(`ALTER TABLE "pois" DROP CONSTRAINT "FK_pois_reviewedBy"`);
-    await queryRunner.query(`ALTER TABLE "pois" DROP CONSTRAINT "FK_pois_createdBy"`);
-    await queryRunner.query(`ALTER TABLE "districts" DROP CONSTRAINT "FK_districts_reviewedBy"`);
-    await queryRunner.query(`ALTER TABLE "districts" DROP CONSTRAINT "FK_districts_createdBy"`);
+    await queryRunner.query(
+      `ALTER TABLE "pois" DROP CONSTRAINT "FK_pois_reviewedBy"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "pois" DROP CONSTRAINT "FK_pois_createdBy"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "districts" DROP CONSTRAINT "FK_districts_reviewedBy"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "districts" DROP CONSTRAINT "FK_districts_createdBy"`,
+    );
 
     // Drop tables
     await queryRunner.query(`DROP TABLE "districts"`);
