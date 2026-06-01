@@ -1,6 +1,6 @@
 # Colours of Safety — Project TODOs
 
-> Sources: PRD, ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS  
+> Sources: PRD, ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT  
 > Last updated: 2026-06-01
 
 ---
@@ -43,6 +43,42 @@
 | [x] Mobile-responsive layout | `@/frontend/src/app/app.scss`, `@/frontend/src/app/map/map.scss` | ✅     |
 | [x] Rate limiting            | `@/backend/src/app.module.ts` — `@nestjs/throttler`              | ✅     |
 | [x] Privacy policy page      | `@/frontend/src/app/privacy/` + route + footer                   | ✅     |
+
+### Accessibility — Critical (WCAG 2.1 Level A violations)
+
+> Source: ACCESSIBILITY_AUDIT — fix in recommended priority order
+
+| ID  | Task                                                                                                                       | Files                                                                         | Effort   |
+| --- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------- |
+| C6  | [ ] Add `role="status" aria-live="polite" aria-atomic="true"` to toast                                                     | `@/frontend/src/app/map/map.html:88`                                          | 1 line   |
+| C10 | [ ] Add `aria-label="Close welcome message"` to close-hint button                                                          | `@/frontend/src/app/map/map.html:69`                                          | 1 line   |
+| M7  | [ ] Add `aria-hidden="true"` to brand emoji `🏳️‍🌈`                                                                           | `@/frontend/src/app/app.html:3`                                               | 1 line   |
+| C2  | [ ] Add `aria-label="Search city or address"` to search input                                                              | `@/frontend/src/app/map/map.html:8`                                           | 1 line   |
+| C3  | [ ] Add `aria-label` to all icon-only buttons (🔍 📍 ✎ ✕)                                                                  | `@/frontend/src/app/map/map.html:14-25`, `my-submissions.html:50-61`          | 5 min    |
+| C4  | [ ] Implement focus-trap + `role="dialog" aria-modal="true"` on edit/delete modals                                         | `@/frontend/src/app/submissions/my-submissions.html:70-126`                   | Medium   |
+| M1  | [ ] Add skip-to-content link + `id="main-content"` on `<main>`                                                             | `@/frontend/src/index.html`, `@/frontend/src/app/app.html`                    | 15 min   |
+| C9  | [ ] Add `outline: 2px solid #e84393` + `@media (forced-colors: active)` to focus styles                                    | `@/frontend/src/app/map/map.scss:170`, `@/frontend/src/app/auth/auth.scss:44` | CSS only |
+| M2  | [ ] Add `role="alert"` to error `<p>` in login/register; `aria-describedby` on inputs                                      | `login.html:15`, `register.html:20`                                           | 5 min    |
+| M3  | [ ] Bind `[attr.aria-valuetext]` on safety rating range inputs                                                             | `@/frontend/src/app/map/map.html:115`, `my-submissions.html:93`               | 15 min   |
+| C1  | [ ] Add `role="application" aria-label="Interactive safety map"` to map div; visually-hidden place list for screen readers | `@/frontend/src/app/map/map.html:2`                                           | 1 day    |
+| M10 | [ ] Replace `display:none` on `.brand-name` (mobile) with visually-hidden class or `aria-label` on brand link              | `@/frontend/src/app/app.scss:119`                                             | 15 min   |
+| M11 | [ ] Replace `display:none` on non-active nav links (mobile ≤480px) with accessible hamburger/disclosure pattern            | `@/frontend/src/app/app.scss:148`                                             | Medium   |
+| M9  | [ ] Add `[attr.aria-label]="'Change role for ' + user.displayName"` to admin role select                                   | `@/frontend/src/app/admin/admin.component.html:25`                            | 1 line   |
+| M5  | [ ] Add `:focus-visible` outline to review filter buttons                                                                  | `@/frontend/src/app/review/review.scss`                                       | CSS only |
+| M8  | [ ] Add `:focus-visible` to footer links                                                                                   | `@/frontend/src/app/app.scss:169`                                             | CSS only |
+| C5  | [ ] Add `aria-hidden="true"` to legend swatches; add visually-hidden rating text in marker popups                          | `@/frontend/src/app/map/map.html:55`                                          | 15 min   |
+| N1  | [ ] Add `aria-hidden="true"` to decorative legend swatches `<span class="swatch">`                                         | `@/frontend/src/app/map/map.html:55`                                          | 1 line   |
+| C7  | [ ] Wrap review note textarea in `<label>` or add `aria-label`                                                             | `@/frontend/src/app/review/review.html:52`                                    | 1 line   |
+| C8  | [ ] Add `aria-label="Main navigation"` to `<nav>`                                                                          | `@/frontend/src/app/app.html:7`                                               | 1 line   |
+
+### Inclusivity — Critical (LGBTQIA_INCLUSIVITY_REPORT Phase 1)
+
+| Task                                                                                                                                                                                                   | Files                                                                              | Effort   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- | -------- |
+| [ ] Expand POI categories — add: `bookstore`, `youth_center`, `support_group`, `transgender_services`, `crisis_shelter`, `hiv_sti_testing`, `legal_aid`, `religious_spiritual`, `sexual_health_clinic` | `@/frontend/src/app/core/safety.ts`, `@/backend/src/pois/poi.entity.ts`            | 1 day    |
+| [ ] Add wheelchair accessibility checkbox to submission form + filter                                                                                                                                  | `@/frontend/src/app/map/map.html`, `@/backend/src/pois/poi.entity.ts`              | 1 day    |
+| [ ] Add anonymous submission toggle (hide `displayName` on contributions per-submission)                                                                                                               | `@/frontend/src/app/map/map.ts`, `@/backend/src/pois/`, `@/backend/src/districts/` | 1–2 days |
+| [ ] Add secondary visual indicators (icons/patterns) to safety colour scale for colour-blind users                                                                                                     | `@/frontend/src/app/core/safety.ts`, `@/frontend/src/app/map/map.html`             | 1 day    |
 
 ---
 
@@ -97,17 +133,17 @@
 
 ### Engagement (1–2 weeks dev)
 
-| Task                              | Files                                                 |
-| --------------------------------- | ----------------------------------------------------- |
-| [ ] Onboarding tooltip tour       | `@/frontend/src/app/core/onboarding.service.ts`       |
-| [ ] "Recently approved" indicator | `@/frontend/src/app/map/map.ts`                       |
-| [ ] Share button on marker        | Marker popup                                          |
-| [ ] Soft-gate drawing for guests  | `@/frontend/src/app/map/map.ts`                       |
-| [ ] Email notifications           | Backend + email provider                              |
-| [ ] Cookie consent banner         | `@/frontend/src/app/core/cookie-consent.component.ts` |
-| [ ] Accessibility (WCAG 2.1 AA)   | Audit + fixes                                         |
-| [ ] High contrast mode            | `@/frontend/src/styles/`                              |
-| [ ] Email verification            | Backend + frontend flow                               |
+| Task                                               | Files                                                       |
+| -------------------------------------------------- | ----------------------------------------------------------- |
+| [ ] Onboarding tooltip tour                        | `@/frontend/src/app/core/onboarding.service.ts`             |
+| [ ] "Recently approved" indicator                  | `@/frontend/src/app/map/map.ts`                             |
+| [ ] Share button on marker                         | Marker popup                                                |
+| [ ] Soft-gate drawing for guests                   | `@/frontend/src/app/map/map.ts`                             |
+| [ ] Email notifications                            | Backend + email provider                                    |
+| [ ] Cookie consent banner                          | `@/frontend/src/app/core/cookie-consent.component.ts`       |
+| [ ] High contrast mode / colour-blind safe palette | `@/frontend/src/app/map/map.scss`, `@/frontend/src/styles/` |
+| [ ] `prefers-reduced-motion` — toast + animations  | `@/frontend/src/app/map/map.scss`                           |
+| [ ] Email verification                             | Backend + frontend flow                                     |
 
 ### Moderation & Content
 
@@ -115,6 +151,19 @@
 - [ ] Edit suggestions for approved POIs
 - [ ] `/place/:id` individual pages
 - [ ] Dynamic sitemap generation
+
+### Inclusivity — Phase 2 (LGBTQIA_INCLUSIVITY_REPORT)
+
+| Task                                                                                                                             | Files                                               | Effort  |
+| -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------- |
+| [ ] Multi-dimensional safety ratings — `physicalSafety`, `emotionalSafety`, `bathroomAccess`, `racialSafety`, `disabilityAccess` | Backend entity + frontend form + map display        | 1 week  |
+| [ ] Pronouns field (optional) in user profile                                                                                    | `@/backend/src/users/user.entity.ts`, register form | 0.5 day |
+| [ ] Add geolocation privacy warning before requesting permission                                                                 | `@/frontend/src/app/map/map.ts`                     | 1 hour  |
+| [ ] Document Nominatim data sharing in privacy policy                                                                            | `@/frontend/src/app/privacy/`                       | 1 hour  |
+| [ ] Account deletion (right to be forgotten / GDPR Art. 17)                                                                      | Backend delete endpoint + frontend UI               | 1 day   |
+| [ ] GDPR Article 9 explicit consent — sexual orientation data inferred from usage                                                | Privacy policy + consent flow                       | 0.5 day |
+| [ ] Create `reviewerGuidelines.md` — bias awareness + intersectional review standards                                            | `@/docs/`                                           | 2 hours |
+| [ ] Appeals process for rejected submissions                                                                                     | Backend + frontend                                  | 1 day   |
 
 ---
 
@@ -134,9 +183,17 @@
 
 - [ ] Photo uploads with moderation
 - [ ] Operating hours, website links per POI
-- [ ] Tags/attributes ("Wheelchair accessible", "Trans-owned")
+- [ ] Tags/attributes ("Trans-owned", "BIPOC-welcoming", "Youth-friendly")
 - [ ] User reviews on places
 - [ ] "Verify" system — confirm place still safe
+
+### Inclusivity — Phase 3 (LGBTQIA_INCLUSIVITY_REPORT)
+
+- [ ] i18n framework + priority languages: Spanish, Portuguese, French, Arabic
+- [ ] Progress Pride / Transgender / Intersex / Asexual flag options alongside rainbow flag
+- [ ] Auto-detect map centre or user-configurable default (remove Brussels hardcode)
+- [ ] COPPA review — age verification / youth safety policy
+- [ ] 2FA (TOTP/WebAuthn) for admin/reviewer accounts
 
 ### Technical
 
@@ -151,7 +208,9 @@
 
 ---
 
-## Open Questions (Resolve by P0)
+## Open Questions
+
+### Resolve before P0 launch
 
 | Question                       | Context | Decision Needed                       |
 | ------------------------------ | ------- | ------------------------------------- |
@@ -160,3 +219,12 @@
 | Spam prevention?               | PRD §5  | Rate-limiting design                  |
 | Geographic scope?              | PRD §5  | Brussels default or auto-locate?      |
 | Data licensing?                | PRD §5  | ODbL for OSM compatibility?           |
+
+### Resolve before P2
+
+| Question                              | Context    | Decision Needed                                      |
+| ------------------------------------- | ---------- | ---------------------------------------------------- |
+| Anonymity default?                    | LGBTQIA §3 | Opt-in anonymous or named-by-default with opt-out?   |
+| "Queer" terminology preference?       | LGBTQIA §5 | Single label or user-selectable language preference? |
+| Multi-dim ratings — rollout strategy? | LGBTQIA §6 | Replace existing 1–5, or add alongside?              |
+| Reviewer bias training — mandatory?   | LGBTQIA §7 | Block reviews until guidelines acknowledged?         |
