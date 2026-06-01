@@ -46,7 +46,7 @@ spec:
   replicas: 1
   template:
     spec:
-      repository: Merilairon/colours-of-safety
+      repository: merilairon/colours-of-safety
       serviceAccountName: colours-of-safety-runner
       labels:
         - colours-of-safety
