@@ -1,10 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 
@@ -39,7 +35,7 @@ export class RegisterComponent {
     this.auth.register(email, displayName, password).subscribe({
       next: () => {
         this.submitting.set(false);
-        void this.router.navigate(['/']);
+        void this.router.navigate(['/'], { queryParams: { welcome: 'true' } });
       },
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);

@@ -61,6 +61,13 @@
     </div>
   </div>
 
+  @if (showWelcome()) {
+    <div class="hint welcome">
+      <strong>Welcome! 🎉</strong> Add your first queer-friendly place to help the community.
+      <button type="button" class="close-hint" (click)="showWelcome.set(false)">✕</button>
+    </div>
+  }
+
   @if (!isLoggedIn()) {
     <div class="hint">
       <a routerLink="/login">Log in</a> to mark a queer-friendly place or district.

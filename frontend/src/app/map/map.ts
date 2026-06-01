@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import * as L from 'leaflet';
 import 'leaflet-draw';
 import { AuthService } from '../core/auth.service';
@@ -38,6 +38,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly markings = inject(MarkingsService);
   private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isLoggedIn = this.auth.isLoggedIn;
   protected readonly categories = POI_CATEGORIES;
@@ -66,6 +67,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   // Data storage for filtering
   private allPois: Poi[] = [];
   private allDistricts: District[] = [];
+
+  // Welcome prompt for new users
+  protected readonly showWelcome = signal(false);
 
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -99,6 +103,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.map.on('draw:created', (e) => this.onShapeCreated(e as L.DrawEvents.Created));
 
     this.loadData();
+
+    // Check for welcome query param (post-registration)
+    this.route.queryParams.subscribe((params) => {
+      if (params['welcome'] === 'true') {
+        this.showWelcome.set(true);
+        setTimeout(() => this.showWelcome.set(false), 10000);
+      }
+    });
   }
 
   ngOnDestroy(): void {
