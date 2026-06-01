@@ -34,7 +34,7 @@
         <select [value]="selectedCategory()" (change)="onCategoryChange($event)">
           <option value="all">All categories</option>
           @for (c of categories; track c) {
-            <option [value]="c">{{ c }}</option>
+            <option [value]="c">{{ categoryLabels[c] || c }}</option>
           }
         </select>
       </label>
@@ -47,6 +47,14 @@
           <option value="5">Explicitly welcoming (5)</option>
         </select>
       </label>
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          [checked]="wheelchairFilter()"
+          (change)="onWheelchairChange($event)"
+        />
+        ♿ Wheelchair accessible
+      </label>
     </div>
   </div>
 
@@ -54,11 +62,19 @@
     <h3>Safety rating</h3>
     @for (r of [5, 4, 3, 2, 1]; track r) {
       <div class="legend-row">
-        <span class="swatch" aria-hidden="true" [style.background]="colorFor(r)"></span>
+        <span class="swatch" aria-hidden="true" [style.background]="colorFor(r)">
+          <span class="indicator">{{ indicatorFor(r) }}</span>
+        </span>
+        <span class="visually-hidden">{{ indicatorFor(r) }}</span>
         {{ safetyLabel(r) }}
       </div>
     }
-    <p class="legend-note">Markers = places · Shaded areas = districts</p>
+    <p class="legend-note">
+      Symbols help colour-blind users: ✕ unsafe, △ caution, ◆ mixed, ✓ friendly, ★ welcoming
+    </p>
+    <p class="legend-note">
+      Markers = places · Shaded areas = districts · ♿ = wheelchair accessible
+    </p>
     <!-- Social Proof Counter -->
     <div class="social-proof">
       <strong>{{ approvedCount().pois + approvedCount().districts }}</strong> safe spaces mapped
@@ -113,11 +129,16 @@
             Category
             <select formControlName="category">
               @for (c of categories; track c) {
-                <option [value]="c">{{ c }}</option>
+                <option [value]="c">{{ categoryLabels[c] || c }}</option>
               }
             </select>
           </label>
         }
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="wheelchairAccessible" />
+          ♿ Wheelchair accessible
+        </label>
 
         <label>
           Safety rating: <strong>{{ safetyLabel(form.controls.safetyRating.value) }}</strong>
@@ -139,6 +160,14 @@
             placeholder="Why is this place safe / welcoming?"
           ></textarea>
         </label>
+
+        <label class="checkbox-label anonymity-toggle">
+          <input type="checkbox" formControlName="isAnonymous" />
+          <span class="anon-icon">🕵️</span> Submit anonymously (hide my name)
+        </label>
+        <p class="anon-hint">
+          Your safety matters. Anonymous submissions still help the community.
+        </p>
 
         <div class="actions">
           <button type="button" class="secondary" (click)="cancelDraft()">Cancel</button>

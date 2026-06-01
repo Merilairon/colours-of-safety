@@ -15,7 +15,13 @@ import 'leaflet-draw';
 import { AuthService } from '../core/auth.service';
 import { MarkingsService } from '../core/markings.service';
 import { CreateDistrictPayload, CreatePoiPayload, GeoPolygon, Poi, District } from '../core/models';
-import { POI_CATEGORIES, safetyColor, safetyLabel } from '../core/safety';
+import {
+  POI_CATEGORIES,
+  POI_CATEGORY_LABELS,
+  safetyColor,
+  safetyIndicator,
+  safetyLabel,
+} from '../core/safety';
 
 type DraftKind = 'poi' | 'district';
 
@@ -44,6 +50,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   protected readonly categories = POI_CATEGORIES;
   protected readonly safetyLabel = safetyLabel;
   protected readonly colorFor = safetyColor;
+  protected readonly indicatorFor = safetyIndicator;
+  protected readonly categoryLabels = POI_CATEGORY_LABELS;
 
   protected readonly draft = signal<Draft | null>(null);
   protected readonly toast = signal<string | null>(null);
@@ -53,6 +61,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   // Filters
   protected readonly selectedCategory = signal<string>('all');
   protected readonly minSafetyRating = signal<number>(1);
+  protected readonly wheelchairFilter = signal<boolean>(false);
 
   // Stats for social proof
   protected readonly approvedCount = signal<{ pois: number; districts: number }>({
@@ -76,6 +85,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     description: [''],
     category: ['other'],
     safetyRating: [5, [Validators.required]],
+    wheelchairAccessible: [false],
+    isAnonymous: [false],
   });
 
   private map!: L.Map;
@@ -183,7 +194,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         description: value.description,
         category: value.category,
         safetyRating: value.safetyRating,
+        wheelchairAccessible: value.wheelchairAccessible,
         location: { type: 'Point', coordinates: draft.location },
+        isAnonymous: value.isAnonymous,
       };
       this.markings.createPoi(payload).subscribe({
         next: () => this.onSubmitted(),
@@ -194,7 +207,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         name: value.name,
         description: value.description,
         safetyRating: value.safetyRating,
+        wheelchairAccessible: value.wheelchairAccessible,
         area: draft.area,
+        isAnonymous: value.isAnonymous,
       };
       this.markings.createDistrict(payload).subscribe({
         next: () => this.onSubmitted(),
@@ -245,6 +260,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       description: '',
       category: 'other',
       safetyRating: 5,
+      wheelchairAccessible: false,
+      isAnonymous: false,
     });
   }
 
@@ -263,11 +280,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     const category = this.selectedCategory();
     const minRating = this.minSafetyRating();
+    const wheelchairOnly = this.wheelchairFilter();
 
     // Filter POIs
     const filteredPois = this.allPois.filter((poi) => {
       if (category !== 'all' && poi.category !== category) return false;
       if (poi.safetyRating < minRating) return false;
+      if (wheelchairOnly && !poi.wheelchairAccessible) return false;
       return true;
     });
 
@@ -287,6 +306,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     // Filter Districts
     const filteredDistricts = this.allDistricts.filter((district) => {
       if (district.safetyRating < minRating) return false;
+      if (wheelchairOnly && !district.wheelchairAccessible) return false;
       return true;
     });
 
@@ -299,7 +319,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         weight: 2,
       });
       polygon.bindPopup(
-        this.districtPopup(district.name, district.description, district.safetyRating),
+        this.districtPopup(
+          district.name,
+          district.description,
+          district.safetyRating,
+          district.wheelchairAccessible,
+        ),
       );
       this.dataLayer.addLayer(polygon);
     }
@@ -314,6 +339,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   protected onRatingChange(event: Event): void {
     const value = parseInt((event.target as HTMLSelectElement).value, 10);
     this.minSafetyRating.set(value);
+    this.applyFilters();
+  }
+
+  protected onWheelchairChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).checked;
+    this.wheelchairFilter.set(value);
     this.applyFilters();
   }
 
@@ -408,20 +439,42 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private poiPopup(
     name: string,
-    poi: { id?: string; description: string; category: string; safetyRating: number },
+    poi: {
+      id?: string;
+      description: string;
+      category: string;
+      safetyRating: number;
+      wheelchairAccessible?: boolean;
+    },
   ): string {
+    const indicator = safetyIndicator(poi.safetyRating);
+    const wheelchairBadge = poi.wheelchairAccessible ? ' ♿' : '';
     return `
-      <strong>${this.escape(name)}</strong>
-      <div class="pop-meta">${this.escape(poi.category)} · ${safetyLabel(poi.safetyRating)}</div>
+      <strong>${this.escape(name)}${wheelchairBadge}</strong>
+      <div class="pop-meta">
+        <span class="safety-indicator" aria-hidden="true">${indicator}</span>
+        ${this.escape(this.categoryLabels[poi.category] || poi.category)}
+        · ${safetyLabel(poi.safetyRating)}
+      </div>
       ${poi.description ? `<p>${this.escape(poi.description)}</p>` : ''}
       ${this.reportLink()}
     `;
   }
 
-  private districtPopup(name: string, description: string, rating: number): string {
+  private districtPopup(
+    name: string,
+    description: string,
+    rating: number,
+    wheelchairAccessible?: boolean,
+  ): string {
+    const indicator = safetyIndicator(rating);
+    const wheelchairBadge = wheelchairAccessible ? ' ♿' : '';
     return `
-      <strong>${this.escape(name)}</strong>
-      <div class="pop-meta">District · ${safetyLabel(rating)}</div>
+      <strong>${this.escape(name)}${wheelchairBadge}</strong>
+      <div class="pop-meta">
+        <span class="safety-indicator" aria-hidden="true">${indicator}</span>
+        District · ${safetyLabel(rating)}
+      </div>
       ${description ? `<p>${this.escape(description)}</p>` : ''}
       ${this.reportLink()}
     `;

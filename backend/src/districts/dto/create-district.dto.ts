@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsInt,
   IsOptional,
   IsString,
@@ -30,4 +31,12 @@ export class CreateDistrictDto {
   @ValidateNested()
   @Type(() => PolygonDto)
   area: PolygonDto;
+
+  @IsOptional()
+  @IsBoolean()
+  wheelchairAccessible?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isAnonymous?: boolean;
 }

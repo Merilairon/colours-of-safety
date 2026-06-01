@@ -30,11 +30,13 @@ export interface Poi {
   description: string;
   category: string;
   safetyRating: number;
+  wheelchairAccessible: boolean;
   location: GeoPoint;
   status: ReviewStatus;
   reviewNote: string | null;
   createdBy?: AuthUser;
   createdAt: string;
+  isAnonymous: boolean;
 }
 
 export interface District {
@@ -42,11 +44,13 @@ export interface District {
   name: string;
   description: string;
   safetyRating: number;
+  wheelchairAccessible: boolean;
   area: GeoPolygon;
   status: ReviewStatus;
   reviewNote: string | null;
   createdBy?: AuthUser;
   createdAt: string;
+  isAnonymous: boolean;
 }
 
 export interface CreatePoiPayload {
@@ -54,14 +58,18 @@ export interface CreatePoiPayload {
   description?: string;
   category?: string;
   safetyRating: number;
+  wheelchairAccessible?: boolean;
   location: GeoPoint;
+  isAnonymous?: boolean;
 }
 
 export interface CreateDistrictPayload {
   name: string;
   description?: string;
   safetyRating: number;
+  wheelchairAccessible?: boolean;
   area: GeoPolygon;
+  isAnonymous?: boolean;
 }
 
 export interface ReviewPayload {

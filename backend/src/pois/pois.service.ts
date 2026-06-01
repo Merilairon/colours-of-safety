@@ -19,9 +19,11 @@ export class PoisService {
       description: dto.description ?? '',
       category: dto.category ?? 'other',
       safetyRating: dto.safetyRating,
+      wheelchairAccessible: dto.wheelchairAccessible ?? false,
       location: { type: 'Point', coordinates: dto.location.coordinates },
       status: ReviewStatus.PENDING,
       createdById: userId,
+      isAnonymous: dto.isAnonymous ?? false,
     });
     return this.pois.save(poi);
   }
@@ -76,7 +78,9 @@ export class PoisService {
       description: dto.description ?? '',
       category: dto.category ?? 'other',
       safetyRating: dto.safetyRating,
+      wheelchairAccessible: dto.wheelchairAccessible ?? false,
       location: { type: 'Point', coordinates: dto.location.coordinates },
+      isAnonymous: dto.isAnonymous ?? false,
     });
     return this.pois.findOneOrFail({ where: { id } });
   }

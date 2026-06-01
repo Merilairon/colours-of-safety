@@ -27,6 +27,12 @@ export class District {
   @Column({ type: 'int', default: 3 })
   safetyRating: number;
 
+  @Column({ default: false })
+  wheelchairAccessible: boolean;
+
+  @Column({ default: false })
+  isAnonymous: boolean;
+
   @Index({ spatial: true })
   @Column({
     type: 'geometry',

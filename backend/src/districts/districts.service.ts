@@ -18,9 +18,11 @@ export class DistrictsService {
       name: dto.name,
       description: dto.description ?? '',
       safetyRating: dto.safetyRating,
+      wheelchairAccessible: dto.wheelchairAccessible ?? false,
       area: { type: 'Polygon', coordinates: dto.area.coordinates },
       status: ReviewStatus.PENDING,
       createdById: userId,
+      isAnonymous: dto.isAnonymous ?? false,
     });
     return this.districts.save(district);
   }
@@ -82,7 +84,9 @@ export class DistrictsService {
       name: dto.name,
       description: dto.description ?? '',
       safetyRating: dto.safetyRating,
+      wheelchairAccessible: dto.wheelchairAccessible ?? false,
       area: { type: 'Polygon', coordinates: dto.area.coordinates },
+      isAnonymous: dto.isAnonymous ?? false,
     });
     return this.districts.findOneOrFail({ where: { id } });
   }

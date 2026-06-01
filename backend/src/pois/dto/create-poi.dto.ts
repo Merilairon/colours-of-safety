@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsInt,
   IsOptional,
   IsString,
@@ -35,4 +36,12 @@ export class CreatePoiDto {
   @ValidateNested()
   @Type(() => PointDto)
   location: PointDto;
+
+  @IsOptional()
+  @IsBoolean()
+  wheelchairAccessible?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isAnonymous?: boolean;
 }
