@@ -21,6 +21,12 @@ import { UsersModule } from './users/users.module';
         database: config.get<string>('DB_NAME', 'colours_of_safety'),
         autoLoadEntities: true,
         synchronize: true,
+        poolSize: 10,
+        extra: {
+          max: 10,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 2000,
+        },
       }),
     }),
     UsersModule,
