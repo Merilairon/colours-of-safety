@@ -1,7 +1,7 @@
 # Colours of Safety — Project TODOs
 
 > Sources: PRD (rev 2), ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT, UI-DESIGN (rev 2)  
-> Last updated: 2026-06-01
+> Last updated: 2026-06-02
 
 ---
 
@@ -100,14 +100,18 @@
 
 ### P1 Features (PRD §2)
 
-| Task                                                                                                                                                        | Files                                                                         | Effort   |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------- |
-| [x] Edit/delete pending submissions                                                                                                                         | `@/frontend/src/app/submissions/`                                             | 1–2 days |
-| [x] Filter map by category/rating                                                                                                                           | `@/frontend/src/app/map/map.ts`                                               | 1–2 days |
-| [x] Filter review queue                                                                                                                                     | `@/frontend/src/app/review/review.ts`                                         | 1 day    |
-| [x] Admin user management                                                                                                                                   | `@/frontend/src/app/admin/`                                                   | ✅       |
-| [x] Pronouns `<select>` on register form — options: they/them, she/her, he/him, ze/zir, prefer not to say, custom                                           | `@/frontend/src/app/auth/register.html`, `@/backend/src/users/user.entity.ts` | 0.5 day  |
-| [x] All pending POIs render on map at 40% opacity; districts with translucent/hatched fill; popup labels "Pending — awaiting review"; not visible to guests | `@/frontend/src/app/map/map.ts`                                               | 1–2 days |
+| Task                                                                                                                                                        | Files                                                                                | Effort   |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------- |
+| [x] Edit/delete pending submissions                                                                                                                         | `@/frontend/src/app/submissions/`                                                    | 1–2 days |
+| [x] Filter map by category/rating                                                                                                                           | `@/frontend/src/app/map/map.ts`                                                      | 1–2 days |
+| [x] Filter review queue                                                                                                                                     | `@/frontend/src/app/review/review.ts`                                                | 1 day    |
+| [x] Admin user management                                                                                                                                   | `@/frontend/src/app/admin/`                                                          | ✅       |
+| [x] Pronouns `<select>` on register form — options: they/them, she/her, he/him, ze/zir, prefer not to say, custom                                           | `@/frontend/src/app/auth/register.html`, `@/backend/src/users/user.entity.ts`        | 0.5 day  |
+| [ ] Admin-only reviewer assignment                                                                                                                          | `@/frontend/src/app/admin/`, `@/backend/src/auth/`                                   | 0.5 day  |
+| [ ] Deletion policy — allow remove after approved/rejected                                                                                                  | `@/frontend/src/app/submissions/`, `@/backend/src/pois/`, `@/backend/src/districts/` | 1 day    |
+| [ ] Spam prevention — review rate limiting with Software Architect                                                                                          | `@/backend/src/app.module.ts` — `@nestjs/throttler`                                  | TBD      |
+| [ ] Auto-locate map default (with Brussels fallback)                                                                                                        | `@/frontend/src/app/map/map.ts`                                                      | 0.5 day  |
+| [x] All pending POIs render on map at 40% opacity; districts with translucent/hatched fill; popup labels "Pending — awaiting review"; not visible to guests | `@/frontend/src/app/map/map.ts`                                                      | 1–2 days |
 
 ### Quick Wins (< 1 week total)
 
@@ -159,29 +163,30 @@
 
 > Pending visible to all logged-in users; guests see none; threshold-based auto-approval.
 
-| Task                                                                                                        | Files                                                                            | Effort  |
-| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------- |
-| [ ] `votes` field on POI/district entity — store net score + per-user vote record (prevent duplicates)      | `@/backend/src/pois/poi.entity.ts`, `@/backend/src/districts/district.entity.ts` | 1 day   |
-| [ ] `POST /pois/:id/vote` + `POST /districts/:id/vote` endpoints — ≤1 vote (up/down) per user per item      | `@/backend/src/pois/`, `@/backend/src/districts/`                                | 1 day   |
-| [ ] Auto-approval trigger — when net upvotes ≥ configurable threshold (default 10), set `status = approved` | Backend service logic                                                            | 0.5 day |
-| [ ] Admin-configurable threshold setting                                                                    | `@/backend/src/`, admin UI                                                       | 0.5 day |
-| [ ] All pending submissions visible to logged-in users at 40% opacity on map (guests see none)              | `@/frontend/src/app/map/map.ts`                                                  | 1 day   |
-| [ ] Marker/area popup shows vote tally + upvote/downvote buttons (logged-in only)                           | `@/frontend/src/app/map/map.html`                                                | 1 day   |
-| [ ] Reviewer queue shows vote score per item; sort highly-upvoted items to top                              | `@/frontend/src/app/review/review.ts`                                            | 0.5 day |
-| [ ] Auto-approved submissions optionally appear in reviewer queue for post-hoc audit (configurable)         | Backend + review UI                                                              | 0.5 day |
+| Task                                                                                                                 | Files                                                                            | Effort  |
+| -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------- |
+| [ ] `votes` field on POI/district entity — store net score + per-user+IP vote record (prevent duplicates)            | `@/backend/src/pois/poi.entity.ts`, `@/backend/src/districts/district.entity.ts` | 1 day   |
+| [ ] `POST /pois/:id/vote` + `POST /districts/:id/vote` endpoints — ≤1 vote per user+IP combo per item                | `@/backend/src/pois/`, `@/backend/src/districts/`                                | 1 day   |
+| [ ] Auto-approval trigger — when upvotes ≥ threshold (exact value TBC with Reality Checker), set `status = approved` | Backend service logic                                                            | 0.5 day |
+| [ ] Admin-configurable threshold setting                                                                             | `@/backend/src/`, admin UI                                                       | 0.5 day |
+| [ ] All pending submissions visible to logged-in users at 40% opacity on map (guests see none)                       | `@/frontend/src/app/map/map.ts`                                                  | 1 day   |
+| [ ] Marker/area popup shows vote tally + upvote button only (logged-in only, no downvote)                            | `@/frontend/src/app/map/map.html`                                                | 1 day   |
+| [ ] Reviewer queue shows vote score per item; sort highly-upvoted items to top                                       | `@/frontend/src/app/review/review.ts`                                            | 0.5 day |
+| [ ] Auto-approved submissions silently approved with real-time queue update                                          | Backend + review UI                                                              | 0.5 day |
 
 ### Inclusivity — Phase 2 (LGBTQIA_INCLUSIVITY_REPORT)
 
-| Task                                                                                                                             | Files                                               | Effort  |
-| -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------- |
-| [ ] Multi-dimensional safety ratings — `physicalSafety`, `emotionalSafety`, `bathroomAccess`, `racialSafety`, `disabilityAccess` | Backend entity + frontend form + map display        | 1 week  |
-| [ ] Pronouns field (optional) in user profile                                                                                    | `@/backend/src/users/user.entity.ts`, register form | 0.5 day |
-| [ ] Add geolocation privacy warning before requesting permission                                                                 | `@/frontend/src/app/map/map.ts`                     | 1 hour  |
-| [ ] Document Nominatim data sharing in privacy policy                                                                            | `@/frontend/src/app/privacy/`                       | 1 hour  |
-| [ ] Account deletion (right to be forgotten / GDPR Art. 17)                                                                      | Backend delete endpoint + frontend UI               | 1 day   |
-| [ ] GDPR Article 9 explicit consent — sexual orientation data inferred from usage                                                | Privacy policy + consent flow                       | 0.5 day |
-| [ ] Create `reviewerGuidelines.md` — bias awareness + intersectional review standards                                            | `@/docs/`                                           | 2 hours |
-| [ ] Appeals process for rejected submissions                                                                                     | Backend + frontend                                  | 1 day   |
+| Task                                                                                                                                                       | Files                                               | Effort  |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------- |
+| [ ] Multi-dimensional safety ratings — replace existing 1–5 with `physicalSafety`, `emotionalSafety`, `bathroomAccess`, `racialSafety`, `disabilityAccess` | Backend entity + frontend form + map display        | 1 week  |
+| [ ] Pronouns field (optional) in user profile                                                                                                              | `@/backend/src/users/user.entity.ts`, register form | 0.5 day |
+| [ ] "Queer" terminology preference — user-selectable language in profile                                                                                   | `@/backend/src/users/user.entity.ts`, settings UI   | 0.5 day |
+| [ ] Add geolocation privacy warning before requesting permission                                                                                           | `@/frontend/src/app/map/map.ts`                     | 1 hour  |
+| [ ] Document Nominatim data sharing in privacy policy                                                                                                      | `@/frontend/src/app/privacy/`                       | 1 hour  |
+| [ ] Account deletion (right to be forgotten / GDPR Art. 17)                                                                                                | Backend delete endpoint + frontend UI               | 1 day   |
+| [ ] GDPR Article 9 explicit consent — sexual orientation data inferred from usage                                                                          | Privacy policy + consent flow                       | 0.5 day |
+| [ ] Mandatory reviewer bias training — block reviews until guidelines acknowledged                                                                         | `@/docs/reviewerGuidelines.md`, review UI           | 1 day   |
+| [ ] Appeals process for rejected submissions                                                                                                               | Backend + frontend                                  | 1 day   |
 
 ---
 
@@ -209,7 +214,7 @@
 
 - [ ] i18n framework + priority languages: Spanish, Portuguese, French, Arabic (language selector in topbar/footer, dynamic `lang` on `<html>`)
 - [ ] Community symbols — Progress Pride, Transgender, Intersex, Asexual flags in relevant category contexts (youth centers, trans services, etc.) in topbar + map markers
-- [ ] Auto-detect map centre or user-configurable default (remove Brussels hardcode)
+- [ ] User-configurable default map centre (remove Brussels hardcode; auto-locate already planned in P0)
 - [ ] COPPA review — age verification / youth safety policy
 - [ ] 2FA (TOTP/WebAuthn) for admin/reviewer accounts
 - [ ] "Stealth mode" educational notice — private browsing guidance re: browser history
@@ -231,23 +236,23 @@
 
 ### Resolve before P0 launch
 
-| Question                       | Context | Decision Needed                       |
-| ------------------------------ | ------- | ------------------------------------- |
-| Self-registration to reviewer? | PRD §5  | User-requested or admin-only?         |
-| Deletion policy?               | PRD §5  | Delete pending only, or approved too? |
-| Spam prevention?               | PRD §5  | Rate-limiting design                  |
-| Geographic scope?              | PRD §5  | Brussels default or auto-locate?      |
-| Data licensing?                | PRD §5  | ODbL for OSM compatibility?           |
+| Question                       | Context | Decision                                                                                             |
+| ------------------------------ | ------- | ---------------------------------------------------------------------------------------------------- |
+| Self-registration to reviewer? | PRD §5  | **Admin-only.** Admins assign reviewer role; no self-registration                                    |
+| Deletion policy?               | PRD §5  | **Removable after final state.** Submissions deletable once approved (live district/POI) or rejected |
+| Spam prevention?               | PRD §5  | **Defer to Software Architect.** Rate-limiting design to be reviewed with Architect                  |
+| Geographic scope?              | PRD §5  | **Auto-locate.** Map defaults to user geolocation; fallback to Brussels                              |
+| Data licensing?                | PRD §5  | **Open / free licence.** Data stays open source; revenue limited to donations and/or ads only        |
 
 ### Resolve before P2
 
-| Question                              | Context    | Decision Needed                                                               |
-| ------------------------------------- | ---------- | ----------------------------------------------------------------------------- |
-| Anonymity default?                    | LGBTQIA §3 | Opt-in anonymous or named-by-default with opt-out?                            |
-| "Queer" terminology preference?       | LGBTQIA §5 | Single label or user-selectable language preference?                          |
-| Multi-dim ratings — rollout strategy? | LGBTQIA §6 | Replace existing 1–5, or add alongside?                                       |
-| Reviewer bias training — mandatory?   | LGBTQIA §7 | Block reviews until guidelines acknowledged?                                  |
-| Pending visibility scope?             | PRD §5 Q6  | All pending visible to all logged-in users, or only to submitter?             |
-| Auto-accept threshold?                | PRD §5 Q7  | Default net-upvote count; who can change it; downvote cancels upvote 1-for-1? |
-| Vote manipulation prevention?         | PRD §5 Q8  | Account age minimum, verified email, 1 vote per IP?                           |
-| Auto-accepted submissions in queue?   | PRD §5 Q9  | Show in reviewer queue for post-hoc audit, or silently approve?               |
+| Question                              | Context    | Decision                                                                               |
+| ------------------------------------- | ---------- | -------------------------------------------------------------------------------------- |
+| Anonymity default?                    | LGBTQIA §3 | **No.** Named by default; anonymous toggle per submission (already implemented)        |
+| "Queer" terminology preference?       | LGBTQIA §5 | **User-selectable.** Allow user to choose preferred terminology in profile             |
+| Multi-dim ratings — rollout strategy? | LGBTQIA §6 | **Replace existing 1–5.** Full migration to multi-dimensional safety ratings           |
+| Reviewer bias training — mandatory?   | LGBTQIA §7 | **Mandatory.** Block reviews until reviewer acknowledges guidelines                    |
+| Pending visibility scope?             | PRD §5 Q6  | **All logged-in users.** All pending visible to any authenticated user at 40% opacity  |
+| Auto-accept threshold?                | PRD §5 Q7  | **Upvotes only.** One vote per user+IP combo; exact threshold TBC with Reality Checker |
+| Vote manipulation prevention?         | PRD §5 Q8  | **Login-gated.** Only authenticated users can vote; no guest voting                    |
+| Auto-accepted submissions in queue?   | PRD §5 Q9  | **Silent approval.** Auto-accepted items approved in real time; queue updated silently |
