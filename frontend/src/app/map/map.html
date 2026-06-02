@@ -75,6 +75,9 @@
     <p class="legend-note">
       Markers = places · Shaded areas = districts · ♿ = wheelchair accessible
     </p>
+    @if (isLoggedIn()) {
+      <p class="legend-note pending-note">⏳ Faded = pending review</p>
+    }
     <!-- Social Proof Counter -->
     <div class="social-proof">
       <strong>{{ approvedCount().pois + approvedCount().districts }}</strong> safe spaces mapped

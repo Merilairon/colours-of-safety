@@ -19,9 +19,18 @@ export class AuthService {
 
   constructor(private readonly http: HttpClient) {}
 
-  register(email: string, displayName: string, password: string): Observable<AuthResult> {
+  register(
+    email: string,
+    displayName: string,
+    password: string,
+    pronouns?: string,
+  ): Observable<AuthResult> {
+    const body: Record<string, string> = { email, displayName, password };
+    if (pronouns) {
+      body['pronouns'] = pronouns;
+    }
     return this.http
-      .post<AuthResult>('/api/auth/register', { email, displayName, password })
+      .post<AuthResult>('/api/auth/register', body)
       .pipe(tap((res) => this.persist(res)));
   }
 

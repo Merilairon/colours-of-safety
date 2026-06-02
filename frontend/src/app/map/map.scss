@@ -65,6 +65,11 @@
     margin: 0.5rem 0 0;
     color: #6b6f80;
     max-width: 180px;
+
+    &.pending-note {
+      color: #b07d00;
+      font-weight: 600;
+    }
   }
 }
 
@@ -295,6 +300,17 @@
 
 :host ::ng-deep .leaflet-popup-content p {
   margin: 0.25rem 0 0;
+}
+
+:host ::ng-deep .pop-pending {
+  color: #b07d00;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+:host ::ng-deep .leaflet-interactive.pending-district {
+  fill-opacity: 0.12;
 }
 
 :host ::ng-deep .pop-report {

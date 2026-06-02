@@ -16,6 +16,18 @@
       <input type="password" formControlName="password" autocomplete="new-password" />
       <small>At least 8 characters.</small>
     </label>
+    <label>
+      Pronouns <small>(optional)</small>
+      <select formControlName="pronouns">
+        <option value="">Prefer not to say / skip</option>
+        <option value="they/them">they/them</option>
+        <option value="she/her">she/her</option>
+        <option value="he/him">he/him</option>
+        <option value="ze/zir">ze/zir</option>
+        <option value="prefer not to say">Prefer not to say</option>
+        <option value="custom">Custom (add in profile)</option>
+      </select>
+    </label>
 
     @if (error()) {
       <p class="error" role="alert">{{ error() }}</p>

@@ -77,6 +77,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private allPois: Poi[] = [];
   private allDistricts: District[] = [];
 
+  // Pending layer (logged-in users only)
+  private pendingLayer!: L.LayerGroup;
+
   // Welcome prompt for new users
   protected readonly showWelcome = signal(false);
 
@@ -107,6 +110,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }).addTo(this.map);
 
     this.dataLayer = L.layerGroup().addTo(this.map);
+    this.pendingLayer = L.layerGroup().addTo(this.map);
     this.draftLayer = L.layerGroup().addTo(this.map);
     this.initBlendedPane();
 
@@ -155,7 +159,26 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     blur.setAttribute('stdDeviation', '8');
 
     filter.appendChild(blur);
+
+    // Hatch pattern for pending districts
+    const pattern = document.createElementNS(svgNS, 'pattern');
+    pattern.setAttribute('id', 'pending-hatch');
+    pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+    pattern.setAttribute('width', '8');
+    pattern.setAttribute('height', '8');
+    pattern.setAttribute('patternTransform', 'rotate(45)');
+    const line = document.createElementNS(svgNS, 'line');
+    line.setAttribute('x1', '0');
+    line.setAttribute('y1', '0');
+    line.setAttribute('x2', '0');
+    line.setAttribute('y2', '8');
+    line.setAttribute('stroke', '#888');
+    line.setAttribute('stroke-width', '1.5');
+    line.setAttribute('stroke-opacity', '0.4');
+    pattern.appendChild(line);
+
     defs.appendChild(filter);
+    defs.appendChild(pattern);
     svg.appendChild(defs);
     this.blendedPane.appendChild(svg);
 
@@ -473,6 +496,89 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       },
       error: () => this.loadError.set('Could not load districts.'),
     });
+
+    if (this.isLoggedIn()) {
+      this.loadPendingData();
+    }
+  }
+
+  private loadPendingData(): void {
+    this.markings.getPendingPois().subscribe({
+      next: (pois) => {
+        for (const poi of pois) {
+          const [lng, lat] = poi.location.coordinates;
+          const marker = L.circleMarker([lat, lng], {
+            radius: 9,
+            color: safetyColor(poi.safetyRating),
+            fillColor: safetyColor(poi.safetyRating),
+            fillOpacity: 0.4,
+            weight: 2,
+            dashArray: '4 3',
+          });
+          marker.bindPopup(this.pendingPoiPopup(poi.name, poi));
+          this.pendingLayer.addLayer(marker);
+        }
+      },
+    });
+
+    this.markings.getPendingDistricts().subscribe({
+      next: (districts) => {
+        for (const district of districts) {
+          const ring = district.area.coordinates[0].map(([lng, lat]): [number, number] => [
+            lat,
+            lng,
+          ]);
+          const polygon = L.polygon(ring, {
+            color: safetyColor(district.safetyRating),
+            fillColor: safetyColor(district.safetyRating),
+            fillOpacity: 0.12,
+            weight: 2,
+            dashArray: '6 4',
+            className: 'pending-district',
+          });
+          polygon.bindPopup(
+            this.pendingDistrictPopup(district.name, district.description, district.safetyRating),
+          );
+          this.pendingLayer.addLayer(polygon);
+        }
+      },
+    });
+  }
+
+  private pendingPoiPopup(
+    name: string,
+    poi: {
+      description: string;
+      category: string;
+      safetyRating: number;
+      wheelchairAccessible?: boolean;
+    },
+  ): string {
+    const indicator = safetyIndicator(poi.safetyRating);
+    const wheelchairBadge = poi.wheelchairAccessible ? ' ♿' : '';
+    return `
+      <strong>${this.escape(name)}${wheelchairBadge}</strong>
+      <div class="pop-meta pop-pending">⏳ Pending — awaiting review</div>
+      <div class="pop-meta">
+        <span class="safety-indicator" aria-hidden="true">${indicator}</span>
+        ${this.escape(this.categoryLabels[poi.category] || poi.category)}
+        · ${safetyLabel(poi.safetyRating)}
+      </div>
+      ${poi.description ? `<p>${this.escape(poi.description)}</p>` : ''}
+    `;
+  }
+
+  private pendingDistrictPopup(name: string, description: string, rating: number): string {
+    const indicator = safetyIndicator(rating);
+    return `
+      <strong>${this.escape(name)}</strong>
+      <div class="pop-meta pop-pending">⏳ Pending — awaiting review</div>
+      <div class="pop-meta">
+        <span class="safety-indicator" aria-hidden="true">${indicator}</span>
+        District · ${safetyLabel(rating)}
+      </div>
+      ${description ? `<p>${this.escape(description)}</p>` : ''}
+    `;
   }
 
   private poiPopup(

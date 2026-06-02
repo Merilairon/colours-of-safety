@@ -106,8 +106,8 @@
 | [x] Filter map by category/rating                                                                                                                           | `@/frontend/src/app/map/map.ts`                                               | 1–2 days |
 | [x] Filter review queue                                                                                                                                     | `@/frontend/src/app/review/review.ts`                                         | 1 day    |
 | [x] Admin user management                                                                                                                                   | `@/frontend/src/app/admin/`                                                   | ✅       |
-| [ ] Pronouns `<select>` on register form — options: they/them, she/her, he/him, ze/zir, prefer not to say, custom                                           | `@/frontend/src/app/auth/register.html`, `@/backend/src/users/user.entity.ts` | 0.5 day  |
-| [ ] All pending POIs render on map at 40% opacity; districts with translucent/hatched fill; popup labels "Pending — awaiting review"; not visible to guests | `@/frontend/src/app/map/map.ts`                                               | 1–2 days |
+| [x] Pronouns `<select>` on register form — options: they/them, she/her, he/him, ze/zir, prefer not to say, custom                                           | `@/frontend/src/app/auth/register.html`, `@/backend/src/users/user.entity.ts` | 0.5 day  |
+| [x] All pending POIs render on map at 40% opacity; districts with translucent/hatched fill; popup labels "Pending — awaiting review"; not visible to guests | `@/frontend/src/app/map/map.ts`                                               | 1–2 days |
 
 ### Quick Wins (< 1 week total)
 

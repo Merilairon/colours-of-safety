@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserRole } from './user.entity';
+import { Pronouns, User, UserRole } from './user.entity';
 
 export interface CreateUserData {
   email: string;
   displayName: string;
   passwordHash: string;
   role?: UserRole;
+  pronouns?: Pronouns;
 }
 
 @Injectable()

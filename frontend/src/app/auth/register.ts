@@ -22,6 +22,7 @@ export class RegisterComponent {
     displayName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
+    pronouns: [''],
   });
 
   submit(): void {
@@ -31,8 +32,8 @@ export class RegisterComponent {
     }
     this.submitting.set(true);
     this.error.set(null);
-    const { displayName, email, password } = this.form.getRawValue();
-    this.auth.register(email, displayName, password).subscribe({
+    const { displayName, email, password, pronouns } = this.form.getRawValue();
+    this.auth.register(email, displayName, password, pronouns || undefined).subscribe({
       next: () => {
         this.submitting.set(false);
         void this.router.navigate(['/'], { queryParams: { welcome: 'true' } });

@@ -33,6 +33,7 @@ export class AuthService {
       email: dto.email,
       displayName: dto.displayName,
       passwordHash,
+      pronouns: dto.pronouns,
     });
     return this.buildResult(user);
   }
