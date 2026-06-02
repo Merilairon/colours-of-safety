@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { ReviewStatus } from '../common/review-status.enum';
 import { District } from './district.entity';
 import { DistrictsService } from './districts.service';
@@ -23,8 +23,12 @@ describe('DistrictsService', () => {
 
   beforeEach(async () => {
     repo = {
-      create: jest.fn((dto: Partial<District>) => dto as District),
-      save: jest.fn((district: District) => Promise.resolve(district)),
+      create: jest
+        .fn()
+        .mockImplementation((dto: DeepPartial<District>) => dto as District),
+      save: jest
+        .fn()
+        .mockImplementation((district: District) => Promise.resolve(district)),
       find: jest.fn().mockResolvedValue([]),
       findOne: jest.fn().mockResolvedValue(null),
       findOneOrFail: jest.fn().mockResolvedValue({}),
