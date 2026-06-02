@@ -61,7 +61,7 @@ export class Poi {
   @JoinColumn({ name: 'reviewedById' })
   reviewedBy: User | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   reviewedById: string | null;
 
   @CreateDateColumn()
