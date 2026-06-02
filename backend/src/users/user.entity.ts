@@ -46,6 +46,15 @@ export class User {
   @Column({ type: 'enum', enum: Pronouns, nullable: true, default: null })
   pronouns: Pronouns | null;
 
+  @Column({ default: false })
+  emailVerified: boolean;
+
+  @Column({ nullable: true })
+  emailVerificationToken: string | null;
+
+  @Column({ nullable: true })
+  emailVerificationExpires: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 }

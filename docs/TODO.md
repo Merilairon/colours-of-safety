@@ -100,28 +100,28 @@
 
 ### P1 Features (PRD §2)
 
-| Task                                                                                                                                                        | Files                                                                                | Effort   |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------- |
-| [x] Edit/delete pending submissions                                                                                                                         | `@/frontend/src/app/submissions/`                                                    | 1–2 days |
-| [x] Filter map by category/rating                                                                                                                           | `@/frontend/src/app/map/map.ts`                                                      | 1–2 days |
-| [x] Filter review queue                                                                                                                                     | `@/frontend/src/app/review/review.ts`                                                | 1 day    |
-| [x] Admin user management                                                                                                                                   | `@/frontend/src/app/admin/`                                                          | ✅       |
-| [x] Pronouns `<select>` on register form — options: they/them, she/her, he/him, ze/zir, prefer not to say, custom                                           | `@/frontend/src/app/auth/register.html`, `@/backend/src/users/user.entity.ts`        | 0.5 day  |
-| [ ] Admin-only reviewer assignment                                                                                                                          | `@/frontend/src/app/admin/`, `@/backend/src/auth/`                                   | 0.5 day  |
-| [ ] Deletion policy — allow remove after approved/rejected                                                                                                  | `@/frontend/src/app/submissions/`, `@/backend/src/pois/`, `@/backend/src/districts/` | 1 day    |
-| [ ] Spam prevention — review rate limiting with Software Architect                                                                                          | `@/backend/src/app.module.ts` — `@nestjs/throttler`                                  | TBD      |
-| [ ] Auto-locate map default (with Brussels fallback)                                                                                                        | `@/frontend/src/app/map/map.ts`                                                      | 0.5 day  |
-| [x] All pending POIs render on map at 40% opacity; districts with translucent/hatched fill; popup labels "Pending — awaiting review"; not visible to guests | `@/frontend/src/app/map/map.ts`                                                      | 1–2 days |
+| Task                                                                                                                                                                      | Files                                                                                | Effort   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------- |
+| [x] Edit/delete pending submissions                                                                                                                                       | `@/frontend/src/app/submissions/`                                                    | 1–2 days |
+| [x] Filter map by category/rating                                                                                                                                         | `@/frontend/src/app/map/map.ts`                                                      | 1–2 days |
+| [x] Filter review queue                                                                                                                                                   | `@/frontend/src/app/review/review.ts`                                                | 1 day    |
+| [x] Admin user management                                                                                                                                                 | `@/frontend/src/app/admin/`                                                          | ✅       |
+| [x] Pronouns `<select>` on register form — options: they/them, she/her, he/him, ze/zir, prefer not to say, custom                                                         | `@/frontend/src/app/auth/register.html`, `@/backend/src/users/user.entity.ts`        | 0.5 day  |
+| [x] Admin-only reviewer assignment                                                                                                                                        | `@/frontend/src/app/admin/`, `@/backend/src/auth/`                                   | ✅       |
+| [x] Deletion policy — allow remove after approved/rejected                                                                                                                | `@/frontend/src/app/submissions/`, `@/backend/src/pois/`, `@/backend/src/districts/` | ✅       |
+| [ ] Spam prevention — review rate limiting with Software Architect                                                                                                        | `@/backend/src/app.module.ts` — `@nestjs/throttler`                                  | TBD      |
+| [x] Auto-locate map default (with Brussels fallback)                                                                                                                      | `@/frontend/src/app/map/map.ts`                                                      | ✅       |
+| [ ] All pending POIs render on map at 40% opacity; districts with translucent/hatched fill; popup labels "Pending — awaiting review"; visible to everyone while in review | `@/frontend/src/app/map/map.ts`                                                      | 1–2 days |
 
 ### Quick Wins (< 1 week total)
 
 | Task                                  | Source                 | Files                                                |
-| ------------------------------------- | ---------------------- | ---------------------------------------------------- |
+| ------------------------------------- | ---------------------- | ---------------------------------------------------- | --- |
 | [x] Social proof counter on legend    | BEHAVIORAL_NUDGES §2.1 | `@/frontend/src/app/map/map.html`                    |
 | [x] Enhanced submission toast         | BEHAVIORAL_NUDGES §2.2 | `@/frontend/src/app/map/map.ts`                      |
 | [x] Post-reg "add first place" prompt | BEHAVIORAL_NUDGES §2.1 | `@/frontend/src/app/auth/register.ts`                |
 | [x] Contribution count on `/mine`     | BEHAVIORAL_NUDGES §2.3 | `@/frontend/src/app/submissions/my-submissions.html` |
-| [ ] Cluster markers                   | TREND_RESEARCH §1.2    | Add `leaflet.markercluster`                          |
+| [x] Cluster markers                   | TREND_RESEARCH §1.2    | `@/frontend/src/app/map/map.ts`                      | ✅  |
 | [x] User location detection           | TREND_RESEARCH §1.3    | Geolocation API in map component                     |
 | [x] Report/flag button on popup       | TREND_RESEARCH §2.2    | Marker popup template                                |
 | [x] Geographic search                 | TREND_RESEARCH §1.1    | Add search input to map                              |
@@ -147,17 +147,17 @@
 | [ ] Share button on marker                         | Marker popup                                                |
 | [ ] Soft-gate drawing for guests                   | `@/frontend/src/app/map/map.ts`                             |
 | [ ] Email notifications                            | Backend + email provider                                    |
-| [ ] Cookie consent banner                          | `@/frontend/src/app/core/cookie-consent.component.ts`       |
-| [ ] High contrast mode / colour-blind safe palette | `@/frontend/src/app/map/map.scss`, `@/frontend/src/styles/` |
-| [ ] `prefers-reduced-motion` — toast + animations  | `@/frontend/src/app/map/map.scss`                           |
-| [ ] Email verification                             | Backend + frontend flow                                     |
+| [x] Cookie consent banner                          | `@/frontend/src/app/core/cookie-consent.component.ts`       |
+| [x] High contrast mode / colour-blind safe palette | `@/frontend/src/app/map/map.scss`, `@/frontend/src/styles/` |
+| [x] `prefers-reduced-motion` — toast + animations  | `@/frontend/src/app/map/map.scss`                           |
+| [x] Email verification                             | Backend + frontend flow                                     |
 
 ### Moderation & Content
 
-- [ ] Bulk approve/reject in queue
+- [x] Bulk approve/reject in queue
 - [ ] Edit suggestions for approved POIs
-- [ ] `/place/:id` individual pages
-- [ ] Dynamic sitemap generation
+- [x] `/place/:id` individual pages
+- [x] Dynamic sitemap generation
 
 ### Community Voting System (PRD P2 — promoted from P3)
 

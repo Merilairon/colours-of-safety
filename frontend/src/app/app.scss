@@ -257,6 +257,25 @@
   }
 }
 
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e84393;
+    outline-offset: 2px;
+  }
+}
+
 .footer {
   display: flex;
   justify-content: center;
@@ -286,5 +305,52 @@
     flex-direction: column;
     gap: 0.5rem;
     padding: 0.5rem;
+  }
+}
+
+// High contrast mode
+:root.high-contrast {
+  .topbar {
+    background: #000;
+    border-bottom: 2px solid #fff;
+  }
+
+  .brand,
+  .nav a,
+  .account a,
+  .account .link-btn {
+    color: #fff;
+  }
+
+  .nav a.active,
+  .nav a:hover {
+    border-bottom-color: #fff;
+    background: #333;
+  }
+
+  .badge {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #000;
+  }
+
+  .cta {
+    background: #fff;
+    color: #000;
+    border: 2px solid #000;
+  }
+
+  .theme-toggle:hover {
+    background: #333;
+  }
+
+  .footer {
+    background: #000;
+    border-top: 2px solid #fff;
+    color: #fff;
+  }
+
+  .footer a {
+    color: #fff;
   }
 }

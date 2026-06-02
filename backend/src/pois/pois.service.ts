@@ -93,9 +93,6 @@ export class PoisService {
     if (poi.createdById !== userId) {
       throw new NotFoundException('POI not found');
     }
-    if (poi.status !== ReviewStatus.PENDING) {
-      throw new NotFoundException('Only pending submissions can be deleted');
-    }
     await this.pois.delete(id);
   }
 }

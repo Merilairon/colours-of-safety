@@ -1,0 +1,100 @@
+<div class="page">
+  @if (loading()) {
+    <div class="loading">Loading place details…</div>
+  } @else if (notFound()) {
+    <div class="not-found">
+      <h1>Place not found</h1>
+      <p>This place doesn't exist or hasn't been approved yet.</p>
+      <a routerLink="/" class="back-link">← Back to map</a>
+    </div>
+  } @else if (error()) {
+    <div class="error">
+      <h1>Error</h1>
+      <p>{{ error() }}</p>
+      <a routerLink="/" class="back-link">← Back to map</a>
+    </div>
+  } @else if (place(); as place) {
+    <div class="place-header">
+      <div class="place-info">
+        <h1>{{ place.name }}</h1>
+        <div class="place-meta">
+          <span class="kind-badge">{{ isPoi(place) ? 'Place' : 'District' }}</span>
+          @if (isPoi(place) && place.category) {
+            <span class="category">{{ categoryLabels[place.category] || place.category }}</span>
+          }
+          <span class="rating" [style.background]="colorFor(place.safetyRating)">
+            {{ safetyLabel(place.safetyRating) }}
+          </span>
+        </div>
+      </div>
+      <a [href]="getMapUrl(place)" class="view-on-map">View on map →</a>
+    </div>
+
+    <div class="place-content">
+      @if (place.description) {
+        <section class="description">
+          <h2>About this place</h2>
+          <p>{{ place.description }}</p>
+        </section>
+      }
+
+      <section class="safety-details">
+        <h2>Safety rating</h2>
+        <div class="safety-display">
+          <div class="safety-circle" [style.background]="colorFor(place.safetyRating)">
+            <span class="safety-indicator">{{ indicatorFor(place.safetyRating) }}</span>
+          </div>
+          <div class="safety-text">
+            <div class="rating-label">{{ safetyLabel(place.safetyRating) }}</div>
+            <p class="rating-description">
+              @switch (place.safetyRating) {
+                @case (5) {
+                  Explicitly welcoming - actively safe and affirming for LGBTQIA+ people
+                }
+                @case (4) {
+                  Very safe - generally welcoming with no known issues
+                }
+                @case (3) {
+                  Mixed - some positive experiences, use caution
+                }
+                @case (2) {
+                  Caution advised - reports of negative experiences
+                }
+                @case (1) {
+                  Unsafe - avoid if possible, known discrimination issues
+                }
+              }
+            </p>
+          </div>
+        </div>
+      </section>
+
+      @if (isPoi(place) && place.wheelchairAccessible) {
+        <section class="accessibility">
+          <h2>Accessibility</h2>
+          <div class="accessibility-info">
+            <span class="wheelchair-badge">♿ Wheelchair accessible</span>
+            <p>This place has confirmed wheelchair accessibility.</p>
+          </div>
+        </section>
+      }
+
+      <section class="contribution">
+        <h2>Contribution details</h2>
+        <div class="contribution-info">
+          <p><strong>Added by:</strong> {{ place.createdBy?.displayName || 'Anonymous' }}</p>
+          <p><strong>Date added:</strong> {{ place.createdAt | date:'mediumDate' }}</p>
+          <p><strong>Status:</strong> <span class="status-approved">Approved</span></p>
+        </div>
+      </section>
+
+      <section class="actions">
+        <h2>What to do</h2>
+        <div class="action-buttons">
+          <a [href]="getMapUrl(place)" class="primary-action">View on map</a>
+          <a routerLink="/" class="secondary-action">Browse other places</a>
+        </div>
+      </section>
+    </div>
+  }
+</div>

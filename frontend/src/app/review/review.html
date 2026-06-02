@@ -19,6 +19,38 @@
     </button>
   </div>
 
+  <!-- Bulk actions -->
+  @if (filteredItems().length > 0) {
+    <div class="bulk-actions">
+      <div class="bulk-select">
+        <input
+          type="checkbox"
+          id="select-all"
+          [checked]="selectedIds().size === filteredItems().length && filteredItems().length > 0"
+          [indeterminate]="selectedIds().size > 0 && selectedIds().size < filteredItems().length"
+          (change)="selectAll()"
+        />
+        <label for="select-all">Select all ({{ selectedIds().size }})</label>
+      </div>
+
+      @if (selectedIds().size > 0) {
+        <div class="bulk-buttons">
+          <button type="button" class="bulk-reject" [disabled]="bulkBusy()" (click)="bulkReject()">
+            Reject selected ({{ selectedIds().size }})
+          </button>
+          <button
+            type="button"
+            class="bulk-approve"
+            [disabled]="bulkBusy()"
+            (click)="bulkApprove()"
+          >
+            Approve selected ({{ selectedIds().size }})
+          </button>
+        </div>
+      }
+    </div>
+  }
+
   @if (error()) {
     <p class="error">{{ error() }}</p>
   }
@@ -30,8 +62,14 @@
   } @else {
     <ul class="queue">
       @for (item of filteredItems(); track item.id) {
-        <li class="card">
+        <li class="card" [class.selected]="selectedIds().has(item.id)">
           <div class="card-head">
+            <input
+              type="checkbox"
+              class="item-checkbox"
+              [checked]="selectedIds().has(item.id)"
+              (change)="toggleSelection(item.id)"
+            />
             <span class="kind">{{ item.kind === 'poi' ? 'Place' : 'District' }}</span>
             <span class="rating" [style.background]="colorFor(item.safetyRating)">{{
               safetyLabel(item.safetyRating)

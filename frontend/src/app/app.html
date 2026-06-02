@@ -31,6 +31,18 @@
   </nav>
 
   <div class="account">
+    <button
+      type="button"
+      class="theme-toggle"
+      (click)="toggleTheme()"
+      [attr.aria-label]="
+        isHighContrast() ? 'Switch to normal theme' : 'Switch to high contrast theme'
+      "
+      title="Toggle high contrast mode"
+    >
+      {{ isHighContrast() ? '🌈' : '🔆' }}
+    </button>
+
     @if (isLoggedIn()) {
       <span class="who">{{ user()?.displayName }}</span>
       @if (isAdmin()) {
@@ -54,3 +66,5 @@
   <span>&copy; 2026 Colours of Safety</span>
   <a routerLink="/privacy">Privacy Policy</a>
 </footer>
+
+<app-cookie-consent />

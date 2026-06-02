@@ -175,8 +175,6 @@ export class MySubmissionsComponent implements OnInit {
   }
 
   protected confirmDelete(row: SubmissionRow): void {
-    if (row.status !== 'pending') return;
-
     const delete$: Observable<unknown> =
       row.kind === 'poi' ? this.markings.deletePoi(row.id) : this.markings.deleteDistrict(row.id);
 
@@ -188,7 +186,7 @@ export class MySubmissionsComponent implements OnInit {
         setTimeout(() => this.success.set(null), 3000);
       },
       error: () => {
-        this.error.set('Failed to delete. Only pending submissions can be deleted.');
+        this.error.set('Failed to delete. You can only delete your own submissions.');
         this.deletingId.set(null);
         setTimeout(() => this.error.set(null), 3000);
       },

@@ -36,6 +36,10 @@ export class MarkingsService {
     return this.http.delete<void>(`/api/pois/${id}`);
   }
 
+  getPoiById(id: string): Observable<Poi | null> {
+    return this.http.get<Poi>(`/api/pois/${id}`);
+  }
+
   // ----- Districts -----
   getApprovedDistricts(): Observable<District[]> {
     return this.http.get<District[]>('/api/districts');
@@ -63,5 +67,9 @@ export class MarkingsService {
 
   deleteDistrict(id: string): Observable<void> {
     return this.http.delete<void>(`/api/districts/${id}`);
+  }
+
+  getDistrictById(id: string): Observable<District | null> {
+    return this.http.get<District>(`/api/districts/${id}`);
   }
 }

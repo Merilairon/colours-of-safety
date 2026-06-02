@@ -76,5 +76,14 @@ export const routes: Routes = [
       description: 'Privacy Policy for Colours of Safety - how we handle your data.',
     },
   },
+  {
+    path: 'place/:id',
+    loadComponent: () => import('./place/place').then((m) => m.PlaceComponent),
+    resolve: { seo: seoResolver },
+    data: {
+      title: 'Safe Space Details | Colours of Safety',
+      description: 'View detailed information about this queer-friendly safe space.',
+    },
+  },
   { path: '**', redirectTo: '' },
 ];

@@ -9,6 +9,14 @@ export interface CreateUserData {
   passwordHash: string;
   role?: UserRole;
   pronouns?: Pronouns;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
+}
+
+export interface UpdateUserData {
+  emailVerified?: boolean;
+  emailVerificationToken?: string | null;
+  emailVerificationExpires?: Date | null;
 }
 
 @Injectable()
@@ -51,5 +59,18 @@ export class UsersService {
   async assignRole(id: string, role: UserRole): Promise<User> {
     await this.users.update(id, { role });
     return this.users.findOneOrFail({ where: { id } });
+  }
+
+  async update(id: string, data: UpdateUserData): Promise<void> {
+    await this.users.update(id, data);
+  }
+
+  findByVerificationToken(token: string): Promise<User | null> {
+    return this.users.findOne({
+      where: {
+        emailVerificationToken: token,
+        emailVerificationExpires: { $gt: new Date() } as any,
+      },
+    });
   }
 }

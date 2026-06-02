@@ -101,9 +101,6 @@ export class DistrictsService {
     if (district.createdById !== userId) {
       throw new NotFoundException('District not found');
     }
-    if (district.status !== ReviewStatus.PENDING) {
-      throw new NotFoundException('Only pending submissions can be deleted');
-    }
     await this.districts.delete(id);
   }
 }

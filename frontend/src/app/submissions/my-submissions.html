@@ -45,8 +45,8 @@
           </div>
           <div class="actions-col">
             <span class="status" [class]="row.status">{{ row.status }}</span>
-            @if (row.status === 'pending') {
-              <div class="row-actions">
+            <div class="row-actions">
+              @if (row.status === 'pending') {
                 <button
                   type="button"
                   class="icon-btn"
@@ -56,17 +56,17 @@
                 >
                   ✎
                 </button>
-                <button
-                  type="button"
-                  class="icon-btn danger"
-                  aria-label="Delete submission"
-                  (click)="startDelete(row.id)"
-                  title="Delete"
-                >
-                  ✕
-                </button>
-              </div>
-            }
+              }
+              <button
+                type="button"
+                class="icon-btn danger"
+                aria-label="Delete submission"
+                (click)="startDelete(row.id)"
+                title="Delete"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         </li>
       }

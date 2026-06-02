@@ -11,4 +11,5 @@ export interface AuthUser {
   email: string;
   displayName: string;
   role: UserRole;
+  emailVerified: boolean;
 }

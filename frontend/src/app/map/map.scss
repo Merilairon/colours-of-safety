@@ -531,3 +531,74 @@
     }
   }
 }
+
+// Marker cluster styles
+:host ::ng-deep .marker-cluster {
+  background: transparent;
+
+  .cluster-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e84393;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 2px solid #fff;
+  }
+}
+
+:host ::ng-deep .marker-cluster-small .cluster-icon {
+  background: #e84393;
+}
+
+:host ::ng-deep .marker-cluster-medium .cluster-icon {
+  background: #d73682;
+}
+
+:host ::ng-deep .marker-cluster-large .cluster-icon {
+  background: #c6286b;
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+
+  .hint {
+    animation: none;
+  }
+
+  .draft-panel {
+    animation: none;
+  }
+
+  .search-panel {
+    animation: none;
+  }
+
+  .legend {
+    animation: none;
+  }
+
+  :host ::ng-deep .leaflet-marker-icon {
+    animation: none;
+  }
+
+  :host ::ng-deep .leaflet-popup {
+    animation: none;
+  }
+
+  .theme-toggle {
+    transition: none;
+  }
+
+  .cookie-btn {
+    transition: none;
+  }
+}

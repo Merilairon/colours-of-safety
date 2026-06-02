@@ -12,6 +12,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import * as L from 'leaflet';
 import 'leaflet-draw';
+import 'leaflet.markercluster';
 import { AuthService } from '../core/auth.service';
 import { MarkingsService } from '../core/markings.service';
 import { CreateDistrictPayload, CreatePoiPayload, GeoPolygon, Poi, District } from '../core/models';
@@ -94,13 +95,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   });
 
   private map!: L.Map;
-  private dataLayer!: L.LayerGroup;
+  private poiClusterLayer!: L.MarkerClusterGroup;
+  private districtLayer!: L.LayerGroup;
   private draftLayer!: L.LayerGroup;
   private blendedPane!: HTMLElement;
 
   ngAfterViewInit(): void {
     this.map = L.map(this.mapEl.nativeElement, {
-      center: [50.8503, 4.3517], // Brussels
+      center: [50.8503, 4.3517], // Brussels fallback
       zoom: 12,
     });
 
@@ -109,7 +111,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       attribution: '© OpenStreetMap contributors',
     }).addTo(this.map);
 
-    this.dataLayer = L.layerGroup().addTo(this.map);
+    this.poiClusterLayer = L.markerClusterGroup({
+      maxClusterRadius: 50,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+      iconCreateFunction: (cluster) => {
+        const count = cluster.getChildCount();
+        return L.divIcon({
+          html: `<div class="cluster-icon"><span>${count}</span></div>`,
+          className: 'marker-cluster',
+          iconSize: L.point(40, 40),
+        });
+      },
+    }).addTo(this.map);
+    this.districtLayer = L.layerGroup().addTo(this.map);
     this.pendingLayer = L.layerGroup().addTo(this.map);
     this.draftLayer = L.layerGroup().addTo(this.map);
     this.initBlendedPane();
@@ -121,6 +137,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.map.on('draw:created', (e) => this.onShapeCreated(e as L.DrawEvents.Created));
 
     this.loadData();
+
+    // Auto-locate user on first load
+    this.attemptAutoLocate();
 
     // Check for welcome query param (post-registration)
     this.route.queryParams.subscribe((params) => {
@@ -335,7 +354,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   protected applyFilters(): void {
-    this.dataLayer.clearLayers();
+    this.poiClusterLayer.clearLayers();
+    this.districtLayer.clearLayers();
 
     const category = this.selectedCategory();
     const minRating = this.minSafetyRating();
@@ -359,7 +379,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         weight: 2,
       });
       marker.bindPopup(this.poiPopup(poi.name, poi));
-      this.dataLayer.addLayer(marker);
+      this.poiClusterLayer.addLayer(marker);
     }
 
     // Filter Districts
@@ -386,7 +406,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           district.wheelchairAccessible,
         ),
       );
-      this.dataLayer.addLayer(polygon);
+      this.districtLayer.addLayer(polygon);
     }
   }
 
@@ -429,6 +449,22 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     );
   }
 
+  private attemptAutoLocate(): void {
+    if (!navigator.geolocation) return;
+
+    // Silent auto-locate on page load
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        this.map.setView([latitude, longitude], 14);
+      },
+      () => {
+        // Silent fail - keep Brussels fallback
+      },
+      { timeout: 5000, enableHighAccuracy: false },
+    );
+  }
+
   protected onSearch(event: Event): void {
     event.preventDefault();
     const query = this.searchQuery().trim();
@@ -458,41 +494,16 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private loadData(): void {
     this.markings.getApprovedPois().subscribe({
       next: (pois) => {
-        for (const poi of pois) {
-          const [lng, lat] = poi.location.coordinates;
-          const marker = L.circleMarker([lat, lng], {
-            radius: 9,
-            color: safetyColor(poi.safetyRating),
-            fillColor: safetyColor(poi.safetyRating),
-            fillOpacity: 0.85,
-            weight: 2,
-          });
-          marker.bindPopup(this.poiPopup(poi.name, poi));
-          this.dataLayer.addLayer(marker);
-        }
+        this.allPois = pois;
+        this.applyFilters();
       },
       error: () => this.loadError.set('Could not load places.'),
     });
 
     this.markings.getApprovedDistricts().subscribe({
       next: (districts) => {
-        for (const district of districts) {
-          const ring = district.area.coordinates[0].map(([lng, lat]): [number, number] => [
-            lat,
-            lng,
-          ]);
-          const polygon = L.polygon(ring, {
-            color: safetyColor(district.safetyRating),
-            fillColor: safetyColor(district.safetyRating),
-            fillOpacity: district.blendEdges ? 0.55 : 0.25,
-            weight: district.blendEdges ? 0 : 2,
-            pane: district.blendEdges ? 'blendedDistricts' : 'overlayPane',
-          });
-          polygon.bindPopup(
-            this.districtPopup(district.name, district.description, district.safetyRating),
-          );
-          this.dataLayer.addLayer(polygon);
-        }
+        this.allDistricts = districts;
+        this.applyFilters();
       },
       error: () => this.loadError.set('Could not load districts.'),
     });

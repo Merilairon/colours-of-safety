@@ -35,6 +35,10 @@ export class ReviewComponent implements OnInit {
   protected readonly filterType = signal<'all' | 'poi' | 'district'>('all');
   protected readonly filteredItems = signal<QueueItem[]>([]);
 
+  // Bulk actions
+  protected readonly selectedIds = signal<Set<string>>(new Set());
+  protected readonly bulkBusy = signal(false);
+
   ngOnInit(): void {
     this.load();
   }
@@ -125,5 +129,74 @@ export class ReviewComponent implements OnInit {
 
   private setBusy(item: QueueItem, busy: boolean): void {
     this.items.update((list) => list.map((it) => (it.id === item.id ? { ...it, busy } : it)));
+  }
+
+  protected toggleSelection(id: string): void {
+    this.selectedIds.update((set) => {
+      const newSet = new Set(set);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  }
+
+  protected selectAll(): void {
+    this.selectedIds.set(new Set(this.filteredItems().map((item) => item.id)));
+  }
+
+  protected clearSelection(): void {
+    this.selectedIds.set(new Set());
+  }
+
+  protected bulkApprove(): void {
+    this.bulkAction('approved');
+  }
+
+  protected bulkReject(): void {
+    this.bulkAction('rejected');
+  }
+
+  private bulkAction(status: 'approved' | 'rejected'): void {
+    const selectedIds = this.selectedIds();
+    if (selectedIds.size === 0) return;
+
+    this.bulkBusy.set(true);
+    this.error.set(null);
+
+    const promises = Array.from(selectedIds).map((id) => {
+      const item = this.items().find((it) => it.id === id);
+      if (!item) return Promise.resolve();
+
+      this.setBusy(item, true);
+      const payload = { status, reviewNote: item.note || undefined };
+      const obs: Observable<unknown> =
+        item.kind === 'poi'
+          ? this.markings.reviewPoi(item.id, payload)
+          : this.markings.reviewDistrict(item.id, payload);
+
+      return new Promise<void>((resolve) => {
+        obs.subscribe({
+          next: () => {
+            this.items.update((list) => list.filter((it) => it.id !== id));
+            resolve();
+          },
+          error: () => {
+            this.setBusy(item, false);
+            resolve();
+          },
+        });
+      });
+    });
+
+    Promise.all(promises).then(() => {
+      this.bulkBusy.set(false);
+      this.clearSelection();
+      if (this.items().length === 0) {
+        this.error.set(null);
+      }
+    });
   }
 }
