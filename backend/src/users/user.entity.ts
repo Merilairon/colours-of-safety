@@ -40,10 +40,15 @@ export class User {
   @Column({ select: false })
   passwordHash: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  @Column({ type: 'simple-enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
-  @Column({ type: 'enum', enum: Pronouns, nullable: true, default: null })
+  @Column({
+    type: 'simple-enum',
+    enum: Pronouns,
+    nullable: true,
+    default: null,
+  })
   pronouns: Pronouns | null;
 
   @Column({ default: false })
