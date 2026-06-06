@@ -127,30 +127,9 @@ jobs:
           kubectl apply -f k8s/namespace.yml
           kubectl apply -f k8s/frontend-nginx-configmap.yml
           kubectl apply -f k8s/cloudflare-tunnel-ingress.yml
-          kubectl apply -f k8s/actions-runner-rbac.yml
 
       - name: Apply postgres
         run: kubectl apply -f k8s/postgres.yml
-
-      - name: Run database migrations
-        run: |
-          kubectl run migration-job \
-            --image=${{ needs.build-and-push.outputs.backend_image }}:${{ needs.build-and-push.outputs.image_tag }} \
-            --namespace=colours-of-safety \
-            --restart=Never \
-            --env=DB_HOST=postgres \
-            --env=DB_PORT=5432 \
-            --env=DB_USERNAME=$(kubectl get secret app-secrets -n colours-of-safety -o jsonpath='{.data.DB_USERNAME}' | base64 -d) \
-            --env=DB_PASSWORD=$(kubectl get secret app-secrets -n colours-of-safety -o jsonpath='{.data.DB_PASSWORD}' | base64 -d) \
-            --env=DB_NAME=$(kubectl get secret app-secrets -n colours-of-safety -o jsonpath='{.data.DB_NAME}' | base64 -d) \
-            --command -- npx typeorm migration:run -d src/data-source.ts \
-            --attach=false
-
-          # Wait for job to complete
-          kubectl wait --for=condition=complete job/migration-job -n colours-of-safety --timeout=300s
-
-          # Clean up the job
-          kubectl delete job migration-job -n colours-of-safety
 
       - name: Apply backend
         run: |
