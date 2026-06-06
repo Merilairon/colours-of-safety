@@ -62,7 +62,15 @@ export class AuthService {
       return null;
     }
     try {
-      return JSON.parse(raw) as AuthUser;
+      const user = JSON.parse(raw) as Partial<AuthUser>;
+      // Handle missing fields from old localStorage data
+      if (user.emailVerified === undefined) {
+        user.emailVerified = true; // Assume verified for existing users
+      }
+      if (!user.id || !user.email || !user.displayName || !user.role) {
+        return null; // Invalid user data
+      }
+      return user as AuthUser;
     } catch {
       return null;
     }

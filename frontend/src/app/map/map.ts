@@ -130,7 +130,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.draftLayer = L.layerGroup().addTo(this.map);
     this.initBlendedPane();
 
+    console.log('Map init - isLoggedIn:', this.isLoggedIn(), 'user:', this.auth.user());
     if (this.isLoggedIn()) {
+      console.log('Adding draw controls');
       this.addDrawControls();
     }
 
