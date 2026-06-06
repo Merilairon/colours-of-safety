@@ -28,9 +28,27 @@ describe('UserService', () => {
   describe('getUsers', () => {
     it('fetches all users', () => {
       const mockUsers: AuthUser[] = [
-        { id: 'user-1', email: 'user1@example.com', displayName: 'User 1', role: 'user' },
-        { id: 'user-2', email: 'user2@example.com', displayName: 'User 2', role: 'reviewer' },
-        { id: 'user-3', email: 'user3@example.com', displayName: 'User 3', role: 'admin' },
+        {
+          id: 'user-1',
+          email: 'user1@example.com',
+          displayName: 'User 1',
+          role: 'user',
+          emailVerified: true,
+        },
+        {
+          id: 'user-2',
+          email: 'user2@example.com',
+          displayName: 'User 2',
+          role: 'reviewer',
+          emailVerified: true,
+        },
+        {
+          id: 'user-3',
+          email: 'user3@example.com',
+          displayName: 'User 3',
+          role: 'admin',
+          emailVerified: true,
+        },
       ];
       httpClientMock.get.mockReturnValue(of(mockUsers));
 
@@ -59,6 +77,7 @@ describe('UserService', () => {
         email: 'user1@example.com',
         displayName: 'User 1',
         role: 'reviewer',
+        emailVerified: true,
       };
       httpClientMock.patch.mockReturnValue(of(updatedUser));
 
@@ -77,6 +96,7 @@ describe('UserService', () => {
         email: 'user1@example.com',
         displayName: 'User 1',
         role: 'admin',
+        emailVerified: true,
       };
       httpClientMock.patch.mockReturnValue(of(updatedUser));
 
@@ -95,6 +115,7 @@ describe('UserService', () => {
         email: 'user1@example.com',
         displayName: 'User 1',
         role: 'super_admin',
+        emailVerified: true,
       };
       httpClientMock.patch.mockReturnValue(of(updatedUser));
 
@@ -113,6 +134,7 @@ describe('UserService', () => {
         email: 'user1@example.com',
         displayName: 'User 1',
         role: 'user',
+        emailVerified: true,
       };
       httpClientMock.patch.mockReturnValue(of(updatedUser));
 

@@ -36,6 +36,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         displayName: 'Test User',
         role: 'user',
+        emailVerified: true,
       };
       localStorage.setItem('cos.user', JSON.stringify(mockUser));
       localStorage.setItem('cos.token', 'test-token');
@@ -64,6 +65,7 @@ describe('AuthService', () => {
           email: 'new@example.com',
           displayName: 'New User',
           role: 'user',
+          emailVerified: true,
         },
       };
 
@@ -95,6 +97,7 @@ describe('AuthService', () => {
           email: 'test@example.com',
           displayName: 'Test User',
           role: 'user',
+          emailVerified: true,
         },
       };
 
@@ -122,6 +125,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         displayName: 'Test User',
         role: 'user',
+        emailVerified: true,
       };
       localStorage.setItem('cos.user', JSON.stringify(mockUser));
       localStorage.setItem('cos.token', 'token');
@@ -154,7 +158,13 @@ describe('AuthService', () => {
     it('isReviewer returns true for reviewer role', () => {
       const mockResult: AuthResult = {
         accessToken: 'token',
-        user: { id: '1', email: 'r@example.com', displayName: 'Reviewer', role: 'reviewer' },
+        user: {
+          id: '1',
+          email: 'r@example.com',
+          displayName: 'Reviewer',
+          role: 'reviewer',
+          emailVerified: true,
+        },
       };
 
       (httpClientMock.post as ReturnType<typeof vi.fn>).mockReturnValue(of(mockResult));
@@ -168,7 +178,13 @@ describe('AuthService', () => {
     it('isAdmin returns true for admin role', () => {
       const mockResult: AuthResult = {
         accessToken: 'token',
-        user: { id: '1', email: 'a@example.com', displayName: 'Admin', role: 'admin' },
+        user: {
+          id: '1',
+          email: 'a@example.com',
+          displayName: 'Admin',
+          role: 'admin',
+          emailVerified: true,
+        },
       };
 
       (httpClientMock.post as ReturnType<typeof vi.fn>).mockReturnValue(of(mockResult));
@@ -182,7 +198,13 @@ describe('AuthService', () => {
     it('isAdmin returns true for super_admin role', () => {
       const mockResult: AuthResult = {
         accessToken: 'token',
-        user: { id: '1', email: 'sa@example.com', displayName: 'Super', role: 'super_admin' },
+        user: {
+          id: '1',
+          email: 'sa@example.com',
+          displayName: 'Super',
+          role: 'super_admin',
+          emailVerified: true,
+        },
       };
 
       (httpClientMock.post as ReturnType<typeof vi.fn>).mockReturnValue(of(mockResult));
@@ -196,7 +218,13 @@ describe('AuthService', () => {
     it('role checks return false for regular user', () => {
       const mockResult: AuthResult = {
         accessToken: 'token',
-        user: { id: '1', email: 'u@example.com', displayName: 'User', role: 'user' },
+        user: {
+          id: '1',
+          email: 'u@example.com',
+          displayName: 'User',
+          role: 'user',
+          emailVerified: true,
+        },
       };
 
       (httpClientMock.post as ReturnType<typeof vi.fn>).mockReturnValue(of(mockResult));

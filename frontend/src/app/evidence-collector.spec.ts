@@ -395,7 +395,13 @@ describe('AC-5 Review Queue', () => {
     location: { type: 'Point', coordinates: [4.35, 50.85] },
     status: 'pending',
     reviewNote: null,
-    createdBy: { id: 'u1', email: 'u1@example.com', displayName: 'Contributor1', role: 'user' },
+    createdBy: {
+      id: 'u1',
+      email: 'u1@example.com',
+      displayName: 'Contributor1',
+      role: 'user',
+      emailVerified: true,
+    },
     createdAt: '2024-01-15T10:00:00Z',
     isAnonymous: false,
   };
@@ -419,7 +425,13 @@ describe('AC-5 Review Queue', () => {
     },
     status: 'pending',
     reviewNote: null,
-    createdBy: { id: 'u2', email: 'u2@example.com', displayName: 'Contributor2', role: 'user' },
+    createdBy: {
+      id: 'u2',
+      email: 'u2@example.com',
+      displayName: 'Contributor2',
+      role: 'user',
+      emailVerified: true,
+    },
     createdAt: '2024-01-14T10:00:00Z',
     isAnonymous: false,
     blendEdges: false,
@@ -565,9 +577,9 @@ describe('AC-6 Admin User Management', () => {
   let http: HttpTestingController;
 
   const mockUsers: AuthUser[] = [
-    { id: 'u1', email: 'a@b.com', displayName: 'Alice', role: 'user' },
-    { id: 'u2', email: 'r@b.com', displayName: 'Reviewer', role: 'reviewer' },
-    { id: 'u3', email: 'ad@b.com', displayName: 'Admin', role: 'admin' },
+    { id: 'u1', email: 'a@b.com', displayName: 'Alice', role: 'user', emailVerified: true },
+    { id: 'u2', email: 'r@b.com', displayName: 'Reviewer', role: 'reviewer', emailVerified: true },
+    { id: 'u3', email: 'ad@b.com', displayName: 'Admin', role: 'admin', emailVerified: true },
   ];
 
   beforeEach(async () => {
