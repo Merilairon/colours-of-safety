@@ -127,6 +127,7 @@ jobs:
           kubectl apply -f k8s/namespace.yml
           kubectl apply -f k8s/frontend-nginx-configmap.yml
           kubectl apply -f k8s/cloudflare-tunnel-ingress.yml
+          kubectl apply -f k8s/actions-runner-rbac.yml
 
       - name: Apply postgres
         run: kubectl apply -f k8s/postgres.yml
