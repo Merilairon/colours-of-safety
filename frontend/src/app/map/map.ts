@@ -11,6 +11,8 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import * as L from 'leaflet';
+import 'leaflet-draw';
+import 'leaflet.markercluster';
 import { AuthService } from '../core/auth.service';
 import { MarkingsService } from '../core/markings.service';
 import { CreateDistrictPayload, CreatePoiPayload, GeoPolygon, Poi, District } from '../core/models';
@@ -99,11 +101,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private blendedPane!: HTMLElement;
 
   ngAfterViewInit(): void {
-    (window as any)['L'] = L;
-    // Dynamic imports ensure window.L is set before UMD plugins execute
-    Promise.all([import('leaflet-draw'), import('leaflet.markercluster')]).then(() =>
-      this.initMap(),
-    );
+    this.initMap();
   }
 
   private initMap(): void {
