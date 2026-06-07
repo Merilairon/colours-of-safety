@@ -1,7 +1,7 @@
 # Colours of Safety — Project TODOs
 
-> Sources: PRD (rev 2), ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT, UI-DESIGN (rev 2)  
-> Last updated: 2026-06-02
+> Sources: PRD (rev 3), ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT, UI-DESIGN (rev 2)  
+> Last updated: 2026-06-07
 
 ---
 
@@ -44,6 +44,7 @@
 | [x] Mobile-responsive layout | `@/frontend/src/app/app.scss`, `@/frontend/src/app/map/map.scss` | ✅     |
 | [x] Rate limiting            | `@/backend/src/app.module.ts` — `@nestjs/throttler`              | ✅     |
 | [x] Privacy policy page      | `@/frontend/src/app/privacy/` + route + footer                   | ✅     |
+| [x] POI clustering           | `@/frontend/src/app/map/map.ts` — `leaflet.markercluster`        | ✅     |
 
 ### Accessibility — Critical (WCAG 2.1 Level A violations)
 
@@ -115,16 +116,16 @@
 
 ### Quick Wins (< 1 week total)
 
-| Task                                  | Source                 | Files                                                |
-| ------------------------------------- | ---------------------- | ---------------------------------------------------- | --- |
-| [x] Social proof counter on legend    | BEHAVIORAL_NUDGES §2.1 | `@/frontend/src/app/map/map.html`                    |
-| [x] Enhanced submission toast         | BEHAVIORAL_NUDGES §2.2 | `@/frontend/src/app/map/map.ts`                      |
-| [x] Post-reg "add first place" prompt | BEHAVIORAL_NUDGES §2.1 | `@/frontend/src/app/auth/register.ts`                |
-| [x] Contribution count on `/mine`     | BEHAVIORAL_NUDGES §2.3 | `@/frontend/src/app/submissions/my-submissions.html` |
-| [x] Cluster markers                   | TREND_RESEARCH §1.2    | `@/frontend/src/app/map/map.ts`                      | ✅  |
-| [x] User location detection           | TREND_RESEARCH §1.3    | Geolocation API in map component                     |
-| [x] Report/flag button on popup       | TREND_RESEARCH §2.2    | Marker popup template                                |
-| [x] Geographic search                 | TREND_RESEARCH §1.1    | Add search input to map                              |
+| Task                                  | Source                       | Files                                                |
+| ------------------------------------- | ---------------------------- | ---------------------------------------------------- | --- |
+| [x] Social proof counter on legend    | BEHAVIORAL_NUDGES §2.1       | `@/frontend/src/app/map/map.html`                    |
+| [x] Enhanced submission toast         | BEHAVIORAL_NUDGES §2.2       | `@/frontend/src/app/map/map.ts`                      |
+| [x] Post-reg "add first place" prompt | BEHAVIORAL_NUDGES §2.1       | `@/frontend/src/app/auth/register.ts`                |
+| [x] Contribution count on `/mine`     | BEHAVIORAL_NUDGES §2.3       | `@/frontend/src/app/submissions/my-submissions.html` |
+| [x] Cluster markers                   | TREND_RESEARCH §1.2 → PRD P0 | `@/frontend/src/app/map/map.ts`                      | ✅  |
+| [x] User location detection           | TREND_RESEARCH §1.3          | Geolocation API in map component                     |
+| [x] Report/flag button on popup       | TREND_RESEARCH §2.2          | Marker popup template                                |
+| [x] Geographic search                 | TREND_RESEARCH §1.1          | Add search input to map                              |
 
 ---
 

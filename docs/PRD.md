@@ -3,7 +3,7 @@
 **Product:** Colours of Safety  
 **URL:** coloursofsafety.com  
 **Purpose:** Community map for LGBTQIA+ safe places and districts  
-**Last updated:** 2026-06-01 (rev 2)
+**Last updated:** 2026-06-07 (rev 3)
 
 ---
 
@@ -28,6 +28,7 @@
 - Distinguish safety levels at a glance via colour-coding (red → green scale), so I don't need to open every marker
 - Click a marker/area to see its name, category, description, and safety rating, so I get actionable detail
 - Use the app on any device (mobile, tablet, desktop), so I'm not limited to a specific platform
+- See nearby POIs grouped together when zoomed out and separated when zoomed in, so the map remains readable at any scale
 
 **AS A contributor, I want to:**
 
@@ -116,7 +117,7 @@
 
 | Story                        | Acceptance Criteria                                                                                                                                                                                                                                                                              |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Browse map (guest)           | Approved POIs and districts load within 3 s on a standard connection; colour-coded by safety rating                                                                                                                                                                                              |
+| Browse map (guest)           | Approved POIs and districts load within 3 s on a standard connection; colour-coded by safety rating; POIs cluster when zoomed out with count badges                                                                                                                                              |
 | Register                     | Email uniqueness enforced; password min 8 chars; inline error on duplicate email                                                                                                                                                                                                                 |
 | Submit POI                   | Name required (min 2 chars); category required; rating 1–5; submission created with `pending` status; not visible on public map                                                                                                                                                                  |
 | Submit district              | Polygon drawn on map; same form fields as POI minus category                                                                                                                                                                                                                                     |
@@ -126,6 +127,7 @@
 | Pending on map (contributor) | Own `pending` POIs render on map at 40% opacity; own `pending` districts render with hatched/translucent fill; popup labels them "Pending — awaiting review"; not visible to other logged-out users or other contributors                                                                        |
 | Pending on map (public)      | All `pending` submissions visible to logged-in users at 40% opacity; guests see none; popup shows vote tally + upvote/downvote buttons (logged-in only)                                                                                                                                          |
 | Community voting             | Each logged-in user casts ≤1 vote (up or down) per submission; vote count stored on entity; reaching configurable threshold (default: **10 net upvotes**) triggers auto-approval and sets `status = approved`; submission then renders at full opacity; reviewer queue shows vote score per item |
+| POI clustering               | POIs cluster within 50px radius when zoomed out; cluster size (small/medium/large) reflects child count; clicking cluster zooms to bounds; at max zoom clusters spiderfy to show individual markers; cluster icons use brand colour gradient (pink → dark pink)                                  |
 
 ---
 
