@@ -12,7 +12,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import * as L from 'leaflet';
 import 'leaflet-draw';
-import 'leaflet.markercluster';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as _leafletMarkerCluster from 'leaflet.markercluster';
 import { AuthService } from '../core/auth.service';
 import { MarkingsService } from '../core/markings.service';
 import { CreateDistrictPayload, CreatePoiPayload, GeoPolygon, Poi, District } from '../core/models';
@@ -95,7 +96,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   });
 
   private map!: L.Map;
-  private poiClusterLayer!: L.MarkerClusterGroup;
+  private poiClusterLayer!: any;
   private districtLayer!: L.LayerGroup;
   private draftLayer!: L.LayerGroup;
   private blendedPane!: HTMLElement;
@@ -113,20 +114,24 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     this.configureLeafletIcons();
 
-    this.poiClusterLayer = L.markerClusterGroup({
-      maxClusterRadius: 50,
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true,
-      iconCreateFunction: (cluster) => {
-        const count = cluster.getChildCount();
-        return L.divIcon({
-          html: `<div class="cluster-icon"><span>${count}</span></div>`,
-          className: 'marker-cluster',
-          iconSize: L.point(40, 40),
-        });
-      },
-    }).addTo(this.map);
+    // _leafletMarkerCluster import patches L with markerClusterGroup
+    void _leafletMarkerCluster;
+    this.poiClusterLayer = (L as any)
+      .markerClusterGroup({
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        iconCreateFunction: (cluster: any) => {
+          const count = cluster.getChildCount();
+          return L.divIcon({
+            html: `<div class="cluster-icon"><span>${count}</span></div>`,
+            className: 'marker-cluster',
+            iconSize: L.point(40, 40),
+          });
+        },
+      })
+      .addTo(this.map);
     this.districtLayer = L.layerGroup().addTo(this.map);
     this.pendingLayer = L.layerGroup().addTo(this.map);
     this.draftLayer = L.layerGroup().addTo(this.map);
