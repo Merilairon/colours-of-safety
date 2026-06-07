@@ -119,16 +119,34 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.poiClusterLayer = (
       typeof (L as any).markerClusterGroup === 'function'
         ? (L as any).markerClusterGroup({
-            maxClusterRadius: 50,
+            maxClusterRadius: (zoom: number) => {
+              // Dynamic clustering: larger radius when zoomed out
+              if (zoom <= 10) return 80; // Very zoomed out - large clusters
+              if (zoom <= 12) return 60; // Moderately zoomed out
+              if (zoom <= 14) return 40; // City level
+              return 25; // Street level - smaller clusters
+            },
             spiderfyOnMaxZoom: true,
             showCoverageOnHover: false,
             zoomToBoundsOnClick: true,
             iconCreateFunction: (cluster: any) => {
               const count = cluster.getChildCount();
+              let size = 40;
+              let fontSize = 14;
+
+              // Larger cluster icons for bigger clusters
+              if (count > 50) {
+                size = 50;
+                fontSize = 16;
+              } else if (count > 20) {
+                size = 45;
+                fontSize = 15;
+              }
+
               return L.divIcon({
-                html: `<div class="cluster-icon"><span>${count}</span></div>`,
+                html: `<div class="cluster-icon" style="width: ${size}px; height: ${size}px; font-size: ${fontSize}px;"><span>${count}</span></div>`,
                 className: 'marker-cluster',
-                iconSize: L.point(40, 40),
+                iconSize: L.point(size, size),
               });
             },
           })

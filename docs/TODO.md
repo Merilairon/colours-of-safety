@@ -44,7 +44,7 @@
 | [x] Mobile-responsive layout | `@/frontend/src/app/app.scss`, `@/frontend/src/app/map/map.scss` | ✅     |
 | [x] Rate limiting            | `@/backend/src/app.module.ts` — `@nestjs/throttler`              | ✅     |
 | [x] Privacy policy page      | `@/frontend/src/app/privacy/` + route + footer                   | ✅     |
-| [x] POI clustering           | `@/frontend/src/app/map/map.ts` — `leaflet.markercluster`        | ✅     |
+| [ ] POI clustering           | `@/frontend/src/app/map/map.ts` — `leaflet.markercluster`        | ✅     |
 
 ### Accessibility — Critical (WCAG 2.1 Level A violations)
 
