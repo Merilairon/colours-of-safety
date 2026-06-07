@@ -119,19 +119,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.poiClusterLayer = (
       typeof (L as any).markerClusterGroup === 'function'
         ? (L as any).markerClusterGroup({
-            maxClusterRadius: (zoom: number) => {
-              // Screen-relative clustering using device pixel ratio
-              const dpr = window.devicePixelRatio || 1;
-              const baseRadius = 16; // Base radius in CSS pixels (1rem)
-
-              // Calculate relative radius based on zoom and screen density
-              if (zoom <= 6) return baseRadius * 12 * dpr; // Continent level - very aggressive
-              if (zoom <= 8) return baseRadius * 9 * dpr; // Country level - aggressive
-              if (zoom <= 10) return baseRadius * 6 * dpr; // Large region level
-              if (zoom <= 12) return baseRadius * 4 * dpr; // Region level
-              if (zoom <= 14) return baseRadius * 2.5 * dpr; // City level
-              return baseRadius * 1.5 * dpr; // Street level - minimal
-            },
+            maxClusterRadius: 120, // Fixed large radius for aggressive clustering
             spiderfyOnMaxZoom: true,
             showCoverageOnHover: false,
             zoomToBoundsOnClick: true,
