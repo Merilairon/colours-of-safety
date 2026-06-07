@@ -1,6 +1,17 @@
 @import 'leaflet/dist/leaflet.css';
 @import 'leaflet-draw/dist/leaflet.draw.css';
 
+/* Override leaflet-draw image paths */
+.leaflet-draw-toolbar a {
+  background-image: url('/images/spritesheet.png');
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .leaflet-draw-toolbar a {
+    background-image: url('/images/spritesheet-2x.png');
+  }
+}
+
 * {
   box-sizing: border-box;
 }
