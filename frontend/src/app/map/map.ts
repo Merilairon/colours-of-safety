@@ -12,8 +12,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import * as L from 'leaflet';
 import 'leaflet-draw';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import * as _leafletMarkerCluster from 'leaflet.markercluster';
+import 'leaflet.markercluster';
 import { AuthService } from '../core/auth.service';
 import { MarkingsService } from '../core/markings.service';
 import { CreateDistrictPayload, CreatePoiPayload, GeoPolygon, Poi, District } from '../core/models';
@@ -114,8 +113,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     this.configureLeafletIcons();
 
-    // _leafletMarkerCluster import patches L with markerClusterGroup
-    void _leafletMarkerCluster;
     this.poiClusterLayer = (L as any)
       .markerClusterGroup({
         maxClusterRadius: 50,
