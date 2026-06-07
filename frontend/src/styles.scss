@@ -2,13 +2,22 @@
 @import 'leaflet-draw/dist/leaflet.draw.css';
 
 /* Override leaflet-draw image paths */
-.leaflet-draw-toolbar a {
-  background-image: url('/images/spritesheet.png');
+.leaflet-draw-toolbar a,
+.leaflet-draw-toolbar .leaflet-draw-draw,
+.leaflet-draw-toolbar .leaflet-draw-edit {
+  background-image: url('/images/spritesheet.png') !important;
+}
+
+.leaflet-draw-toolbar {
+  display: flex !important;
+  visibility: visible !important;
 }
 
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .leaflet-draw-toolbar a {
-    background-image: url('/images/spritesheet-2x.png');
+  .leaflet-draw-toolbar a,
+  .leaflet-draw-toolbar .leaflet-draw-draw,
+  .leaflet-draw-toolbar .leaflet-draw-edit {
+    background-image: url('/images/spritesheet-2x.png') !important;
   }
 }
 
