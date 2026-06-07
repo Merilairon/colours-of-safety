@@ -8,5 +8,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
     include: ['src/**/*.spec.ts'],
+    alias: {
+      'leaflet-draw': '/dev/null',
+      'leaflet.markercluster': '/dev/null',
+    },
   },
 });
