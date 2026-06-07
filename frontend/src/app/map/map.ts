@@ -117,22 +117,24 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     this.configureLeafletIcons();
 
-    this.poiClusterLayer = (L as any)
-      .markerClusterGroup({
-        maxClusterRadius: 50,
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
-        iconCreateFunction: (cluster: any) => {
-          const count = cluster.getChildCount();
-          return L.divIcon({
-            html: `<div class="cluster-icon"><span>${count}</span></div>`,
-            className: 'marker-cluster',
-            iconSize: L.point(40, 40),
-          });
-        },
-      })
-      .addTo(this.map);
+    this.poiClusterLayer = (
+      typeof (L as any).markerClusterGroup === 'function'
+        ? (L as any).markerClusterGroup({
+            maxClusterRadius: 50,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            iconCreateFunction: (cluster: any) => {
+              const count = cluster.getChildCount();
+              return L.divIcon({
+                html: `<div class="cluster-icon"><span>${count}</span></div>`,
+                className: 'marker-cluster',
+                iconSize: L.point(40, 40),
+              });
+            },
+          })
+        : L.layerGroup()
+    ).addTo(this.map);
     this.districtLayer = L.layerGroup().addTo(this.map);
     this.pendingLayer = L.layerGroup().addTo(this.map);
     this.draftLayer = L.layerGroup().addTo(this.map);
