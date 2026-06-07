@@ -119,7 +119,10 @@ export class ReviewComponent implements OnInit {
         : this.markings.reviewDistrict(item.id, payload);
 
     obs.subscribe({
-      next: () => this.items.update((list) => list.filter((it) => it.id !== item.id)),
+      next: () => {
+        this.items.update((list) => list.filter((it) => it.id !== item.id));
+        this.applyFilter(); // Refresh filtered items
+      },
       error: () => {
         this.setBusy(item, false);
         this.error.set('Could not save your decision. Please try again.');
@@ -194,6 +197,7 @@ export class ReviewComponent implements OnInit {
     Promise.all(promises).then(() => {
       this.bulkBusy.set(false);
       this.clearSelection();
+      this.applyFilter(); // Refresh filtered items
       if (this.items().length === 0) {
         this.error.set(null);
       }

@@ -57,15 +57,27 @@
                   ✎
                 </button>
               }
-              <button
-                type="button"
-                class="icon-btn danger"
-                aria-label="Delete submission"
-                (click)="startDelete(row.id)"
-                title="Delete"
-              >
-                ✕
-              </button>
+              @if (row.status !== 'approved') {
+                <button
+                  type="button"
+                  class="icon-btn danger"
+                  aria-label="Delete submission"
+                  (click)="startDelete(row.id)"
+                  title="Delete"
+                >
+                  ✕
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="icon-btn disabled"
+                  aria-label="Cannot delete approved submission"
+                  title="Approved submissions cannot be deleted"
+                  disabled
+                >
+                  ✕
+                </button>
+              }
             </div>
           </div>
         </li>
