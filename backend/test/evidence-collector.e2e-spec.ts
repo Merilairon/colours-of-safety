@@ -358,25 +358,25 @@ describe('Evidence Collector — Backend E2E', () => {
      ═══════════════════════════════════════════════ */
 
   describe('GET /api/pois/pending', () => {
-    it('rejects guest access', async () => {
+    it('allows public access (pending POIs visible on map)', async () => {
       const res = await request(app.getHttpServer()).get('/api/pois/pending');
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(200);
     });
 
-    it('rejects regular contributor access', async () => {
+    it('allows contributor access', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/pois/pending')
         .set('Authorization', `Bearer ${contributorToken}`);
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(200);
     });
   });
 
   describe('GET /api/districts/pending', () => {
-    it('rejects guest access', async () => {
+    it('allows public access (pending districts visible on map)', async () => {
       const res = await request(app.getHttpServer()).get(
         '/api/districts/pending',
       );
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(200);
     });
   });
 

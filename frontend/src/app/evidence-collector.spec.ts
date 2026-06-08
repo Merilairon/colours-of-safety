@@ -613,7 +613,7 @@ describe('AC-6 Admin User Management', () => {
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
-    const selects = qsa<HTMLSelectElement>(fixture, 'select[aria-label]');
+    const selects = qsa<HTMLSelectElement>(fixture, 'select[aria-label^="Change role for"]');
     expect(selects.length).toBe(3);
     expect(selects[0].getAttribute('aria-label')).toBe('Change role for Alice');
   });

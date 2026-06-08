@@ -1,8 +1,9 @@
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 import { ReviewStatus } from '../common/review-status.enum';
+import { UserRole } from '../users/user.entity';
 import { District } from './district.entity';
 import { DistrictsService } from './districts.service';
 
@@ -291,23 +292,24 @@ describe('DistrictsService', () => {
     it('throws when district not found', async () => {
       repo.findOne.mockResolvedValueOnce(null);
 
-      await expect(service.delete('missing', 'user-1')).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
-    });
-
-    it('throws when user is not owner', async () => {
-      repo.findOne.mockResolvedValueOnce({
-        id: 'district-1',
-        createdById: 'user-2',
-      } as District);
-
       await expect(
-        service.delete('district-1', 'user-1'),
+        service.delete('missing', 'user-1', UserRole.USER),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('throws when district is not pending', async () => {
+    it('throws when user is not owner and not elevated', async () => {
+      repo.findOne.mockResolvedValueOnce({
+        id: 'district-1',
+        createdById: 'user-2',
+        status: ReviewStatus.PENDING,
+      } as District);
+
+      await expect(
+        service.delete('district-1', 'user-1', UserRole.USER),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('throws when owner but district is not pending', async () => {
       repo.findOne.mockResolvedValueOnce({
         id: 'district-1',
         createdById: 'user-1',
@@ -315,8 +317,8 @@ describe('DistrictsService', () => {
       } as District);
 
       await expect(
-        service.delete('district-1', 'user-1'),
-      ).rejects.toBeInstanceOf(NotFoundException);
+        service.delete('district-1', 'user-1', UserRole.USER),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
     it('deletes district when owner and pending', async () => {
@@ -326,9 +328,25 @@ describe('DistrictsService', () => {
         status: ReviewStatus.PENDING,
       } as District);
 
-      await service.delete('district-1', 'user-1');
+      await service.delete('district-1', 'user-1', UserRole.USER);
 
       expect(repo.delete).toHaveBeenCalledWith('district-1');
+    });
+
+    it('soft-deletes (rejects) when caller is reviewer', async () => {
+      repo.findOne.mockResolvedValueOnce({
+        id: 'district-1',
+        createdById: 'user-2',
+        status: ReviewStatus.APPROVED,
+      } as District);
+
+      await service.delete('district-1', 'reviewer-1', UserRole.REVIEWER);
+
+      expect(repo.update).toHaveBeenCalledWith('district-1', {
+        status: ReviewStatus.REJECTED,
+        reviewNote: 'Removed by moderator',
+        reviewedById: 'reviewer-1',
+      });
     });
   });
 });
