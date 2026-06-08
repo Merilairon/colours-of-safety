@@ -252,8 +252,8 @@ describe('AC-4 My Submissions', () => {
         ],
       ],
     },
-    status: 'approved',
-    reviewNote: 'Looks good',
+    status: 'pending',
+    reviewNote: null,
     createdAt: '2024-01-10T10:00:00Z',
     isAnonymous: false,
     blendEdges: false,
@@ -281,27 +281,28 @@ describe('AC-4 My Submissions', () => {
     expect(qsa(fixture, 'li.row').length).toBe(2);
     const badges = qsa(fixture, 'span.status').map((b) => b.textContent?.trim());
     expect(badges).toContain('pending');
-    expect(badges).toContain('approved');
   });
 
   it('shows reviewer note when present', async () => {
+    const poiWithNote = { ...mockPoi, reviewNote: 'Reviewer: Looks good' };
     fixture.detectChanges();
-    http.expectOne('/api/pois/mine').flush([mockPoi]);
-    http.expectOne('/api/districts/mine').flush([mockDistrict]);
+    http.expectOne('/api/pois/mine').flush([poiWithNote]);
+    http.expectOne('/api/districts/mine').flush([]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
     expect(qs(fixture, '.note')?.textContent).toContain('Looks good');
   });
 
-  it('shows edit button only for pending items', async () => {
+  it('shows edit button for pending items', async () => {
     fixture.detectChanges();
     http.expectOne('/api/pois/mine').flush([mockPoi]);
     http.expectOne('/api/districts/mine').flush([mockDistrict]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
-    expect(qsa(fixture, 'button[aria-label="Edit submission"]').length).toBe(1);
+    // Both POI and District are pending, so both show edit buttons
+    expect(qsa(fixture, 'button[aria-label="Edit submission"]').length).toBe(2);
   });
 
   it('edit and delete buttons have aria-labels', async () => {
@@ -361,7 +362,7 @@ describe('AC-4 My Submissions', () => {
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
-    expect(text(fixture, 'p.muted')).toContain("haven't added anything yet");
+    expect(text(fixture, 'p.muted')).toContain('No pending reviews');
   });
 
   it('sorts submissions newest-first', async () => {

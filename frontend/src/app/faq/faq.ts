@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { SeoService } from '../core/seo.service';
 
@@ -10,7 +9,6 @@ interface FaqItem {
 @Component({
   selector: 'app-faq',
   standalone: true,
-  imports: [JsonPipe],
   templateUrl: './faq.html',
   styleUrl: './faq.scss',
 })
@@ -57,19 +55,6 @@ export class FaqComponent {
         'Experienced community members can be promoted to reviewer status by administrators. Reviewers help moderate submissions to ensure quality and accuracy. Contact an admin through the platform if you are interested in contributing as a reviewer.',
     },
   ];
-
-  protected readonly structuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: this.faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  };
 
   constructor(private readonly seo: SeoService) {
     this.seo.updateSeo({
