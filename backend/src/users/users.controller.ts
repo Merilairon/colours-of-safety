@@ -17,10 +17,12 @@ import { UserRole } from './user.entity';
 import { UsersService } from './users.service';
 import { AssignRoleDto } from './dto/assign-role.dto';
 
-const ASSIGNABLE_BY_ADMIN: UserRole[] = [UserRole.REVIEWER];
+const ASSIGNABLE_BY_ADMIN: UserRole[] = [UserRole.USER, UserRole.REVIEWER];
 const ASSIGNABLE_BY_SUPER_ADMIN: UserRole[] = [
+  UserRole.USER,
   UserRole.REVIEWER,
   UserRole.ADMIN,
+  UserRole.SUPER_ADMIN,
 ];
 
 @Controller('users')
@@ -41,6 +43,10 @@ export class UsersController {
     @Body() dto: AssignRoleDto,
     @CurrentUser() actor: AuthUser,
   ) {
+    if (actor.id === id) {
+      throw new BadRequestException('Cannot change your own role');
+    }
+
     const target = await this.users.findById(id);
     if (!target) {
       throw new NotFoundException('User not found');

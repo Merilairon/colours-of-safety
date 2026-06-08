@@ -45,7 +45,9 @@
 
     @if (isLoggedIn()) {
       <span class="who">{{ user()?.displayName }}</span>
-      @if (isAdmin()) {
+      @if (isSuperAdmin()) {
+        <span class="badge super-admin">super admin</span>
+      } @else if (isAdmin()) {
         <span class="badge admin">admin</span>
       } @else if (isReviewer()) {
         <span class="badge">reviewer</span>

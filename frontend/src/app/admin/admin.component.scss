@@ -1,5 +1,83 @@
 @use '../app.scss' as *;
 
+.stats-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  .stat {
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 12px 20px;
+    text-align: center;
+    min-width: 80px;
+
+    .stat-value {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1d1f2b;
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 0.75rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+}
+
+.error-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .error {
+    margin: 0;
+  }
+}
+
+.retry-btn {
+  padding: 6px 16px;
+  border: 1px solid #c62828;
+  border-radius: 4px;
+  background: #fff;
+  color: #c62828;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: #ffebee;
+  }
+}
+
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  .search-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    min-width: 0;
+  }
+
+  .role-select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+}
+
 .user-list {
   list-style: none;
   padding: 0;
@@ -19,11 +97,18 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
+    gap: 8px;
 
     h2 {
       margin: 0;
       font-size: 1.1rem;
     }
+  }
+
+  .card-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .meta {
@@ -33,12 +118,29 @@
   }
 }
 
+.you-label {
+  color: #888;
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+.chip.unverified {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #fff3e0;
+  color: #e65100;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .role-badge {
   font-size: 0.75rem;
   text-transform: uppercase;
   padding: 4px 8px;
   border-radius: 4px;
   font-weight: 600;
+  white-space: nowrap;
 
   &.user {
     background: #e0e0e0;
@@ -74,6 +176,7 @@
 
     &:disabled {
       opacity: 0.6;
+      cursor: not-allowed;
     }
   }
 }
@@ -81,4 +184,20 @@
 .spinner {
   color: #666;
   font-size: 0.85rem;
+}
+
+.saved-feedback {
+  color: #2e7d32;
+  font-size: 0.85rem;
+  font-weight: 600;
+  animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

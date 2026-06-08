@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ReviewDto } from '../common/review.dto';
 import { ReviewStatus } from '../common/review-status.enum';
+import { UserRole } from '../users/user.entity';
 import { District } from './district.entity';
 import { CreateDistrictDto } from './dto/create-district.dto';
 
@@ -93,17 +98,37 @@ export class DistrictsService {
     return this.districts.findOneOrFail({ where: { id } });
   }
 
-  async delete(id: string, userId: string): Promise<void> {
+  private static readonly ELEVATED_ROLES: UserRole[] = [
+    UserRole.REVIEWER,
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+  ];
+
+  async delete(id: string, userId: string, userRole: UserRole): Promise<void> {
     const district = await this.districts.findOne({ where: { id } });
     if (!district) {
       throw new NotFoundException('District not found');
     }
-    if (district.createdById !== userId) {
-      throw new NotFoundException('District not found');
+
+    const isOwner = district.createdById === userId;
+    const isElevated = DistrictsService.ELEVATED_ROLES.includes(userRole);
+
+    if (isOwner && district.status === ReviewStatus.PENDING) {
+      await this.districts.delete(id);
+      return;
     }
-    if (district.status !== ReviewStatus.PENDING) {
-      throw new NotFoundException('Only pending submissions can be deleted');
+
+    if (isElevated) {
+      await this.districts.update(id, {
+        status: ReviewStatus.REJECTED,
+        reviewNote: 'Removed by moderator',
+        reviewedById: userId,
+      });
+      return;
     }
-    await this.districts.delete(id);
+
+    throw new ForbiddenException(
+      'Only pending submissions can be deleted by their owner',
+    );
   }
 }

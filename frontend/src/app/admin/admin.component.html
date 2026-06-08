@@ -2,21 +2,75 @@
   <h1>Admin panel</h1>
   <p class="sub">Manage user roles. Only admins and super admins can access this page.</p>
 
+  @if (!loading() && items().length > 0) {
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-value">{{ roleCounts().total }}</span>
+        <span class="stat-label">Total</span>
+      </div>
+      @for (role of allRoles; track role) {
+        <div class="stat">
+          <span class="stat-value">{{ roleCounts()[role] }}</span>
+          <span class="stat-label">{{ roleLabels[role] }}s</span>
+        </div>
+      }
+    </div>
+  }
+
   @if (error()) {
-    <p class="error">{{ error() }}</p>
+    <div class="error-bar">
+      <p class="error">{{ error() }}</p>
+      <button type="button" class="retry-btn" (click)="load()">Retry</button>
+    </div>
+  }
+
+  @if (!loading() && items().length > 0) {
+    <div class="filter-bar">
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Search by name or email…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        aria-label="Search users"
+      />
+      <select
+        class="role-select"
+        [ngModel]="roleFilter()"
+        (ngModelChange)="roleFilter.set($event)"
+        aria-label="Filter by role"
+      >
+        <option value="">All roles</option>
+        @for (role of allRoles; track role) {
+          <option [value]="role">{{ roleLabels[role] }}</option>
+        }
+      </select>
+    </div>
   }
 
   @if (loading()) {
     <p class="muted">Loading…</p>
   } @else if (items().length === 0) {
     <p class="muted">No users found.</p>
+  } @else if (filteredItems().length === 0) {
+    <p class="muted">No users match your search.</p>
   } @else {
     <ul class="user-list">
-      @for (user of items(); track user.id) {
+      @for (user of filteredItems(); track user.id) {
         <li class="card">
           <div class="card-head">
-            <h2>{{ user.displayName }}</h2>
-            <span class="role-badge" [class]="user.role">{{ user.role }}</span>
+            <h2>
+              {{ user.displayName }}
+              @if (isCurrentUser(user)) {
+                <span class="you-label">(you)</span>
+              }
+            </h2>
+            <div class="card-badges">
+              @if (!user.emailVerified) {
+                <span class="chip unverified">⚠ Unverified</span>
+              }
+              <span class="role-badge" [class]="user.role">{{ roleLabels[user.role] }}</span>
+            </div>
           </div>
 
           <p class="meta">{{ user.email }}</p>
@@ -24,16 +78,20 @@
           <div class="actions">
             <select
               [value]="user.role"
-              [disabled]="user.busy"
+              [disabled]="user.busy || isCurrentUser(user)"
               [attr.aria-label]="'Change role for ' + user.displayName"
+              [title]="isCurrentUser(user) ? 'You cannot change your own role' : ''"
               (change)="setRole(user, $any($event.target).value)"
             >
-              @for (role of roles; track role) {
-                <option [value]="role">{{ role }}</option>
+              @for (role of availableRoles(); track role) {
+                <option [value]="role">{{ roleLabels[role] }}</option>
               }
             </select>
             @if (user.busy) {
               <span class="spinner">Saving…</span>
+            }
+            @if (user.saved) {
+              <span class="saved-feedback">Saved ✓</span>
             }
           </div>
         </li>

@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ReviewDto } from '../common/review.dto';
 import { ReviewStatus } from '../common/review-status.enum';
+import { UserRole } from '../users/user.entity';
 import { CreatePoiDto } from './dto/create-poi.dto';
 import { Poi } from './poi.entity';
 
@@ -85,14 +90,37 @@ export class PoisService {
     return this.pois.findOneOrFail({ where: { id } });
   }
 
-  async delete(id: string, userId: string): Promise<void> {
+  private static readonly ELEVATED_ROLES: UserRole[] = [
+    UserRole.REVIEWER,
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+  ];
+
+  async delete(id: string, userId: string, userRole: UserRole): Promise<void> {
     const poi = await this.pois.findOne({ where: { id } });
     if (!poi) {
       throw new NotFoundException('POI not found');
     }
-    if (poi.createdById !== userId) {
-      throw new NotFoundException('POI not found');
+
+    const isOwner = poi.createdById === userId;
+    const isElevated = PoisService.ELEVATED_ROLES.includes(userRole);
+
+    if (isOwner && poi.status === ReviewStatus.PENDING) {
+      await this.pois.delete(id);
+      return;
     }
-    await this.pois.delete(id);
+
+    if (isElevated) {
+      await this.pois.update(id, {
+        status: ReviewStatus.REJECTED,
+        reviewNote: 'Removed by moderator',
+        reviewedById: userId,
+      });
+      return;
+    }
+
+    throw new ForbiddenException(
+      'Only pending submissions can be deleted by their owner',
+    );
   }
 }

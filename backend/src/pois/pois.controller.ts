@@ -81,6 +81,6 @@ export class PoisController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.pois.delete(id, user.id);
+    return this.pois.delete(id, user.id, user.role);
   }
 }

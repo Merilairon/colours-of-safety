@@ -19,6 +19,7 @@ export class App {
   protected readonly isLoggedIn = this.auth.isLoggedIn;
   protected readonly isReviewer = this.auth.isReviewer;
   protected readonly isAdmin = this.auth.isAdmin;
+  protected readonly isSuperAdmin = this.auth.isSuperAdmin;
   protected readonly navOpen = signal(false);
   protected readonly isHighContrast = this.theme.isHighContrast;
 

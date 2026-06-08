@@ -77,6 +77,6 @@ export class DistrictsController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.districts.delete(id, user.id);
+    return this.districts.delete(id, user.id, user.role);
   }
 }

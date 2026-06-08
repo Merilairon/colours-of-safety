@@ -16,6 +16,7 @@ export class AuthService {
     ['reviewer', 'admin', 'super_admin'].includes(this._user()?.role ?? ''),
   );
   readonly isAdmin = computed(() => ['admin', 'super_admin'].includes(this._user()?.role ?? ''));
+  readonly isSuperAdmin = computed(() => this._user()?.role === 'super_admin');
 
   constructor(private readonly http: HttpClient) {}
 
