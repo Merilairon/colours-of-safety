@@ -77,6 +77,16 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'faq',
+    loadComponent: () => import('./faq/faq').then((m) => m.FaqComponent),
+    resolve: { seo: seoResolver },
+    data: {
+      title: 'FAQ | Colours of Safety',
+      description: 'Frequently asked questions about finding and submitting LGBTQIA+ safe spaces.',
+      keywords: 'FAQ, LGBTQ safe spaces help, community moderation, safety ratings explained',
+    },
+  },
+  {
     path: 'place/:id',
     loadComponent: () => import('./place/place').then((m) => m.PlaceComponent),
     resolve: { seo: seoResolver },

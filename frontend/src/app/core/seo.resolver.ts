@@ -17,7 +17,7 @@ export const seoResolver: ResolveFn<void> = (route: ActivatedRouteSnapshot) => {
       title: seoData.title,
       description: seoData.description,
       robots: seoData.robots || 'index,follow',
-      canonicalUrl: `https://colours-of-safety.org${route.url.join('/')}`,
+      canonicalUrl: `https://coloursofsafety.com${route.url.join('/')}`,
     });
   }
 };

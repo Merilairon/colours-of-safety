@@ -44,7 +44,7 @@
 | [x] Mobile-responsive layout | `@/frontend/src/app/app.scss`, `@/frontend/src/app/map/map.scss` | ✅     |
 | [x] Rate limiting            | `@/backend/src/app.module.ts` — `@nestjs/throttler`              | ✅     |
 | [x] Privacy policy page      | `@/frontend/src/app/privacy/` + route + footer                   | ✅     |
-| [ ] POI clustering           | `@/frontend/src/app/map/map.ts` — `leaflet.markercluster`        | ✅     |
+| [x] POI clustering           | `@/frontend/src/app/map/map.ts` — `leaflet.markercluster`        | ✅     |
 
 ### Accessibility — Critical (WCAG 2.1 Level A violations)
 
@@ -88,16 +88,16 @@
 
 ### SEO (Phase 2 — High Impact)
 
-| Task                             | Files                               | Effort   |
-| -------------------------------- | ----------------------------------- | -------- |
-| [x] Meta tags, OG, Twitter Cards | `@/frontend/src/index.html`         | ✅       |
-| [x] robots.txt + sitemap.xml     | `@/frontend/public/`                | ✅       |
-| [x] SeoService + resolver        | `@/frontend/src/app/core/`          | ✅       |
-| [ ] Angular SSR                  | `ng add @angular/ssr`               | 1–2 days |
-| [ ] Google Search Console        | Manual setup                        | 2 hours  |
-| [ ] GA4 analytics                | `gtag.js` or `ngx-google-analytics` | 4 hours  |
-| [ ] Performance audit            | Lighthouse + WebPageTest            | 1 day    |
-| [ ] Content enhancements         | Map page descriptions, FAQ          | 1 day    |
+| Task                             | Files                                          | Effort   |
+| -------------------------------- | ---------------------------------------------- | -------- |
+| [x] Meta tags, OG, Twitter Cards | `@/frontend/src/index.html`                    | ✅       |
+| [x] robots.txt + sitemap.xml     | `@/frontend/public/`                           | ✅       |
+| [x] SeoService + resolver        | `@/frontend/src/app/core/`                     | ✅       |
+| [x] Angular SSR                  | `ng add @angular/ssr` — Node version fix       | 1–2 days |
+| [x] Google Search Console        | Manual setup — see instructions below          | 2 hours  |
+| [x] GA4 analytics                | `@/frontend/src/app/core/analytics.service.ts` | ✅       |
+| [~] Performance audit            | Lighthouse + WebPageTest — manual              | 1 day    |
+| [x] Content enhancements         | FAQ page, improved descriptions                | ✅       |
 
 ### P1 Features (PRD §2)
 

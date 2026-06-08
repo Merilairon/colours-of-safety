@@ -1,0 +1,23 @@
+<div class="page">
+  <h1>Frequently Asked Questions</h1>
+  <p class="sub">Everything you need to know about Colours of Safety</p>
+
+  <div class="faq-list">
+    @for (faq of faqs; track faq.question) {
+      <details class="faq-item">
+        <summary class="faq-question">{{ faq.question }}</summary>
+        <p class="faq-answer">{{ faq.answer }}</p>
+      </details>
+    }
+  </div>
+
+  <div class="cta">
+    <p>Still have questions?</p>
+    <a routerLink="/" class="btn">Explore the Map</a>
+  </div>
+</div>
+
+<!-- JSON-LD Structured Data for FAQ -->
+<script type="application/ld+json">
+  {{ structuredData | json }}
+</script>
