@@ -17,6 +17,42 @@ h1 {
   color: #6b6f80;
 }
 
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.75rem;
+  color: #3a3d4d;
+}
+
+.stats-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 140px;
+  background: linear-gradient(135deg, #e84393 0%, #d6307a 100%);
+  color: #fff;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  text-align: center;
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    margin-top: 0.25rem;
+  }
+}
+
 .muted {
   color: #6b6f80;
 

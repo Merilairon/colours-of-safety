@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -45,6 +45,19 @@ export class MySubmissionsComponent implements OnInit {
   protected readonly success = signal<string | null>(null);
   protected readonly safetyLabel = safetyLabel;
   protected readonly colorFor = safetyColor;
+
+  // Approved contribution counters
+  protected readonly approvedPoisCount = computed(
+    () => this.rows().filter((r) => r.kind === 'poi' && r.status === 'approved').length,
+  );
+  protected readonly approvedDistrictsCount = computed(
+    () => this.rows().filter((r) => r.kind === 'district' && r.status === 'approved').length,
+  );
+
+  // Filtered view: only pending submissions
+  protected readonly pendingRows = computed(() =>
+    this.rows().filter((r) => r.status === 'pending'),
+  );
 
   protected readonly editingRow = signal<SubmissionRow | null>(null);
   protected readonly deletingId = signal<string | null>(null);

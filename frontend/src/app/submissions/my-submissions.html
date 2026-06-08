@@ -1,13 +1,18 @@
 <div class="page">
   <h1>My submissions</h1>
-  @if (rows().length > 0) {
-    <p class="sub">
-      You've contributed <strong>{{ rows().length }}</strong> safe space{{
-        rows().length === 1 ? '' : 's'
-      }}! Thanks for helping the community.
-    </p>
-  } @else {
-    <p class="sub">Track the review status of places and districts you've contributed.</p>
+
+  <!-- Contribution Counters -->
+  @if (!loading() && rows().length > 0) {
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">{{ approvedPoisCount() }}</div>
+        <div class="stat-label">Approved Places</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ approvedDistrictsCount() }}</div>
+        <div class="stat-label">Approved Districts</div>
+      </div>
+    </div>
   }
 
   @if (error()) {
@@ -18,15 +23,17 @@
     <p class="success">{{ success() }}</p>
   }
 
+  <!-- Pending Reviews Section -->
+  <h2 class="section-title">Pending Reviews</h2>
   @if (loading()) {
     <p class="muted">Loading…</p>
-  } @else if (rows().length === 0) {
+  } @else if (pendingRows().length === 0) {
     <p class="muted">
-      You haven't added anything yet. Head to the <a routerLink="/">map</a> to mark a safe place.
+      No pending reviews. Head to the <a routerLink="/">map</a> to contribute a safe place.
     </p>
   } @else {
     <ul class="list">
-      @for (row of rows(); track row.id) {
+      @for (row of pendingRows(); track row.id) {
         <li class="row">
           <span class="kind">{{ row.kind === 'poi' ? 'Place' : 'District' }}</span>
           <div class="main">
