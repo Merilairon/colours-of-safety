@@ -10,6 +10,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -38,16 +39,15 @@ export class PoisController {
     return this.pois.findMine(user.id);
   }
 
-  /** Reviewer queue: POIs awaiting moderation. */
+  /** Public: all pending POIs visible to everyone while in review. */
   @Get('pending')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.REVIEWER)
   findPending() {
     return this.pois.findByStatus(ReviewStatus.PENDING);
   }
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   create(@Body() dto: CreatePoiDto, @CurrentUser() user: AuthUser) {
     return this.pois.create(dto, user.id);
   }
@@ -65,6 +65,7 @@ export class PoisController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreatePoiDto,
@@ -75,6 +76,7 @@ export class PoisController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   remove(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: AuthUser,

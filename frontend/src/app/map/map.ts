@@ -547,9 +547,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       error: () => this.loadError.set('Could not load districts.'),
     });
 
-    if (this.isLoggedIn()) {
-      this.loadPendingData();
-    }
+    this.loadPendingData();
   }
 
   private loadPendingData(): void {

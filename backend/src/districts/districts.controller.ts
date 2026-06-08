@@ -38,10 +38,8 @@ export class DistrictsController {
     return this.districts.findMine(user.id);
   }
 
-  /** Reviewer queue: districts awaiting moderation. */
+  /** Public: all pending districts visible to everyone while in review. */
   @Get('pending')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.REVIEWER)
   findPending() {
     return this.districts.findByStatus(ReviewStatus.PENDING);
   }
