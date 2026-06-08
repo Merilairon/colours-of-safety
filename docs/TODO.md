@@ -1,7 +1,7 @@
 # Colours of Safety — Project TODOs
 
-> Sources: PRD (rev 3), ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT, UI-DESIGN (rev 2)  
-> Last updated: 2026-06-07
+> Sources: PRD (rev 3), ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT, UI-DESIGN (rev 3)  
+> Last updated: 2026-06-08
 
 ---
 
@@ -107,9 +107,23 @@
 | [x] Filter map by category/rating                                                                                                                                         | `@/frontend/src/app/map/map.ts`                                                                                             | 1–2 days |
 | [x] Filter review queue                                                                                                                                                   | `@/frontend/src/app/review/review.ts`                                                                                       | 1 day    |
 | [x] Admin user management                                                                                                                                                 | `@/frontend/src/app/admin/`                                                                                                 | ✅       |
+| [ ] Admin panel — stats bar (per-role user counts below subtitle)                                                                                                         | `@/frontend/src/app/admin/admin.component.html`, `admin.component.ts`                                                       | 0.5 day  |
+| [ ] Admin panel — search + role filter bar (client-side, real-time)                                                                                                       | `@/frontend/src/app/admin/admin.component.html`, `admin.component.ts`                                                       | 0.5 day  |
+| [ ] Admin panel — `(you)` label on current user's card; disable own role `<select>` + tooltip (self-demotion prevention)                                                  | `@/frontend/src/app/admin/admin.component.html`, `admin.component.ts`                                                       | 2 hours  |
+| [ ] Admin panel — `⚠ Unverified` amber chip on cards where `emailVerified === false`                                                                                      | `@/frontend/src/app/admin/admin.component.html`, `admin.component.scss`                                                     | 1 hour   |
+| [ ] Admin panel — human-readable option labels in role `<select>` ("Super Admin" not `super_admin`)                                                                       | `@/frontend/src/app/admin/admin.component.html`                                                                             | 1 hour   |
+| [ ] Admin panel — `Saved ✓` inline success feedback after role change (auto-hides after 2 s)                                                                              | `@/frontend/src/app/admin/admin.component.ts`, `admin.component.scss`                                                       | 1 hour   |
+| [ ] Admin panel — hide `super_admin` option for non-super admins (privilege escalation guard)                                                                             | `@/frontend/src/app/admin/admin.component.html`, `admin.component.ts`                                                       | 2 hours  |
+| [ ] Admin panel — "Retry" button on load error state                                                                                                                      | `@/frontend/src/app/admin/admin.component.html`, `admin.component.ts`                                                       | 1 hour   |
+| [ ] Admin panel — "No users match your search." empty state for filter (client-side)                                                                                      | `@/frontend/src/app/admin/admin.component.html`                                                                             | 30 min   |
+| [ ] Topbar — show `admin` / `super_admin` role badge (currently only `reviewer` badge shown)                                                                              | `@/frontend/src/app/app.html`, `@/frontend/src/app/app.scss`                                                                | 1 hour   |
+| [ ] `adminGuard` route protection for `/admin` (requires `role === 'admin' or 'super_admin'`)                                                                             | `@/frontend/src/app/app.routes.ts`, `@/frontend/src/app/core/`                                                              | 1 hour   |
 | [x] Pronouns `<select>` on register form — options: they/them, she/her, he/him, ze/zir, prefer not to say, custom                                                         | `@/frontend/src/app/auth/register.html`, `@/backend/src/users/user.entity.ts`                                               | 0.5 day  |
 | [x] Admin-only reviewer assignment                                                                                                                                        | `@/frontend/src/app/admin/`, `@/backend/src/auth/`                                                                          | ✅       |
-| [x] Deletion policy — allow remove after approved/rejected                                                                                                                | `@/frontend/src/app/submissions/`, `@/backend/src/pois/`, `@/backend/src/districts/`                                        | ✅       |
+| [ ] Deletion policy — submitter can delete own submission only while `pending`; block delete after approval on frontend                                                   | `@/frontend/src/app/submissions/my-submissions.html`, `my-submissions.ts`                                                   | 2 hours  |
+| [ ] Deletion policy — reviewer/admin/super admin delete endpoint sets status to `rejected` (not hard-delete) so submitter can see feedback and edit + resubmit            | `@/backend/src/pois/pois.controller.ts`, `@/backend/src/districts/districts.controller.ts`                                  | 0.5 day  |
+| [ ] Deletion policy — backend guard: reject DELETE requests from non-owners on `pending` items, and from non-reviewers/admins on `approved` items                         | `@/backend/src/pois/`, `@/backend/src/districts/`, `@/backend/src/auth/`                                                    | 0.5 day  |
+| [ ] Super admin privilege guard — backend: block role assignment to `admin`/`super_admin` for callers with `role !== 'super_admin'`                                       | `@/backend/src/auth/`, `@/backend/src/users/`                                                                               | 2 hours  |
 | [x] Spam prevention — review rate limiting with Software Architect                                                                                                        | `@/backend/src/app.module.ts` — `@nestjs/throttler`                                                                         | ✅       |
 | [x] Auto-locate map default (with Brussels fallback)                                                                                                                      | `@/frontend/src/app/map/map.ts`                                                                                             | ✅       |
 | [x] All pending POIs render on map at 40% opacity; districts with translucent/hatched fill; popup labels "Pending — awaiting review"; visible to everyone while in review | `@/frontend/src/app/map/map.ts`, `@/backend/src/pois/pois.controller.ts`, `@/backend/src/districts/districts.controller.ts` | ✅       |
@@ -159,6 +173,13 @@
 - [ ] Edit suggestions for approved POIs
 - [x] `/place/:id` individual pages
 - [x] Dynamic sitemap generation
+
+### Legal & Licensing
+
+| Task                                                                             | Files                                                        | Effort  |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------ | ------- |
+| [ ] Add open-source data licence notice (e.g. ODbL) to privacy policy and footer | `@/frontend/src/app/privacy/`, `@/frontend/src/app/app.html` | 2 hours |
+| [ ] Add donations CTA / link in footer or about page                             | `@/frontend/src/app/app.html`                                | 1 hour  |
 
 ### Community Voting System (PRD P2 — promoted from P3)
 
@@ -235,15 +256,20 @@
 
 ## Open Questions
 
+### ✅ Resolved (P0)
+
+| Question                       | Context      | Decision                                                                                                                                                                                                                    |
+| ------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Self-registration to reviewer? | PRD §5       | **No.** Admin or super admin must assign; no self-registration. → Tasked in P1.                                                                                                                                             |
+| Super admin privilege scope?   | UI-DESIGN §6 | **Same as admin + escalation.** Super admin can assign/change `admin` and `super_admin` roles; regular admins cannot. → Tasked in P1.                                                                                       |
+| Deletion policy?               | PRD §5       | **Role-gated + soft-delete.** Submitter deletes only while `pending`; post-approval deletion by reviewer/admin/super admin only; sets status `rejected` so submitter sees feedback and can edit + resubmit. → Tasked in P1. |
+| Spam prevention?               | PRD §5       | **Rate-limiting implemented.** 100 req/min via `@nestjs/throttler`. ✅                                                                                                                                                      |
+| Geographic scope?              | PRD §5       | **Auto-locate implemented.** Map defaults to user geolocation; fallback Brussels. ✅                                                                                                                                        |
+| Data licensing?                | PRD §5       | **Open source only.** ODbL or equivalent; revenue: donations primary, ads possible in future. → Tasked in P2.                                                                                                               |
+
 ### Resolve before P0 launch
 
-| Question                       | Context | Decision                                                                                             |
-| ------------------------------ | ------- | ---------------------------------------------------------------------------------------------------- |
-| Self-registration to reviewer? | PRD §5  | **Admin-only.** Admins assign reviewer role; no self-registration                                    |
-| Deletion policy?               | PRD §5  | **Removable after final state.** Submissions deletable once approved (live district/POI) or rejected |
-| Spam prevention?               | PRD §5  | **Defer to Software Architect.** Rate-limiting design to be reviewed with Architect                  |
-| Geographic scope?              | PRD §5  | **Auto-locate.** Map defaults to user geolocation; fallback to Brussels                              |
-| Data licensing?                | PRD §5  | **Open / free licence.** Data stays open source; revenue limited to donations and/or ads only        |
+_All P0 questions resolved. See table above._
 
 ### Resolve before P2
 

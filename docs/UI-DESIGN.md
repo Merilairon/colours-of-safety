@@ -154,28 +154,106 @@ Empty state: "Nothing to review right now. 🎉"
 
 ---
 
+### 6. Admin Panel (`/admin`) — admin-guarded
+
+Page with `h1` "Admin panel" and subtitle. Allows admins and super admins to manage user roles.
+
+#### Page Header
+
+- `h1` "Admin panel"
+- Subtitle: "Manage user roles. Only admins and super admins can access this page."
+- **Stats bar** — inline summary showing total user counts per role:
+  `{n} users · {n} reviewers · {n} admins · {n} super admins`
+  Styled as muted text (`#6b6f80`), positioned below the subtitle.
+
+#### Search & Filter Bar
+
+- **Search input** — `placeholder="Search by name or email"`, filters the user list client-side in real time.
+  `aria-label="Search users"`. Full-width on mobile, max `360px` on desktop.
+- **Role filter** — `<select>` dropdown: "All roles", "User", "Reviewer", "Admin", "Super Admin".
+  Positioned inline with the search input on desktop (flex row), stacked on mobile.
+
+#### User List
+
+A responsive grid/list of user cards (`<ul class="user-list">`). Each card (`<li class="card">`) contains:
+
+- **Card head row** — left: `h2` display name + optional `(you)` label if this is the currently authenticated user; right: `role-badge` (colour-coded, see Role Badges below).
+- **Email line** — `<p class="meta">` showing `user.email`. If `emailVerified === false`, append a warning chip: `⚠ Unverified` styled in `#ef6c00` amber.
+- **Actions row** — role `<select>` + save state indicator.
+  - `aria-label="Change role for {displayName}"`
+  - Option labels use human-readable text (not raw enum values):
+    | Value | Label |
+    | ------------- | ------------ |
+    | `user` | User |
+    | `reviewer` | Reviewer |
+    | `admin` | Admin |
+    | `super_admin` | Super Admin |
+  - The `<select>` is **disabled** while `user.busy` is true or when the card represents the currently logged-in user (prevents self-demotion).
+  - When `user.busy` is true: show an inline `<span class="spinner">Saving…</span>` next to the select.
+  - On successful save: replace the spinner briefly with a `<span class="save-ok">Saved ✓</span>` (green `#2e933c`, auto-hides after 2 s).
+  - On error: show `<p class="error">` beneath the actions row with message "Could not update role. Please try again."
+
+#### Role Badges
+
+Colour-coded pill badges on each card. Values aligned with design tokens:
+
+| Role          | Badge label | Background | Text colour |
+| ------------- | ----------- | ---------- | ----------- |
+| `user`        | USER        | `#e0e0e0`  | `#333333`   |
+| `reviewer`    | REVIEWER    | `#bbdefb`  | `#1565c0`   |
+| `admin`       | ADMIN       | `#ffe0b2`  | `#ef6c00`   |
+| `super_admin` | SUPER ADMIN | `#ffcdd2`  | `#c62828`   |
+
+Badges are `font-size: 0.75rem`, `font-weight: 600`, `text-transform: uppercase`, `border-radius: 4px`, `padding: 4px 8px`.
+
+#### Guard Behaviour & Self-Protection Rules
+
+- The route is guarded by `adminGuard` (requires `role === 'admin' || role === 'super_admin'`).
+- **Self-demotion prevention**: The role `<select>` for the card matching the currently logged-in user's ID is always `disabled`. A tooltip `title="You cannot change your own role"` is applied to the wrapper.
+- **Super admin protection**: Admins (non-super) cannot promote to or demote from `super_admin`. The `super_admin` option is hidden from the `<select>` for users with `role === 'admin'` (non-super admins).
+
+#### Empty & Loading States
+
+| State           | UI                                                               |
+| --------------- | ---------------------------------------------------------------- |
+| Loading         | `<p class="muted">Loading…</p>` replaces the list                |
+| Load error      | `<p class="error">` with message and a "Retry" text button       |
+| No users        | `<p class="muted">No users found.</p>`                           |
+| No filter match | `<p class="muted">No users match your search.</p>` (client-side) |
+
+#### Topbar — Admin Nav Link
+
+The "Admin" link is visible in the top navigation only for users with `role === 'admin'` or `role === 'super_admin'`. It follows the same active-underline style (`#e84393`, 2px) as other nav links.
+
+---
+
 ## Component Hierarchy
 
 ```
 App (shell + topbar)
-├── MapComponent         /
-├── LoginComponent       /login
-├── RegisterComponent    /register
-├── MySubmissionsComponent  /mine   [authGuard]
-└── ReviewComponent      /review   [reviewerGuard]
+├── MapComponent              /
+├── LoginComponent            /login
+├── RegisterComponent         /register
+├── MySubmissionsComponent    /mine    [authGuard]
+├── ReviewComponent           /review  [reviewerGuard]
+└── AdminComponent            /admin   [adminGuard]
 ```
 
 ---
 
 ## User Roles & Conditional UI
 
-| UI element                     | Guest | User | Reviewer |
-| ------------------------------ | ----- | ---- | -------- |
-| Browse map (approved markings) | ✅    | ✅   | ✅       |
-| Draw / submit marking          | ❌    | ✅   | ✅       |
-| "My submissions" nav link      | ❌    | ✅   | ✅       |
-| "Review queue" nav link        | ❌    | ❌   | ✅       |
-| `reviewer` badge in topbar     | ❌    | ❌   | ✅       |
+| UI element                     | Guest | User | Reviewer | Admin | Super Admin |
+| ------------------------------ | ----- | ---- | -------- | ----- | ----------- |
+| Browse map (approved markings) | ✅    | ✅   | ✅       | ✅    | ✅          |
+| Draw / submit marking          | ❌    | ✅   | ✅       | ✅    | ✅          |
+| "My submissions" nav link      | ❌    | ✅   | ✅       | ✅    | ✅          |
+| "Review queue" nav link        | ❌    | ❌   | ✅       | ✅    | ✅          |
+| `reviewer` badge in topbar     | ❌    | ❌   | ✅       | ❌    | ❌          |
+| "Admin" nav link               | ❌    | ❌   | ❌       | ✅    | ✅          |
+| `admin` badge in topbar        | ❌    | ❌   | ❌       | ✅    | ❌          |
+| `super_admin` badge in topbar  | ❌    | ❌   | ❌       | ❌    | ✅          |
+| Promote users to `super_admin` | ❌    | ❌   | ❌       | ❌    | ✅          |
 
 ---
 
