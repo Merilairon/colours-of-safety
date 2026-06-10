@@ -318,6 +318,42 @@
   }
 }
 
+// Vote section in popups
+:host ::ng-deep .vote-section {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .vote-count {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #2e933c;
+  }
+
+  .vote-btn {
+    padding: 0.35rem 0.75rem;
+    border: none;
+    border-radius: 6px;
+    background: #e84393;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: #d73682;
+    }
+
+    &:disabled {
+      background: #6b6f80;
+      cursor: default;
+    }
+  }
+}
+
 // Search + Filters Panel
 .search-panel {
   position: absolute;

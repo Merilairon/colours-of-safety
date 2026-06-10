@@ -3,6 +3,16 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CreateDistrictPayload, CreatePoiPayload, District, Poi, ReviewPayload } from './models';
 
+export interface VoteResponse {
+  success: boolean;
+  voteCount: number;
+  autoApproved: boolean;
+}
+
+export interface VoteStatusResponse {
+  voted: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MarkingsService {
   constructor(private readonly http: HttpClient) {}
@@ -71,5 +81,22 @@ export class MarkingsService {
 
   getDistrictById(id: string): Observable<District | null> {
     return this.http.get<District>(`/api/districts/${id}`);
+  }
+
+  // ----- Voting -----
+  votePoi(id: string): Observable<VoteResponse> {
+    return this.http.post<VoteResponse>(`/api/pois/${id}/vote`, {});
+  }
+
+  voteDistrict(id: string): Observable<VoteResponse> {
+    return this.http.post<VoteResponse>(`/api/districts/${id}/vote`, {});
+  }
+
+  hasVotedPoi(id: string): Observable<VoteStatusResponse> {
+    return this.http.get<VoteStatusResponse>(`/api/pois/${id}/voted`);
+  }
+
+  hasVotedDistrict(id: string): Observable<VoteStatusResponse> {
+    return this.http.get<VoteStatusResponse>(`/api/districts/${id}/voted`);
   }
 }

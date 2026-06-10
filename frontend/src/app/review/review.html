@@ -81,7 +81,8 @@
             @if (item.category) {
               <span>{{ item.category }}</span> ·
             }
-            <span>by {{ item.author }}</span>
+            <span>by {{ item.author }}</span> ·
+            <span class="vote-badge">{{ item.voteCount }} 👍</span>
           </p>
           @if (item.description) {
             <p class="desc">{{ item.description }}</p>

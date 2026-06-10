@@ -8,6 +8,7 @@ import { DistrictsModule } from './districts/districts.module';
 import { PoisModule } from './pois/pois.module';
 import { SeedService } from './seed/seed.service';
 import { UsersModule } from './users/users.module';
+import { VotesModule } from './common/votes.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     PoisModule,
     DistrictsModule,
+    VotesModule,
   ],
   providers: [
     SeedService,

@@ -47,6 +47,9 @@ export class Poi {
   @Column({ type: 'enum', enum: ReviewStatus, default: ReviewStatus.PENDING })
   status: ReviewStatus;
 
+  @Column({ type: 'int', default: 0 })
+  voteCount: number;
+
   @Column({ type: 'text', nullable: true })
   reviewNote: string | null;
 

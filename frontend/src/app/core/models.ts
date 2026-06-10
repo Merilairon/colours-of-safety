@@ -34,6 +34,7 @@ export interface Poi {
   wheelchairAccessible: boolean;
   location: GeoPoint;
   status: ReviewStatus;
+  voteCount: number;
   reviewNote: string | null;
   createdBy?: AuthUser;
   createdAt: string;
@@ -48,6 +49,7 @@ export interface District {
   wheelchairAccessible: boolean;
   area: GeoPolygon;
   status: ReviewStatus;
+  voteCount: number;
   reviewNote: string | null;
   createdBy?: AuthUser;
   createdAt: string;

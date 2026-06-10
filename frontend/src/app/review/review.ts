@@ -14,6 +14,7 @@ interface QueueItem {
   author: string;
   note: string;
   busy: boolean;
+  voteCount: number;
 }
 
 @Component({
@@ -68,12 +69,12 @@ export class ReviewComponent implements OnInit {
 
   private applyFilter(): void {
     const type = this.filterType();
-    const all = this.items();
-    if (type === 'all') {
-      this.filteredItems.set(all);
-    } else {
-      this.filteredItems.set(all.filter((item) => item.kind === type));
+    let all = this.items();
+    if (type !== 'all') {
+      all = all.filter((item) => item.kind === type);
     }
+    // Sort by vote count descending (highest voted first)
+    this.filteredItems.set(all.sort((a, b) => b.voteCount - a.voteCount));
   }
 
   private fetch(
@@ -94,6 +95,7 @@ export class ReviewComponent implements OnInit {
               author: row.createdBy?.displayName ?? 'Unknown',
               note: '',
               busy: false,
+              voteCount: row.voteCount || 0,
             })),
           ),
         error: reject,

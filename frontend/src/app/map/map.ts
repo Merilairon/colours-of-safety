@@ -551,6 +551,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private loadPendingData(): void {
+    // Only show pending items to logged-in users
+    if (!this.isLoggedIn()) {
+      return;
+    }
+
     this.markings.getPendingPois().subscribe({
       next: (pois) => {
         for (const poi of pois) {
@@ -563,7 +568,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
             weight: 2,
             dashArray: '4 3',
           });
-          marker.bindPopup(this.pendingPoiPopup(poi.name, poi));
+          marker.bindPopup(this.pendingPoiPopup(poi));
+          marker.on('popupopen', () => this.attachVoteHandler(marker, poi.id, 'poi'));
           this.pendingLayer.addLayer(marker);
         }
       },
@@ -584,28 +590,52 @@ export class MapComponent implements AfterViewInit, OnDestroy {
             dashArray: '6 4',
             className: 'pending-district',
           });
-          polygon.bindPopup(
-            this.pendingDistrictPopup(district.name, district.description, district.safetyRating),
-          );
+          polygon.bindPopup(this.pendingDistrictPopup(district));
+          polygon.on('popupopen', () => this.attachVoteHandler(polygon, district.id, 'district'));
           this.pendingLayer.addLayer(polygon);
         }
       },
     });
   }
 
-  private pendingPoiPopup(
-    name: string,
-    poi: {
-      description: string;
-      category: string;
-      safetyRating: number;
-      wheelchairAccessible?: boolean;
-    },
-  ): string {
+  private attachVoteHandler(layer: L.Layer, id: string, kind: 'poi' | 'district'): void {
+    const btn = document.getElementById(`vote-btn-${id}`);
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      const obs = kind === 'poi' ? this.markings.votePoi(id) : this.markings.voteDistrict(id);
+
+      obs.subscribe({
+        next: (res) => {
+          // Update vote count in popup
+          const countEl = document.getElementById(`vote-count-${id}`);
+          if (countEl) {
+            countEl.textContent = `${res.voteCount} 👍`;
+          }
+          // Disable button
+          btn.setAttribute('disabled', 'true');
+          btn.textContent = 'Voted 👍';
+          if (res.autoApproved) {
+            this.showToast('This submission has been auto-approved!');
+            // Remove from pending layer after delay
+            setTimeout(() => {
+              this.pendingLayer.removeLayer(layer);
+            }, 2000);
+          }
+        },
+        error: () => {
+          btn.textContent = 'Error';
+        },
+      });
+    });
+  }
+
+  private pendingPoiPopup(poi: Poi): string {
     const indicator = safetyIndicator(poi.safetyRating);
     const wheelchairBadge = poi.wheelchairAccessible ? ' ♿' : '';
+    const voteCount = poi.voteCount || 0;
     return `
-      <strong>${this.escape(name)}${wheelchairBadge}</strong>
+      <strong>${this.escape(poi.name)}${wheelchairBadge}</strong>
       <div class="pop-meta pop-pending">⏳ Pending — awaiting review</div>
       <div class="pop-meta">
         <span class="safety-indicator" aria-hidden="true">${indicator}</span>
@@ -613,19 +643,28 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         · ${safetyLabel(poi.safetyRating)}
       </div>
       ${poi.description ? `<p>${this.escape(poi.description)}</p>` : ''}
+      <div class="vote-section">
+        <span class="vote-count" id="vote-count-${poi.id}">${voteCount} 👍</span>
+        <button class="vote-btn" id="vote-btn-${poi.id}">Upvote 👍</button>
+      </div>
     `;
   }
 
-  private pendingDistrictPopup(name: string, description: string, rating: number): string {
-    const indicator = safetyIndicator(rating);
+  private pendingDistrictPopup(district: District): string {
+    const indicator = safetyIndicator(district.safetyRating);
+    const voteCount = district.voteCount || 0;
     return `
-      <strong>${this.escape(name)}</strong>
+      <strong>${this.escape(district.name)}</strong>
       <div class="pop-meta pop-pending">⏳ Pending — awaiting review</div>
       <div class="pop-meta">
         <span class="safety-indicator" aria-hidden="true">${indicator}</span>
-        District · ${safetyLabel(rating)}
+        District · ${safetyLabel(district.safetyRating)}
       </div>
-      ${description ? `<p>${this.escape(description)}</p>` : ''}
+      ${district.description ? `<p>${this.escape(district.description)}</p>` : ''}
+      <div class="vote-section">
+        <span class="vote-count" id="vote-count-${district.id}">${voteCount} 👍</span>
+        <button class="vote-btn" id="vote-btn-${district.id}">Upvote 👍</button>
+      </div>
     `;
   }
 
