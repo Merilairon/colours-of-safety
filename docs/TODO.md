@@ -178,8 +178,8 @@
 
 | Task                                                                             | Files                                                        | Effort  |
 | -------------------------------------------------------------------------------- | ------------------------------------------------------------ | ------- |
-| [ ] Add open-source data licence notice (e.g. ODbL) to privacy policy and footer | `@/frontend/src/app/privacy/`, `@/frontend/src/app/app.html` | 2 hours |
-| [ ] Add donations CTA / link in footer or about page                             | `@/frontend/src/app/app.html`                                | 1 hour  |
+| [x] Add open-source data licence notice (e.g. ODbL) to privacy policy and footer | `@/frontend/src/app/privacy/`, `@/frontend/src/app/app.html` | 2 hours |
+| [x] Add donations CTA / link in footer or about page                             | `@/frontend/src/app/app.html`                                | 1 hour  |
 
 ### Community Voting System (PRD P2 — promoted from P3)
 

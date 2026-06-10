@@ -305,6 +305,15 @@
     }
   }
 
+  .footer-donate {
+    color: #e84393;
+    font-weight: 600;
+
+    &:hover {
+      color: #ff6ab4;
+    }
+  }
+
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 0.5rem;
@@ -356,5 +365,14 @@
 
   .footer a {
     color: #fff;
+  }
+
+  .footer .footer-donate {
+    color: #ff0;
+    font-weight: 600;
+
+    &:hover {
+      color: #fff;
+    }
   }
 }

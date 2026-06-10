@@ -96,3 +96,8 @@ cd frontend && npm run build && npm test
 
 See [`.env.example`](./.env.example) for all variables (DB credentials, `JWT_SECRET`,
 `JWT_EXPIRES_IN`, seeded reviewer account, and `FRONTEND_PORT`).
+
+## Licence
+
+- **Application code** — [AGPL-3.0](./LICENSE)
+- **Community map data** — [ODbL 1.0](./LICENSE-DATA)
