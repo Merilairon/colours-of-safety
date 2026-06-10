@@ -187,14 +187,14 @@
 
 | Task                                                                                                                 | Files                                                                            | Effort  |
 | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------- |
-| [ ] `votes` field on POI/district entity — store net score + per-user+IP vote record (prevent duplicates)            | `@/backend/src/pois/poi.entity.ts`, `@/backend/src/districts/district.entity.ts` | 1 day   |
-| [ ] `POST /pois/:id/vote` + `POST /districts/:id/vote` endpoints — ≤1 vote per user+IP combo per item                | `@/backend/src/pois/`, `@/backend/src/districts/`                                | 1 day   |
-| [ ] Auto-approval trigger — when upvotes ≥ threshold (exact value TBC with Reality Checker), set `status = approved` | Backend service logic                                                            | 0.5 day |
-| [ ] Admin-configurable threshold setting                                                                             | `@/backend/src/`, admin UI                                                       | 0.5 day |
-| [ ] All pending submissions visible to logged-in users at 40% opacity on map (guests see none)                       | `@/frontend/src/app/map/map.ts`                                                  | 1 day   |
-| [ ] Marker/area popup shows vote tally + upvote button only (logged-in only, no downvote)                            | `@/frontend/src/app/map/map.html`                                                | 1 day   |
-| [ ] Reviewer queue shows vote score per item; sort highly-upvoted items to top                                       | `@/frontend/src/app/review/review.ts`                                            | 0.5 day |
-| [ ] Auto-approved submissions silently approved with real-time queue update                                          | Backend + review UI                                                              | 0.5 day |
+| [x] `votes` field on POI/district entity — store net score + per-user+IP vote record (prevent duplicates)            | `@/backend/src/pois/poi.entity.ts`, `@/backend/src/districts/district.entity.ts` | 1 day   |
+| [x] `POST /pois/:id/vote` + `POST /districts/:id/vote` endpoints — ≤1 vote per user+IP combo per item                | `@/backend/src/pois/`, `@/backend/src/districts/`                                | 1 day   |
+| [x] Auto-approval trigger — when upvotes ≥ threshold (exact value TBC with Reality Checker), set `status = approved` | Backend service logic                                                            | 0.5 day |
+| [x] Admin-configurable threshold setting                                                                             | `@/backend/src/`, admin UI                                                       | 0.5 day |
+| [x] All pending submissions visible to logged-in users at 40% opacity on map (guests see none)                       | `@/frontend/src/app/map/map.ts`                                                  | 1 day   |
+| [x] Marker/area popup shows vote tally + upvote button only (logged-in only, no downvote)                            | `@/frontend/src/app/map/map.html`                                                | 1 day   |
+| [x] Reviewer queue shows vote score per item; sort highly-upvoted items to top                                       | `@/frontend/src/app/review/review.ts`                                            | 0.5 day |
+| [x] Auto-approved submissions silently approved with real-time queue update                                          | Backend + review UI                                                              | 0.5 day |
 
 ### Inclusivity — Phase 2 (LGBTQIA_INCLUSIVITY_REPORT)
 
