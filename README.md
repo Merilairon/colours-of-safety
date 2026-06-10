@@ -1,5 +1,7 @@
 # Colours of Safety 🏳️‍🌈
 
+Work In Progress
+
 A community map for marking **queer-friendly (LGBTQIA+ safe)** places and districts on
 OpenStreetMap. Anyone can browse approved markings; logged-in users can submit new ones,
 and **reviewers** moderate submissions before they appear publicly.
