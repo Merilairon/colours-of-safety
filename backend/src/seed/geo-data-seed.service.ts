@@ -232,7 +232,11 @@ out center body;`;
   private async fetchOverpass(query: string): Promise<OverpassElement[]> {
     const res = await fetch(OVERPASS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent':
+          'ColoursOfSafety/1.0 (https://coloursofsafety.com; geodata-seed)',
+      },
       body: `data=${encodeURIComponent(query)}`,
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -311,7 +315,11 @@ out center body;`;
     `;
     const url = `${WIKIDATA_SPARQL_URL}?query=${encodeURIComponent(sparql)}&format=json`;
     const res = await fetch(url, {
-      headers: { Accept: 'application/sparql-results+json' },
+      headers: {
+        Accept: 'application/sparql-results+json',
+        'User-Agent':
+          'ColoursOfSafety/1.0 (https://coloursofsafety.com; geodata-seed)',
+      },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = (await res.json()) as {
