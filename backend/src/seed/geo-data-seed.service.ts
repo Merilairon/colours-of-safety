@@ -21,6 +21,9 @@ interface PoiInsertRow {
   wheelchairAccessible: boolean;
 }
 
+// Mirrors: https://overpass-api.de/api/interpreter (2 slots)
+//          https://overpass.kumi.systems/api/interpreter (4 slots)
+//          https://maps.mail.ru/osm/tools/overpass/api/interpreter (varies)
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const WIKIDATA_SPARQL_URL = 'https://query.wikidata.org/sparql';
 
@@ -415,8 +418,8 @@ interface WikidataBinding {
  * Designed to be run once before production launch via `npm run seed:geo`.
  * Idempotent: skips records whose name+location already exists.
  */
-/** Max concurrent Overpass requests — stay well under API rate limits. */
-const OVERPASS_CONCURRENCY = 5;
+/** Max concurrent Overpass requests — Overpass API enforces 2 slots per IP. */
+const OVERPASS_CONCURRENCY = 2;
 /** Max concurrent Wikidata requests. */
 const WIKIDATA_CONCURRENCY = 4;
 /** Rows per bulk insert batch. */
