@@ -23,8 +23,8 @@ interface PoiInsertRow {
 
 // Mirrors: https://overpass-api.de/api/interpreter (2 slots)
 //          https://overpass.kumi.systems/api/interpreter (rate limit 0 = unlimited)
-//          https://maps.mail.ru/osm/tools/overpass/api/interpreter (varies)
-const OVERPASS_URL = 'https://overpass.kumi.systems/api/interpreter';
+//          https://maps.mail.ru/osm/tools/overpass/api/interpreter (4 slots)
+const OVERPASS_URL = 'https://maps.mail.ru/osm/tools/overpass/api/interpreter';
 const WIKIDATA_SPARQL_URL = 'https://query.wikidata.org/sparql';
 
 /** Bounding boxes [south, west, north, east] for priority cities. */
@@ -348,18 +348,25 @@ const CITY_BBOXES: Array<{
   { name: 'Port Moresby', bbox: [-9.46, 147.17, -9.42, 147.22] },
 ];
 
-/** Wikidata class QIDs to query → maps to app category. */
+/**
+ * Wikidata class QIDs to query → maps to app category.
+ * `requireLgbtqAudience: true` adds a SPARQL filter so generic venue classes
+ * (clinics, hotels, museums) only match items explicitly tagged for an LGBTQ
+ * audience (P2596=Q6636) or operated by an LGBTQ organisation (P137 subclass
+ * of Q17145). Classes that are LGBTQ-specific by definition don't need this.
+ */
 const WIKIDATA_CLASSES: Array<{
   qid: string;
   category: string;
   label: string;
+  requireLgbtqAudience?: boolean;
 }> = [
-  // Bars & nightlife
+  // Bars & nightlife — inherently LGBTQ+ by class definition
   { qid: 'Q1412694', category: 'bar', label: 'gay bar' },
   { qid: 'Q1378312', category: 'club', label: 'gay nightclub' },
   { qid: 'Q56076827', category: 'bar', label: 'lesbian bar' },
   { qid: 'Q117253659', category: 'club', label: 'LGBTQ nightclub' },
-  // Community & organisations
+  // Community & organisations — inherently LGBTQ+
   { qid: 'Q1628398', category: 'community', label: 'LGBTQ community center' },
   {
     qid: 'Q15249553',
@@ -372,26 +379,33 @@ const WIKIDATA_CLASSES: Array<{
     category: 'support_group',
     label: 'transgender organisation',
   },
-  // Health
+  // Health — generic classes: filter to LGBTQ-audience items only
   {
     qid: 'Q1076486',
     category: 'sexual_health_clinic',
     label: 'sexual health clinic',
+    requireLgbtqAudience: true,
   },
   {
     qid: 'Q1060791',
     category: 'hiv_sti_testing',
     label: 'HIV/AIDS service organisation',
+    requireLgbtqAudience: true,
   },
-  // Culture & memorials
+  // Culture & memorials — inherently LGBTQ+
   { qid: 'Q20671774', category: 'community', label: 'LGBTQ memorial' },
   { qid: 'Q207694', category: 'community', label: 'LGBTQ museum' },
   { qid: 'Q1191680', category: 'community', label: 'gay sauna' },
-  // Accommodation
-  { qid: 'Q1146519', category: 'community', label: 'gay-friendly hotel' },
-  // Books & media
+  // Accommodation — generic: filter to LGBTQ-audience items only
+  {
+    qid: 'Q1146519',
+    category: 'community',
+    label: 'gay-friendly hotel',
+    requireLgbtqAudience: true,
+  },
+  // Books & media — inherently LGBTQ+
   { qid: 'Q2735359', category: 'community', label: 'LGBT bookshop' },
-  // Pride events (as venues/routes)
+  // Pride events — inherently LGBTQ+
   { qid: 'Q83371', category: 'community', label: 'pride parade' },
 ];
 
@@ -418,8 +432,8 @@ interface WikidataBinding {
  * Designed to be run once before production launch via `npm run seed:geo`.
  * Idempotent: skips records whose name+location already exists.
  */
-/** Max concurrent Overpass requests — Overpass API enforces 2 slots per IP. */
-const OVERPASS_CONCURRENCY = 2;
+/** Max concurrent Overpass requests — maps.mail.ru mirror enforces 4 slots. */
+const OVERPASS_CONCURRENCY = 4;
 /** Max concurrent Wikidata requests. */
 const WIKIDATA_CONCURRENCY = 4;
 /** Rows per bulk insert batch. */
@@ -600,8 +614,8 @@ export class GeoDataSeedService {
       const inserted = await this.bulkInsertPois(poisToInsert);
       totalInserted += inserted;
 
-      // Brief pause between batches — polite to Overpass.
-      await this.sleep(2000);
+      // Brief pause between batches — polite to Overpass mirror.
+      await this.sleep(1000);
     }
 
     this.logger.log(
@@ -676,10 +690,9 @@ out center body;`;
     for (const batch of this.chunk(WIKIDATA_CLASSES, WIKIDATA_CONCURRENCY)) {
       const results = await Promise.allSettled(
         batch.map((cls) =>
-          this.fetchWikidata(cls.qid).then((bindings) => ({
-            cls,
-            bindings,
-          })),
+          this.fetchWikidata(cls.qid, cls.requireLgbtqAudience).then(
+            (bindings) => ({ cls, bindings }),
+          ),
         ),
       );
 
@@ -731,11 +744,21 @@ out center body;`;
     );
   }
 
-  private async fetchWikidata(classQid: string): Promise<WikidataBinding[]> {
+  private async fetchWikidata(
+    classQid: string,
+    requireLgbtqAudience = false,
+  ): Promise<WikidataBinding[]> {
+    // P2596 = «culture» / target audience; Q6636 = LGBT
+    // P137  = operator; Q17145 = LGBT (broader superclass)
+    const lgbtqFilter = requireLgbtqAudience
+      ? `{ ?item wdt:P2596 wd:Q6636. } UNION
+         { ?item wdt:P137 ?op. ?op wdt:P31/wdt:P279* wd:Q17145. }`
+      : '';
     const sparql = `
       SELECT ?item ?itemLabel ?coord WHERE {
         ?item wdt:P31 wd:${classQid}.
         ?item wdt:P625 ?coord.
+        ${lgbtqFilter}
         SERVICE wikibase:label { bd:serviceParam wikibase:language "en,fr,nl,de". }
       }
       LIMIT 500
