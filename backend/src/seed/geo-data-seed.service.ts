@@ -281,13 +281,45 @@ const WIKIDATA_CLASSES: Array<{
   category: string;
   label: string;
 }> = [
+  // Bars & nightlife
   { qid: 'Q1412694', category: 'bar', label: 'gay bar' },
+  { qid: 'Q1378312', category: 'club', label: 'gay nightclub' },
+  { qid: 'Q56076827', category: 'bar', label: 'lesbian bar' },
+  { qid: 'Q117253659', category: 'club', label: 'LGBTQ nightclub' },
+  // Community & organisations
   { qid: 'Q1628398', category: 'community', label: 'LGBTQ community center' },
+  {
+    qid: 'Q15249553',
+    category: 'support_group',
+    label: 'LGBTQ rights organisation',
+  },
+  { qid: 'Q15249558', category: 'support_group', label: 'LGBT organisation' },
+  {
+    qid: 'Q97498871',
+    category: 'support_group',
+    label: 'transgender organisation',
+  },
+  // Health
   {
     qid: 'Q1076486',
     category: 'sexual_health_clinic',
     label: 'sexual health clinic',
   },
+  {
+    qid: 'Q1060791',
+    category: 'hiv_sti_testing',
+    label: 'HIV/AIDS service organisation',
+  },
+  // Culture & memorials
+  { qid: 'Q20671774', category: 'community', label: 'LGBTQ memorial' },
+  { qid: 'Q207694', category: 'community', label: 'LGBTQ museum' },
+  { qid: 'Q1191680', category: 'community', label: 'gay sauna' },
+  // Accommodation
+  { qid: 'Q1146519', category: 'community', label: 'gay-friendly hotel' },
+  // Books & media
+  { qid: 'Q2735359', category: 'community', label: 'LGBT bookshop' },
+  // Pride events (as venues/routes)
+  { qid: 'Q83371', category: 'community', label: 'pride parade' },
 ];
 
 interface OverpassElement {
@@ -464,7 +496,7 @@ export class GeoDataSeedService {
     number,
   ]): string {
     const bbox = `${south},${west},${north},${east}`;
-    return `[out:json][timeout:60];
+    return `[out:json][timeout:30];
 (
   node["lgbtq"~"primary|welcome|yes|only"](${bbox});
   way["lgbtq"~"primary|welcome|yes|only"](${bbox});
@@ -489,7 +521,7 @@ out center body;`;
         body: `data=${encodeURIComponent(query)}`,
       });
 
-      if (res.status === 429 || res.status === 503) {
+      if (res.status === 429 || res.status === 503 || res.status === 504) {
         if (attempt === retries)
           throw new Error(`HTTP ${res.status} after ${retries} attempts`);
         this.logger.warn(
