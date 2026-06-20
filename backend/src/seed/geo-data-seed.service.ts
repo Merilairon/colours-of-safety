@@ -24,7 +24,7 @@ interface PoiInsertRow {
 // Mirrors: https://overpass-api.de/api/interpreter (2 slots)
 //          https://overpass.kumi.systems/api/interpreter (rate limit 0 = unlimited)
 //          https://maps.mail.ru/osm/tools/overpass/api/interpreter (varies)
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+const OVERPASS_URL = 'https://overpass.kumi.systems/api/interpreter';
 const WIKIDATA_SPARQL_URL = 'https://query.wikidata.org/sparql';
 
 /** Bounding boxes [south, west, north, east] for priority cities. */
