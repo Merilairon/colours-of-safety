@@ -17,6 +17,15 @@ rules:
       - services
       - persistentvolumeclaims
     verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources:
+      - pods
+      - pods/log
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+    verbs: ["get", "list", "watch", "create", "delete"]
   - apiGroups: ["apps"]
     resources:
       - deployments
