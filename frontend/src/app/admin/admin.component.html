@@ -77,17 +77,20 @@
 
           <div class="actions">
             <select
-              [value]="user.role"
               [disabled]="user.busy || isCurrentUser(user)"
               [attr.aria-label]="'Change role for ' + user.displayName"
               [title]="isCurrentUser(user) ? 'You cannot change your own role' : ''"
               (change)="setRole(user, $any($event.target).value)"
             >
               @for (role of availableRoles(); track role) {
-                <option [value]="role">{{ roleLabels[role] }}</option>
+                <option [value]="role" [selected]="role === user.role">
+                  {{ roleLabels[role] }}
+                </option>
               }
               @if (!availableRoles().includes(user.role)) {
-                <option [value]="user.role" disabled>{{ roleLabels[user.role] }}</option>
+                <option [value]="user.role" [selected]="true" disabled>
+                  {{ roleLabels[user.role] }}
+                </option>
               }
             </select>
             @if (user.busy) {
