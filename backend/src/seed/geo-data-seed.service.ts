@@ -551,7 +551,14 @@ export class GeoDataSeedService {
 
       for (const result of results) {
         if (result.status === 'rejected') {
-          this.logger.warn(`Overpass batch query failed: ${result.reason}`);
+          const err = result.reason as Error;
+          const cause = (err as NodeJS.ErrnoException).cause;
+          const causeStr = cause
+            ? ` (cause: ${cause instanceof Error ? cause.message : JSON.stringify(cause)})`
+            : '';
+          this.logger.warn(
+            `Overpass batch query failed: ${err.message}${causeStr}`,
+          );
           continue;
         }
         const { city, elements } = result.value;

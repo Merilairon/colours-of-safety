@@ -25,7 +25,8 @@ rules:
   - apiGroups: ["batch"]
     resources:
       - jobs
-    verbs: ["get", "list", "watch", "create", "delete"]
+      - cronjobs
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   - apiGroups: ["apps"]
     resources:
       - deployments
