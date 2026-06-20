@@ -552,12 +552,8 @@ export class GeoDataSeedService {
       for (const result of results) {
         if (result.status === 'rejected') {
           const err = result.reason as Error;
-          const cause = (err as NodeJS.ErrnoException).cause;
-          const causeStr = cause
-            ? ` (cause: ${cause instanceof Error ? cause.message : JSON.stringify(cause)})`
-            : '';
           this.logger.warn(
-            `Overpass batch query failed: ${err.message}${causeStr}`,
+            `Overpass batch query failed: ${this.describeError(err)}`,
           );
           continue;
         }
@@ -802,6 +798,23 @@ out center body;`;
     const out: T[][] = [];
     for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
     return out;
+  }
+
+  private describeError(err: unknown, depth = 0): string {
+    if (depth > 4 || !err) return String(err);
+    if (err instanceof AggregateError && err.errors?.length) {
+      return `${err.message} [${err.errors.map((e: unknown) => this.describeError(e, depth + 1)).join(' | ')}]`;
+    }
+    if (err instanceof Error) {
+      const causeStr = (err as NodeJS.ErrnoException).cause
+        ? ` → ${this.describeError((err as NodeJS.ErrnoException).cause, depth + 1)}`
+        : '';
+      const code = (err as NodeJS.ErrnoException).code
+        ? ` [${(err as NodeJS.ErrnoException).code}]`
+        : '';
+      return `${err.message}${code}${causeStr}`;
+    }
+    return JSON.stringify(err);
   }
 
   private sleep(ms: number): Promise<void> {
