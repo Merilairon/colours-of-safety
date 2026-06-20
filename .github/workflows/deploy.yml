@@ -131,6 +131,30 @@ jobs:
       - name: Apply postgres
         run: kubectl apply -f k8s/postgres.yml
 
+      - name: Run database migrations
+        run: |
+          kubectl delete job backend-migrate --namespace colours-of-safety --ignore-not-found
+          kubectl run backend-migrate \
+            --image=${{ needs.build-and-push.outputs.backend_image }}:${{ needs.build-and-push.outputs.image_tag }} \
+            --namespace colours-of-safety \
+            --restart=Never \
+            --env="DB_HOST=postgres" \
+            --env="DB_PORT=5432" \
+            --env="DB_USERNAME=$(kubectl get secret app-secrets --namespace colours-of-safety -o jsonpath='{.data.DB_USERNAME}' | base64 -d)" \
+            --env="DB_PASSWORD=$(kubectl get secret app-secrets --namespace colours-of-safety -o jsonpath='{.data.DB_PASSWORD}' | base64 -d)" \
+            --env="DB_NAME=$(kubectl get secret app-secrets --namespace colours-of-safety -o jsonpath='{.data.DB_NAME}' | base64 -d)" \
+            -- npm run migration:run:prod
+          kubectl wait pod/backend-migrate \
+            --namespace colours-of-safety \
+            --for=condition=Ready \
+            --timeout=60s || true
+          kubectl wait pod/backend-migrate \
+            --namespace colours-of-safety \
+            --for=jsonpath='{.status.phase}'=Succeeded \
+            --timeout=120s
+          kubectl logs pod/backend-migrate --namespace colours-of-safety
+          kubectl delete pod backend-migrate --namespace colours-of-safety
+
       - name: Apply backend
         run: |
           kubectl apply -f k8s/backend.yml
