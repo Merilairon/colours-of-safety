@@ -24,7 +24,7 @@ interface PoiInsertRow {
 // Mirrors: https://overpass-api.de/api/interpreter (2 slots)
 //          https://overpass.kumi.systems/api/interpreter (rate limit 0 = unlimited)
 //          https://maps.mail.ru/osm/tools/overpass/api/interpreter (varies)
-const OVERPASS_URL = 'https://overpass.kumi.systems/api/interpreter';
+const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const WIKIDATA_SPARQL_URL = 'https://query.wikidata.org/sparql';
 
 /** Bounding boxes [south, west, north, east] for priority cities. */
@@ -418,8 +418,8 @@ interface WikidataBinding {
  * Designed to be run once before production launch via `npm run seed:geo`.
  * Idempotent: skips records whose name+location already exists.
  */
-/** Max concurrent Overpass requests — kumi.systems mirror has no rate limit. */
-const OVERPASS_CONCURRENCY = 10;
+/** Max concurrent Overpass requests — Overpass API enforces 2 slots per IP. */
+const OVERPASS_CONCURRENCY = 2;
 /** Max concurrent Wikidata requests. */
 const WIKIDATA_CONCURRENCY = 4;
 /** Rows per bulk insert batch. */
@@ -600,8 +600,8 @@ export class GeoDataSeedService {
       const inserted = await this.bulkInsertPois(poisToInsert);
       totalInserted += inserted;
 
-      // Brief pause between batches — be a polite client.
-      await this.sleep(500);
+      // Brief pause between batches — polite to Overpass.
+      await this.sleep(2000);
     }
 
     this.logger.log(
