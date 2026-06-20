@@ -191,4 +191,45 @@ button {
     color: #fff;
     border: 2px solid #fff;
   }
+
+  .topbar {
+    background: #000;
+    border-bottom: 2px solid #fff;
+  }
+
+  .brand,
+  .nav a,
+  .account a,
+  .account .link-btn {
+    color: #fff;
+  }
+
+  .nav a.active,
+  .nav a:hover {
+    border-bottom-color: #fff;
+    background: #333;
+  }
+
+  .theme-toggle:hover {
+    background: #333;
+  }
+
+  .footer {
+    background: #000;
+    border-top: 2px solid #fff;
+    color: #fff;
+
+    a {
+      color: #fff;
+    }
+
+    .footer-donate {
+      color: #ff0;
+      font-weight: 600;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
 }
