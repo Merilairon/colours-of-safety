@@ -449,7 +449,7 @@ export class GeoDataSeedService {
       this.logger.log(
         `  ${city.name}: ${elements.length} elements fetched, inserted so far: ${totalInserted}`,
       );
-      await this.sleep(1500); // polite delay between city requests
+      await this.sleep(3000); // polite delay between city requests
     }
 
     this.logger.log(
@@ -473,19 +473,38 @@ export class GeoDataSeedService {
 out center body;`;
   }
 
-  private async fetchOverpass(query: string): Promise<OverpassElement[]> {
-    const res = await fetch(OVERPASS_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent':
-          'ColoursOfSafety/1.0 (https://coloursofsafety.com; geodata-seed)',
-      },
-      body: `data=${encodeURIComponent(query)}`,
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = (await res.json()) as { elements: OverpassElement[] };
-    return json.elements ?? [];
+  private async fetchOverpass(
+    query: string,
+    retries = 5,
+  ): Promise<OverpassElement[]> {
+    let delay = 10_000;
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      const res = await fetch(OVERPASS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent':
+            'ColoursOfSafety/1.0 (https://coloursofsafety.com; geodata-seed)',
+        },
+        body: `data=${encodeURIComponent(query)}`,
+      });
+
+      if (res.status === 429 || res.status === 503) {
+        if (attempt === retries)
+          throw new Error(`HTTP ${res.status} after ${retries} attempts`);
+        this.logger.warn(
+          `Overpass rate-limited (HTTP ${res.status}), retrying in ${delay / 1000}s (attempt ${attempt}/${retries})…`,
+        );
+        await this.sleep(delay);
+        delay *= 2;
+        continue;
+      }
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = (await res.json()) as { elements: OverpassElement[] };
+      return json.elements ?? [];
+    }
+    throw new Error('fetchOverpass: exhausted retries');
   }
 
   private extractCoords(el: OverpassElement): [number, number] | null {
