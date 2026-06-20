@@ -10,8 +10,16 @@ import {
   KNOWN_POIS,
   OSM_LGBTQ_SAFETY,
   osmTagsToCategory,
-  StaticDistrict,
 } from './geo-seed.data';
+
+interface PoiInsertRow {
+  name: string;
+  description: string;
+  category: string;
+  safetyRating: number;
+  location: Point;
+  wheelchairAccessible: boolean;
+}
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const WIKIDATA_SPARQL_URL = 'https://query.wikidata.org/sparql';
@@ -195,19 +203,48 @@ const CITY_BBOXES: Array<{
   { name: 'Boston', bbox: [42.34, -71.1, 42.38, -71.05] },
   { name: 'Las Vegas', bbox: [36.1, -115.18, 36.16, -115.13] },
   { name: 'Philadelphia', bbox: [39.94, -75.18, 39.98, -75.13] },
+  { name: 'Dallas', bbox: [32.77, -96.82, 32.81, -96.77] },
+  { name: 'Houston', bbox: [29.74, -95.41, 29.78, -95.36] },
+  { name: 'Phoenix', bbox: [33.44, -112.08, 33.48, -112.03] },
+  { name: 'San Diego', bbox: [32.71, -117.17, 32.75, -117.12] },
+  { name: 'Nashville', bbox: [36.15, -86.8, 36.19, -86.75] },
+  { name: 'Salt Lake City', bbox: [40.75, -111.92, 40.79, -111.87] },
+  { name: 'Columbus OH', bbox: [39.95, -83.01, 39.99, -82.96] },
+  { name: 'Detroit', bbox: [42.32, -83.06, 42.36, -83.01] },
+  { name: 'Baltimore', bbox: [39.28, -76.63, 39.32, -76.58] },
+  { name: 'Fort Lauderdale', bbox: [26.11, -80.15, 26.15, -80.1] },
+  { name: 'Provincetown MA', bbox: [42.04, -70.2, 42.07, -70.17] },
+  { name: 'Palm Springs CA', bbox: [33.82, -116.56, 33.85, -116.52] },
+  { name: 'Asheville NC', bbox: [35.56, -82.57, 35.6, -82.53] },
+  { name: 'Pittsburgh', bbox: [40.43, -80.02, 40.47, -79.97] },
+  { name: 'Kansas City', bbox: [39.09, -94.6, 39.13, -94.55] },
+  { name: 'Louisville KY', bbox: [38.24, -85.77, 38.28, -85.72] },
+  { name: 'Richmond VA', bbox: [37.53, -77.47, 37.57, -77.42] },
   // ── North America — Canada ───────────────────────────────────────────────
   { name: 'Toronto', bbox: [43.64, -79.42, 43.68, -79.36] },
   { name: 'Montreal', bbox: [45.51, -73.59, 45.55, -73.54] },
   { name: 'Vancouver', bbox: [49.27, -123.14, 49.31, -123.09] },
   { name: 'Calgary', bbox: [51.03, -114.1, 51.07, -114.04] },
   { name: 'Ottawa', bbox: [45.41, -75.72, 45.44, -75.68] },
-  // ── North America — Mexico ───────────────────────────────────────────────
+  { name: 'Edmonton', bbox: [53.53, -113.52, 53.57, -113.47] },
+  { name: 'Winnipeg', bbox: [49.88, -97.16, 49.92, -97.11] },
+  { name: 'Halifax', bbox: [44.64, -63.6, 44.67, -63.56] },
+  { name: 'Victoria BC', bbox: [48.42, -123.38, 48.45, -123.34] },
+  { name: 'Quebec City', bbox: [46.8, -71.23, 46.83, -71.19] },
+  // ── North America — Mexico & Central America ─────────────────────────────
   { name: 'Mexico City', bbox: [19.41, -99.19, 19.46, -99.13] },
   { name: 'Guadalajara', bbox: [20.66, -103.38, 20.7, -103.33] },
   { name: 'Puerto Vallarta', bbox: [20.61, -105.25, 20.64, -105.22] },
+  { name: 'Monterrey', bbox: [25.66, -100.33, 25.7, -100.28] },
+  { name: 'Cancun', bbox: [21.15, -86.86, 21.19, -86.82] },
+  { name: 'Oaxaca', bbox: [17.06, -96.73, 17.09, -96.69] },
+  { name: 'San José CR', bbox: [9.93, -84.09, 9.96, -84.05] },
+  { name: 'Panama City', bbox: [8.99, -79.53, 9.02, -79.49] },
 
   // ── Caribbean ────────────────────────────────────────────────────────────
   { name: 'San Juan PR', bbox: [18.46, -66.12, 18.49, -66.08] },
+  { name: 'Havana', bbox: [23.12, -82.39, 23.16, -82.34] },
+  { name: 'Kingston Jamaica', bbox: [17.99, -76.81, 18.02, -76.77] },
 
   // ── South America ────────────────────────────────────────────────────────
   { name: 'São Paulo', bbox: [-23.57, -46.67, -23.53, -46.63] },
@@ -218,6 +255,16 @@ const CITY_BBOXES: Array<{
   { name: 'Lima', bbox: [-12.08, -77.06, -12.04, -77.01] },
   { name: 'Montevideo', bbox: [-34.92, -56.2, -34.88, -56.15] },
   { name: 'Medellin', bbox: [6.22, -75.59, 6.27, -75.54] },
+  { name: 'Belo Horizonte', bbox: [-19.93, -43.95, -19.89, -43.9] },
+  { name: 'Porto Alegre', bbox: [-30.04, -51.24, -30.0, -51.19] },
+  { name: 'Florianopolis', bbox: [-27.6, -48.56, -27.56, -48.52] },
+  { name: 'Curitiba', bbox: [-25.44, -49.3, -25.4, -49.25] },
+  { name: 'Recife', bbox: [-8.07, -34.92, -8.03, -34.87] },
+  { name: 'Cartagena', bbox: [10.39, -75.53, 10.43, -75.49] },
+  { name: 'Quito', bbox: [-0.23, -78.53, -0.19, -78.48] },
+  { name: 'Asuncion', bbox: [-25.3, -57.65, -25.26, -57.6] },
+  { name: 'La Paz', bbox: [-16.52, -68.16, -16.48, -68.11] },
+  { name: 'Caracas', bbox: [10.48, -66.92, 10.52, -66.87] },
 
   // ── Africa ───────────────────────────────────────────────────────────────
   { name: 'Cape Town', bbox: [-33.94, 18.41, -33.9, 18.46] },
@@ -226,6 +273,19 @@ const CITY_BBOXES: Array<{
   { name: 'Lagos', bbox: [6.44, 3.37, 6.49, 3.42] },
   { name: 'Accra', bbox: [5.54, -0.22, 5.58, -0.17] },
   { name: 'Dar es Salaam', bbox: [-6.82, 39.27, -6.78, 39.32] },
+  { name: 'Durban', bbox: [-29.87, 31.01, -29.83, 31.06] },
+  { name: 'Pretoria', bbox: [-25.75, 28.18, -25.71, 28.23] },
+  { name: 'Kampala', bbox: [0.31, 32.57, 0.35, 32.62] },
+  { name: 'Addis Ababa', bbox: [8.98, 38.74, 9.02, 38.79] },
+  { name: 'Dakar', bbox: [14.68, -17.47, 14.72, -17.42] },
+  { name: 'Abidjan', bbox: [5.34, -4.03, 5.38, -3.98] },
+  { name: 'Lusaka', bbox: [-15.43, 28.28, -15.39, 28.33] },
+  { name: 'Harare', bbox: [-17.84, 31.03, -17.8, 31.08] },
+  { name: 'Kigali', bbox: [-1.96, 30.05, -1.92, 30.1] },
+  { name: 'Maputo', bbox: [-25.98, 32.57, -25.94, 32.62] },
+  { name: 'Windhoek', bbox: [-22.57, 17.07, -22.53, 17.12] },
+  { name: 'Gaborone', bbox: [-24.67, 25.9, -24.63, 25.95] },
+  { name: 'Mombasa', bbox: [-4.06, 39.65, -4.02, 39.7] },
 
   // ── Middle East / North Africa ───────────────────────────────────────────
   { name: 'Tel Aviv', bbox: [32.06, 34.76, 32.1, 34.81] },
@@ -271,8 +331,18 @@ const CITY_BBOXES: Array<{
   { name: 'Sydney', bbox: [-33.89, 151.19, -33.85, 151.24] },
   { name: 'Melbourne', bbox: [-37.83, 144.95, -37.79, 145.0] },
   { name: 'Brisbane', bbox: [-27.49, 153.01, -27.45, 153.06] },
+  { name: 'Perth', bbox: [-31.96, 115.85, -31.92, 115.9] },
+  { name: 'Adelaide', bbox: [-34.93, 138.59, -34.89, 138.64] },
+  { name: 'Canberra', bbox: [-35.32, 149.12, -35.28, 149.17] },
+  { name: 'Gold Coast', bbox: [-28.02, 153.4, -27.98, 153.45] },
+  { name: 'Newcastle AU', bbox: [-32.93, 151.76, -32.89, 151.81] },
+  { name: 'Hobart', bbox: [-42.89, 147.32, -42.85, 147.37] },
   { name: 'Auckland', bbox: [-36.88, 174.74, -36.84, 174.79] },
   { name: 'Wellington', bbox: [-41.3, 174.77, -41.27, 174.81] },
+  { name: 'Christchurch', bbox: [-43.54, 172.62, -43.5, 172.67] },
+  { name: 'Hamilton NZ', bbox: [-37.79, 175.27, -37.75, 175.32] },
+  { name: 'Suva', bbox: [-18.16, 178.42, -18.12, 178.47] },
+  { name: 'Port Moresby', bbox: [-9.46, 147.17, -9.42, 147.22] },
 ];
 
 /** Wikidata class QIDs to query → maps to app category. */
@@ -345,12 +415,21 @@ interface WikidataBinding {
  * Designed to be run once before production launch via `npm run seed:geo`.
  * Idempotent: skips records whose name+location already exists.
  */
+/** Max concurrent Overpass requests — stay well under API rate limits. */
+const OVERPASS_CONCURRENCY = 5;
+/** Max concurrent Wikidata requests. */
+const WIKIDATA_CONCURRENCY = 4;
+/** Rows per bulk insert batch. */
+const INSERT_BATCH_SIZE = 100;
+
 export class GeoDataSeedService {
   private readonly logger = new Logger(GeoDataSeedService.name);
   private poiRepo: Repository<Poi>;
   private districtRepo: Repository<District>;
   private userRepo: Repository<User>;
   private seederId: string;
+  /** In-memory set of existing POI names — avoids per-row DB reads. */
+  private existingPoiNames = new Set<string>();
 
   constructor(private readonly dataSource: DataSource) {
     this.poiRepo = dataSource.getRepository(Poi);
@@ -362,6 +441,13 @@ export class GeoDataSeedService {
     this.logger.log('Starting geo data seed…');
 
     this.seederId = await this.ensureSeederAccount();
+
+    // Load all existing POI names once — O(1) lookups during seeding.
+    const existing = await this.poiRepo.find({ select: ['name'] });
+    this.existingPoiNames = new Set(existing.map((p) => p.name));
+    this.logger.log(
+      `Loaded ${this.existingPoiNames.size} existing POI names into cache.`,
+    );
 
     await this.seedStaticDistricts();
     await this.seedStaticPois();
@@ -396,36 +482,50 @@ export class GeoDataSeedService {
   // ---------------------------------------------------------------------------
 
   private async seedStaticDistricts(): Promise<void> {
-    let inserted = 0;
-    for (const d of KNOWN_DISTRICTS) {
-      const exists = await this.districtRepo.findOne({
-        where: { name: d.name },
-      });
-      if (exists) continue;
-      await this.insertDistrict(d);
-      inserted++;
+    const existing = await this.districtRepo.find({ select: ['name'] });
+    const existingNames = new Set(existing.map((d) => d.name));
+
+    const toInsert = KNOWN_DISTRICTS.filter((d) => !existingNames.has(d.name));
+    for (const batch of this.chunk(toInsert, INSERT_BATCH_SIZE)) {
+      const entities = batch.map((d) =>
+        this.districtRepo.create({
+          name: d.name,
+          description: d.description,
+          safetyRating: d.safetyRating,
+          blendEdges: d.blendEdges,
+          area: d.area,
+          status: ReviewStatus.APPROVED,
+          isAnonymous: false,
+          wheelchairAccessible: false,
+          voteCount: 0,
+          reviewNote: null,
+          createdById: this.seederId,
+          reviewedById: this.seederId,
+        }),
+      );
+      await this.districtRepo.save(entities);
     }
     this.logger.log(
-      `Static districts: ${inserted} inserted (${KNOWN_DISTRICTS.length - inserted} already present).`,
+      `Static districts: ${toInsert.length} inserted (${existingNames.size} already present).`,
     );
   }
 
   private async seedStaticPois(): Promise<void> {
-    let inserted = 0;
-    for (const p of KNOWN_POIS) {
-      if (await this.poiNameExists(p.name)) continue;
-      await this.insertPoi(
-        p.name,
-        p.description,
-        p.category,
-        p.safetyRating,
-        p.location,
-        p.wheelchairAccessible,
-      );
-      inserted++;
-    }
+    const toInsert = KNOWN_POIS.filter(
+      (p) => !this.existingPoiNames.has(p.name),
+    );
+    await this.bulkInsertPois(
+      toInsert.map((p) => ({
+        name: p.name,
+        description: p.description,
+        category: p.category,
+        safetyRating: p.safetyRating,
+        location: p.location,
+        wheelchairAccessible: p.wheelchairAccessible,
+      })),
+    );
     this.logger.log(
-      `Static POIs: ${inserted} inserted (${KNOWN_POIS.length - inserted} already present).`,
+      `Static POIs: ${toInsert.length} inserted (${KNOWN_POIS.length - toInsert.length} already present).`,
     );
   }
 
@@ -437,51 +537,65 @@ export class GeoDataSeedService {
     let totalInserted = 0;
     let totalSkipped = 0;
 
-    for (const city of CITY_BBOXES) {
-      const query = this.buildOverpassQuery(city.bbox);
-      this.logger.log(`Querying Overpass for ${city.name}…`);
+    // Process cities in concurrent batches.
+    for (const batch of this.chunk(CITY_BBOXES, OVERPASS_CONCURRENCY)) {
+      const results = await Promise.allSettled(
+        batch.map(async (city) => {
+          const query = this.buildOverpassQuery(city.bbox);
+          const elements = await this.fetchOverpass(query);
+          return { city: city.name, elements };
+        }),
+      );
 
-      let elements: OverpassElement[];
-      try {
-        elements = await this.fetchOverpass(query);
-      } catch (err) {
-        this.logger.warn(
-          `Overpass query failed for ${city.name}: ${(err as Error).message}`,
-        );
-        continue;
-      }
+      const poisToInsert: Parameters<typeof this.bulkInsertPois>[0] = [];
 
-      for (const el of elements) {
-        const tags = el.tags ?? {};
-        const lgbtqTag = tags['lgbtq'] ?? tags['lgbtq:venue'] ?? '';
-        const safetyRating = OSM_LGBTQ_SAFETY[lgbtqTag] ?? 3;
-        const category = osmTagsToCategory(tags);
-        const name = tags['name'] ?? tags['name:en'] ?? `OSM node ${el.id}`;
-        const description = tags['description'] ?? tags['note'] ?? '';
-        const wheelchair = tags['wheelchair'] === 'yes';
-
-        const coords = this.extractCoords(el);
-        if (!coords) continue;
-        if (await this.poiNameExists(name)) {
-          totalSkipped++;
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          this.logger.warn(`Overpass batch query failed: ${result.reason}`);
           continue;
         }
+        const { city, elements } = result.value;
+        let cityInserted = 0;
 
-        await this.insertPoi(
-          name,
-          description,
-          category,
-          safetyRating,
-          { type: 'Point', coordinates: coords },
-          wheelchair,
+        for (const el of elements) {
+          const tags = el.tags ?? {};
+          const lgbtqTag = tags['lgbtq'] ?? tags['lgbtq:venue'] ?? '';
+          const safetyRating = OSM_LGBTQ_SAFETY[lgbtqTag] ?? 3;
+          const category = osmTagsToCategory(tags);
+          const name = tags['name'] ?? tags['name:en'] ?? `OSM node ${el.id}`;
+          const description = tags['description'] ?? tags['note'] ?? '';
+          const wheelchair = tags['wheelchair'] === 'yes';
+          const coords = this.extractCoords(el);
+
+          if (!coords) continue;
+          if (this.existingPoiNames.has(name)) {
+            totalSkipped++;
+            continue;
+          }
+
+          // Mark in cache immediately to avoid duplicates within this batch.
+          this.existingPoiNames.add(name);
+          poisToInsert.push({
+            name,
+            description,
+            category,
+            safetyRating,
+            location: { type: 'Point', coordinates: coords },
+            wheelchairAccessible: wheelchair,
+          });
+          cityInserted++;
+        }
+
+        this.logger.log(
+          `  ${city}: ${elements.length} elements, ${cityInserted} queued for insert`,
         );
-        totalInserted++;
       }
 
-      this.logger.log(
-        `  ${city.name}: ${elements.length} elements fetched, inserted so far: ${totalInserted}`,
-      );
-      await this.sleep(3000); // polite delay between city requests
+      const inserted = await this.bulkInsertPois(poisToInsert);
+      totalInserted += inserted;
+
+      // Brief pause between batches — polite to Overpass.
+      await this.sleep(2000);
     }
 
     this.logger.log(
@@ -553,44 +667,56 @@ out center body;`;
     let totalInserted = 0;
     let totalSkipped = 0;
 
-    for (const cls of WIKIDATA_CLASSES) {
-      this.logger.log(`Querying Wikidata for class ${cls.qid} (${cls.label})…`);
+    for (const batch of this.chunk(WIKIDATA_CLASSES, WIKIDATA_CONCURRENCY)) {
+      const results = await Promise.allSettled(
+        batch.map((cls) =>
+          this.fetchWikidata(cls.qid).then((bindings) => ({
+            cls,
+            bindings,
+          })),
+        ),
+      );
 
-      let bindings: WikidataBinding[];
-      try {
-        bindings = await this.fetchWikidata(cls.qid);
-      } catch (err) {
-        this.logger.warn(
-          `Wikidata query failed for ${cls.qid}: ${(err as Error).message}`,
-        );
-        continue;
-      }
+      const poisToInsert: PoiInsertRow[] = [];
 
-      for (const b of bindings) {
-        const name = b.itemLabel?.value;
-        if (!name) continue;
-
-        const coords = this.parseWktPoint(b.coord?.value);
-        if (!coords) continue;
-        if (await this.poiNameExists(name)) {
-          totalSkipped++;
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          this.logger.warn(
+            `Wikidata batch query failed: ${String(result.reason)}`,
+          );
           continue;
         }
+        const { cls, bindings } = result.value;
+        let clsInserted = 0;
 
-        await this.insertPoi(
-          name,
-          `Sourced from Wikidata: ${b.item.value}`,
-          cls.category,
-          4,
-          { type: 'Point', coordinates: coords },
-          false,
+        for (const b of bindings) {
+          const name = b.itemLabel?.value;
+          if (!name) continue;
+          const coords = this.parseWktPoint(b.coord?.value);
+          if (!coords) continue;
+          if (this.existingPoiNames.has(name)) {
+            totalSkipped++;
+            continue;
+          }
+          this.existingPoiNames.add(name);
+          poisToInsert.push({
+            name,
+            description: `Sourced from Wikidata: ${b.item.value}`,
+            category: cls.category,
+            safetyRating: 4,
+            location: { type: 'Point', coordinates: coords },
+            wheelchairAccessible: false,
+          });
+          clsInserted++;
+        }
+
+        this.logger.log(
+          `  ${cls.label}: ${bindings.length} results, ${clsInserted} queued`,
         );
-        totalInserted++;
       }
 
-      this.logger.log(
-        `  ${cls.label}: ${bindings.length} results, inserted so far: ${totalInserted}`,
-      );
+      const inserted = await this.bulkInsertPois(poisToInsert);
+      totalInserted += inserted;
       await this.sleep(1000);
     }
 
@@ -635,52 +761,40 @@ out center body;`;
   // DB helpers
   // ---------------------------------------------------------------------------
 
-  private async insertDistrict(d: StaticDistrict): Promise<void> {
-    const district = this.districtRepo.create({
-      name: d.name,
-      description: d.description,
-      safetyRating: d.safetyRating,
-      blendEdges: d.blendEdges,
-      area: d.area,
-      status: ReviewStatus.APPROVED,
-      isAnonymous: false,
-      wheelchairAccessible: false,
-      voteCount: 0,
-      reviewNote: null,
-      createdById: this.seederId,
-      reviewedById: this.seederId,
-    });
-    await this.districtRepo.save(district);
+  /**
+   * Bulk-inserts POI rows in batches and returns the count inserted.
+   * Skips rows whose name is already in existingPoiNames.
+   */
+  private async bulkInsertPois(rows: PoiInsertRow[]): Promise<number> {
+    if (rows.length === 0) return 0;
+    let inserted = 0;
+    for (const batch of this.chunk(rows, INSERT_BATCH_SIZE)) {
+      const entities = batch.map((r) =>
+        this.poiRepo.create({
+          name: r.name,
+          description: r.description,
+          category: r.category,
+          safetyRating: r.safetyRating,
+          location: r.location,
+          wheelchairAccessible: r.wheelchairAccessible,
+          status: ReviewStatus.APPROVED,
+          isAnonymous: false,
+          voteCount: 0,
+          reviewNote: null,
+          createdById: this.seederId,
+          reviewedById: this.seederId,
+        }),
+      );
+      await this.poiRepo.save(entities);
+      inserted += entities.length;
+    }
+    return inserted;
   }
 
-  private async insertPoi(
-    name: string,
-    description: string,
-    category: string,
-    safetyRating: number,
-    location: { type: 'Point'; coordinates: [number, number] },
-    wheelchairAccessible: boolean,
-  ): Promise<void> {
-    const poi = this.poiRepo.create({
-      name,
-      description,
-      category,
-      safetyRating,
-      location: location as Point,
-      wheelchairAccessible,
-      status: ReviewStatus.APPROVED,
-      isAnonymous: false,
-      voteCount: 0,
-      reviewNote: null,
-      createdById: this.seederId,
-      reviewedById: this.seederId,
-    });
-    await this.poiRepo.save(poi);
-  }
-
-  private async poiNameExists(name: string): Promise<boolean> {
-    const count = await this.poiRepo.count({ where: { name } });
-    return count > 0;
+  private chunk<T>(arr: T[], size: number): T[][] {
+    const out: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+    return out;
   }
 
   private sleep(ms: number): Promise<void> {

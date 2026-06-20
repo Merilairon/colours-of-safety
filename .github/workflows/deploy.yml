@@ -131,6 +131,14 @@ jobs:
       - name: Apply postgres
         run: kubectl apply -f k8s/postgres.yml
 
+      - name: Apply seed cron job
+        run: |
+          kubectl apply -f k8s/seed-cronjob.yml
+          kubectl patch cronjob geo-seed \
+            --namespace colours-of-safety \
+            --type='json' \
+            -p='[{"op":"replace","path":"/spec/jobTemplate/spec/template/spec/containers/0/image","value":"${{ needs.build-and-push.outputs.backend_image }}:${{ needs.build-and-push.outputs.image_tag }}"}]'
+
       - name: Run database migrations
         run: |
           kubectl delete job backend-migrate --namespace colours-of-safety --ignore-not-found
