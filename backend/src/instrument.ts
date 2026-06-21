@@ -9,12 +9,8 @@ Sentry.init({
   profileSessionSampleRate: 1.0,
   profileLifecycle: 'trace',
   dataCollection: {
-    userInfo: true,
-    httpBodies: [
-      'incomingRequest',
-      'outgoingRequest',
-      'incomingResponse',
-      'outgoingResponse',
-    ],
+    // Only enable user data collection after explicit GDPR consent.
+    userInfo: false,
+    httpBodies: [],
   },
 });
