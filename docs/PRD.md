@@ -74,6 +74,16 @@
 - View all registered users and their roles, so I have visibility over the community
 - Promote a user to reviewer or admin, so the moderation team can scale
 - Demote or suspend a problematic account, so community safety is protected
+- Ban or unban accounts, so persistent bad actors cannot access the platform
+- Hide all submissions from a banned account, so harmful content is removed from public view
+
+**AS AN authenticated user, I want to:**
+
+- View and edit my profile (display name, avatar, bio), so my account reflects who I am
+- Change my password, so I can keep my account secure
+- Update my email address, so I can receive communications at the right inbox
+- Choose whether to receive email notifications, so I control my inbox
+- Delete my account, so I can remove my data from the platform
 
 ---
 
@@ -127,6 +137,7 @@
 | Review approval              | Reviewer can approve/reject from queue; optional note saved; approved marking appears on map; contributor sees updated status in "My submissions"                                                                                                                                                                   |
 | My submissions               | Lists all own POIs and districts with status badge and reviewer note if present; newest-first                                                                                                                                                                                                                       |
 | Admin user management        | Admin can list users and change roles via `/admin` route                                                                                                                                                                                                                                                            |
+| Admin ban & content sweep    | Admin can ban/unban accounts from `/admin`; banned users cannot log in or perform actions; all POIs and districts owned by a banned user are hidden from the public map and marked with `banned` status; unbanning restores visibility unless individually moderated afterwards                                     |
 | Pending on map (contributor) | Own `pending` POIs render on map at 40% opacity; own `pending` districts render with hatched/translucent fill; popup labels them "Pending — awaiting review"; not visible to other logged-out users or other contributors                                                                                           |
 | Pending on map (public)      | All `pending` submissions visible to logged-in users at 40% opacity; guests see none; popup shows vote tally + upvote/downvote buttons (logged-in only)                                                                                                                                                             |
 | Community voting             | Each logged-in user casts ≤1 vote (up or down) per submission; vote count stored on entity; reaching configurable threshold (default: **10 net upvotes**) triggers auto-approval and sets `status = approved`; submission then renders at full opacity; reviewer queue shows vote score per item                    |
@@ -135,6 +146,7 @@
 | Propose district edit        | Same as POI edit proposal; polygon geometry can also be modified; proposal is queued for review without affecting the currently approved district                                                                                                                                                                   |
 | Review edit proposal         | Reviewer sees edit proposals in queue with diff (old vs new values) and original author; can approve or reject with an optional note; on approval, the target entity is updated and the proposal status becomes `approved`; on rejection, the target entity is unchanged and the proposal status becomes `rejected` |
 | My edits                     | Contributor can list all own edit proposals with target name, status badge, and reviewer note; newest-first; linked to the current version of the target entity                                                                                                                                                     |
+| Profile & settings           | Authenticated user can view and update display name, avatar, and bio; change password with current-password confirmation; update email address with verification; toggle email notifications; delete account after confirmation; all changes persist across sessions and reflect in the UI immediately              |
 
 ---
 

@@ -134,6 +134,26 @@
 
 > Status: edit-proposal feature implemented. Backend has `EditProposal` entity, endpoints, and migration; frontend has popup edit button, review diff, and My edits page.
 
+### Profile & Settings (PRD P1)
+
+| Task                                                        | Files                                                                        | Effort   |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------- | -------- |
+| [ ] User profile page — view/edit display name, avatar, bio | `@/frontend/src/app/profile/`, `@/backend/src/users/`                        | 1–2 days |
+| [ ] Change password with current-password confirmation      | `@/frontend/src/app/profile/`, `@/backend/src/auth/`                         | 0.5 day  |
+| [ ] Update email address with verification flow             | `@/frontend/src/app/profile/`, `@/backend/src/users/`, `@/backend/src/auth/` | 1 day    |
+| [ ] Notification preferences toggle                         | `@/frontend/src/app/profile/`, `@/backend/src/users/user.entity.ts`          | 0.5 day  |
+| [ ] Account deletion (GDPR Art. 17)                         | `@/frontend/src/app/profile/`, `@/backend/src/users/`                        | 1 day    |
+
+### Admin Ban & Content Sweep (PRD P1)
+
+| Task                                                              | Files                                                                        | Effort  |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------- |
+| [ ] Add `banned` boolean + `bannedAt` timestamp to user entity    | `@/backend/src/users/user.entity.ts`                                         | 0.5 day |
+| [ ] Ban/unban controls in admin panel                             | `@/frontend/src/app/admin/`                                                  | 0.5 day |
+| [ ] Block banned users from login and all authenticated actions   | `@/backend/src/auth/`, `@/backend/src/guards/`                               | 0.5 day |
+| [ ] Hide all POIs/districts owned by banned users from public map | `@/backend/src/pois/`, `@/backend/src/districts/`, `@/frontend/src/app/map/` | 1 day   |
+| [ ] Soft-delete / unban restore path                              | `@/backend/src/users/`                                                       | 0.5 day |
+
 ### Quick Wins (< 1 week total)
 
 | Task                                  | Source                       | Files                                                |
@@ -211,7 +231,6 @@
 | [ ] "Queer" terminology preference — user-selectable language in profile                                                                                   | `@/backend/src/users/user.entity.ts`, settings UI   | 0.5 day |
 | [ ] Add geolocation privacy warning before requesting permission                                                                                           | `@/frontend/src/app/map/map.ts`                     | 1 hour  |
 | [ ] Document Nominatim data sharing in privacy policy                                                                                                      | `@/frontend/src/app/privacy/`                       | 1 hour  |
-| [ ] Account deletion (right to be forgotten / GDPR Art. 17)                                                                                                | Backend delete endpoint + frontend UI               | 1 day   |
 | [ ] GDPR Article 9 explicit consent — sexual orientation data inferred from usage                                                                          | Privacy policy + consent flow                       | 0.5 day |
 | [ ] Mandatory reviewer bias training — block reviews until guidelines acknowledged                                                                         | `@/docs/reviewerGuidelines.md`, review UI           | 1 day   |
 | [ ] Appeals process for rejected submissions                                                                                                               | Backend + frontend                                  | 1 day   |
