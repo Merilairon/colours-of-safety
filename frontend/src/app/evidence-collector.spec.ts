@@ -230,6 +230,7 @@ describe('AC-4 My Submissions', () => {
     wheelchairAccessible: true,
     location: { type: 'Point', coordinates: [4.35, 50.85] },
     status: 'pending',
+    voteCount: 0,
     reviewNote: null,
     createdAt: '2024-01-15T10:00:00Z',
     isAnonymous: false,
@@ -253,6 +254,7 @@ describe('AC-4 My Submissions', () => {
       ],
     },
     status: 'pending',
+    voteCount: 0,
     reviewNote: null,
     createdAt: '2024-01-10T10:00:00Z',
     isAnonymous: false,
@@ -395,6 +397,7 @@ describe('AC-5 Review Queue', () => {
     wheelchairAccessible: false,
     location: { type: 'Point', coordinates: [4.35, 50.85] },
     status: 'pending',
+    voteCount: 0,
     reviewNote: null,
     createdBy: {
       id: 'u1',
@@ -425,6 +428,7 @@ describe('AC-5 Review Queue', () => {
       ],
     },
     status: 'pending',
+    voteCount: 0,
     reviewNote: null,
     createdBy: {
       id: 'u2',
@@ -454,6 +458,7 @@ describe('AC-5 Review Queue', () => {
     fixture.detectChanges();
     http.expectOne('/api/pois/pending').flush([mockPoi]);
     http.expectOne('/api/districts/pending').flush([mockDistrict]);
+    http.expectOne('/api/edits/pending').flush([]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
@@ -465,6 +470,7 @@ describe('AC-5 Review Queue', () => {
     fixture.detectChanges();
     http.expectOne('/api/pois/pending').flush([]);
     http.expectOne('/api/districts/pending').flush([]);
+    http.expectOne('/api/edits/pending').flush([]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
@@ -475,6 +481,7 @@ describe('AC-5 Review Queue', () => {
     fixture.detectChanges();
     http.expectOne('/api/pois/pending').flush([mockPoi]);
     http.expectOne('/api/districts/pending').flush([mockDistrict]);
+    http.expectOne('/api/edits/pending').flush([]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
@@ -491,6 +498,7 @@ describe('AC-5 Review Queue', () => {
     fixture.detectChanges();
     http.expectOne('/api/pois/pending').flush([mockPoi]);
     http.expectOne('/api/districts/pending').flush([]);
+    http.expectOne('/api/edits/pending').flush([]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
@@ -506,6 +514,7 @@ describe('AC-5 Review Queue', () => {
     fixture.detectChanges();
     http.expectOne('/api/pois/pending').flush([mockPoi]);
     http.expectOne('/api/districts/pending').flush([]);
+    http.expectOne('/api/edits/pending').flush([]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
@@ -521,6 +530,7 @@ describe('AC-5 Review Queue', () => {
     fixture.detectChanges();
     http.expectOne('/api/pois/pending').flush([mockPoi]);
     http.expectOne('/api/districts/pending').flush([]);
+    http.expectOne('/api/edits/pending').flush([]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
@@ -533,6 +543,7 @@ describe('AC-5 Review Queue', () => {
     fixture.detectChanges();
     http.expectOne('/api/pois/pending').flush([mockPoi]);
     http.expectOne('/api/districts/pending').flush([mockDistrict]);
+    http.expectOne('/api/edits/pending').flush([]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
@@ -544,6 +555,7 @@ describe('AC-5 Review Queue', () => {
     fixture.detectChanges();
     http.expectOne('/api/pois/pending').flush([mockPoi]);
     http.expectOne('/api/districts/pending').flush([]);
+    http.expectOne('/api/edits/pending').flush([]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
@@ -561,6 +573,7 @@ describe('AC-5 Review Queue', () => {
     fixture.detectChanges();
     http.expectOne('/api/pois/pending').flush([mockPoi]);
     http.expectOne('/api/districts/pending').flush([]);
+    http.expectOne('/api/edits/pending').flush([]);
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
