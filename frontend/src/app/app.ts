@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, isDevMode, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import * as Sentry from '@sentry/angular';
 import { AuthService } from './core/auth.service';
@@ -23,6 +23,7 @@ export class App {
   protected readonly isSuperAdmin = this.auth.isSuperAdmin;
   protected readonly navOpen = signal(false);
   protected readonly isHighContrast = this.theme.isHighContrast;
+  protected readonly showSentryTest = isDevMode();
 
   logout(): void {
     this.auth.logout();

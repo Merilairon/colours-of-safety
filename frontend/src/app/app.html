@@ -68,7 +68,9 @@
 
 <footer class="footer">
   <span>&copy; 2026 Colours of Safety</span>
-  <button type="button" class="link-btn" (click)="throwTestError()">Test Sentry Error</button>
+  @if (showSentryTest) {
+    <button type="button" class="link-btn" (click)="throwTestError()">Test Sentry Error</button>
+  }
   <a routerLink="/faq">FAQ</a>
   <a routerLink="/privacy">Privacy Policy</a>
   <a
