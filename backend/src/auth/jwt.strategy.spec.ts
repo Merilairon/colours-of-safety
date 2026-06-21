@@ -12,7 +12,9 @@ describe('JwtStrategy', () => {
 
   beforeEach(async () => {
     usersService = {
-      findById: jest.fn(() => Promise.resolve(null)),
+      findById: jest.fn<Promise<User | null>, [string]>(() =>
+        Promise.resolve(null),
+      ),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -54,6 +56,10 @@ describe('JwtStrategy', () => {
         displayName: 'Test User',
         role: UserRole.USER,
         passwordHash: 'hash',
+        pronouns: null,
+        emailVerified: false,
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
         createdAt: new Date(),
       };
 
@@ -98,6 +104,10 @@ describe('JwtStrategy', () => {
         displayName: 'Admin User',
         role: UserRole.ADMIN,
         passwordHash: 'hash',
+        pronouns: null,
+        emailVerified: false,
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
         createdAt: new Date(),
       };
 
@@ -121,6 +131,10 @@ describe('JwtStrategy', () => {
         displayName: 'Reviewer User',
         role: UserRole.REVIEWER,
         passwordHash: 'hash',
+        pronouns: null,
+        emailVerified: false,
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
         createdAt: new Date(),
       };
 
@@ -144,6 +158,10 @@ describe('JwtStrategy', () => {
         displayName: 'Super Admin',
         role: UserRole.SUPER_ADMIN,
         passwordHash: 'hash',
+        pronouns: null,
+        emailVerified: false,
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
         createdAt: new Date(),
       };
 
