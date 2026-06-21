@@ -75,7 +75,8 @@ export class PoisController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   remove(
     @Param('id', ParseUUIDPipe) id: string,

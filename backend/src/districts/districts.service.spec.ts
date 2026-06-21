@@ -333,19 +333,19 @@ describe('DistrictsService', () => {
       expect(repo.delete).toHaveBeenCalledWith('district-1');
     });
 
-    it('soft-deletes (rejects) when caller is reviewer', async () => {
+    it('soft-deletes (rejects) when caller is admin', async () => {
       repo.findOne.mockResolvedValueOnce({
         id: 'district-1',
         createdById: 'user-2',
         status: ReviewStatus.APPROVED,
       } as District);
 
-      await service.delete('district-1', 'reviewer-1', UserRole.REVIEWER);
+      await service.delete('district-1', 'admin-1', UserRole.ADMIN);
 
       expect(repo.update).toHaveBeenCalledWith('district-1', {
         status: ReviewStatus.REJECTED,
         reviewNote: 'Removed by moderator',
-        reviewedById: 'reviewer-1',
+        reviewedById: 'admin-1',
       });
     });
   });

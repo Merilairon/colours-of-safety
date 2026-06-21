@@ -56,6 +56,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly isLoggedIn = this.auth.isLoggedIn;
+  protected readonly isAdmin = this.auth.isAdmin;
   protected readonly categories = POI_CATEGORIES;
   protected readonly safetyLabel = safetyLabel;
   protected readonly colorFor = safetyColor;
@@ -590,6 +591,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       if (this.isLoggedIn()) {
         marker.on('popupopen', () => this.attachEditHandler(marker, poi, 'poi'));
       }
+      if (this.isAdmin()) {
+        marker.on('popupopen', () =>
+          this.attachRemoveHandler(marker, poi.id, 'poi', this.poiClusterLayer),
+        );
+      }
       this.poiClusterLayer.addLayer(marker);
     }
 
@@ -620,6 +626,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       );
       if (this.isLoggedIn()) {
         polygon.on('popupopen', () => this.attachEditHandler(polygon, district, 'district'));
+      }
+      if (this.isAdmin()) {
+        polygon.on('popupopen', () =>
+          this.attachRemoveHandler(polygon, district.id, 'district', this.districtLayer),
+        );
       }
       this.districtLayer.addLayer(polygon);
     }
@@ -746,6 +757,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           });
           marker.bindPopup(this.pendingPoiPopup(poi));
           marker.on('popupopen', () => this.attachVoteHandler(marker, poi.id, 'poi'));
+          if (this.isAdmin()) {
+            marker.on('popupopen', () =>
+              this.attachRemoveHandler(marker, poi.id, 'poi', this.pendingLayer),
+            );
+          }
           this.pendingLayer.addLayer(marker);
         }
       },
@@ -768,6 +784,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           });
           polygon.bindPopup(this.pendingDistrictPopup(district));
           polygon.on('popupopen', () => this.attachVoteHandler(polygon, district.id, 'district'));
+          if (this.isAdmin()) {
+            polygon.on('popupopen', () =>
+              this.attachRemoveHandler(polygon, district.id, 'district', this.pendingLayer),
+            );
+          }
           this.pendingLayer.addLayer(polygon);
         }
       },
@@ -830,6 +851,32 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  private attachRemoveHandler(
+    layer: L.Layer,
+    id: string,
+    kind: 'poi' | 'district',
+    source: L.LayerGroup,
+  ): void {
+    const btn = document.getElementById(`remove-${id}`);
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      if (!confirm('Remove this submission from the map?')) {
+        return;
+      }
+      const obs = kind === 'poi' ? this.markings.deletePoi(id) : this.markings.deleteDistrict(id);
+      obs.subscribe({
+        next: () => {
+          source.removeLayer(layer);
+          this.showToast('Submission removed from the map');
+        },
+        error: () => {
+          this.showToast('Failed to remove submission');
+        },
+      });
+    });
+  }
+
   private pendingPoiPopup(poi: Poi): string {
     const indicator = safetyIndicator(poi.safetyRating);
     const wheelchairBadge = poi.wheelchairAccessible ? ' ♿' : '';
@@ -847,6 +894,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         <span class="vote-count" id="vote-count-${poi.id}">${voteCount} 👍</span>
         <button class="vote-btn" id="vote-btn-${poi.id}">Upvote 👍</button>
       </div>
+      ${this.removeButton(poi.id)}
     `;
   }
 
@@ -865,6 +913,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         <span class="vote-count" id="vote-count-${district.id}">${voteCount} 👍</span>
         <button class="vote-btn" id="vote-btn-${district.id}">Upvote 👍</button>
       </div>
+      ${this.removeButton(district.id)}
     `;
   }
 
@@ -890,6 +939,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       </div>
       ${poi.description ? `<p>${this.escape(poi.description)}</p>` : ''}
       ${this.editProposalButton(id)}
+      ${this.removeButton(id)}
       ${this.reportLink()}
     `;
   }
@@ -911,6 +961,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       </div>
       ${description ? `<p>${this.escape(description)}</p>` : ''}
       ${this.editProposalButton(id)}
+      ${this.removeButton(id)}
       ${this.reportLink()}
     `;
   }
@@ -918,6 +969,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private editProposalButton(id?: string): string {
     if (!id || !this.isLoggedIn()) return '';
     return `<button class="edit-proposal-btn" id="edit-proposal-${id}">✎ Suggest edit</button>`;
+  }
+
+  private removeButton(id?: string): string {
+    if (!id || !this.isAdmin()) return '';
+    return `<button class="remove-btn" id="remove-${id}" aria-label="Remove submission">🗑 Remove</button>`;
   }
 
   private reportLink(): string {

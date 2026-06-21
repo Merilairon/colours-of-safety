@@ -395,6 +395,25 @@
   }
 }
 
+// Admin remove button in popups
+:host ::ng-deep .remove-btn {
+  display: inline-block;
+  margin-top: 0.5rem;
+  margin-left: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: #d7263d;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #b51f32;
+  }
+}
+
 // Search + Filters Panel
 .search-panel {
   position: absolute;

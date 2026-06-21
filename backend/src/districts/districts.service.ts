@@ -99,7 +99,6 @@ export class DistrictsService {
   }
 
   private static readonly ELEVATED_ROLES: UserRole[] = [
-    UserRole.REVIEWER,
     UserRole.ADMIN,
     UserRole.SUPER_ADMIN,
   ];
