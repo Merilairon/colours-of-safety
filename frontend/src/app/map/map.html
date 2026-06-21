@@ -226,6 +226,43 @@
           <textarea rows="3" formControlName="description"></textarea>
         </label>
 
+        @if (t.kind === 'poi') {
+          <div class="geometry-edit">
+            <p class="sub">Location: {{ formatLocation(editGeometry()?.location) }}</p>
+            <button
+              type="button"
+              class="secondary"
+              (click)="startMovePoi()"
+              [disabled]="editGeometryMode() === 'move'"
+            >
+              Move pin
+            </button>
+          </div>
+        } @else {
+          <div class="geometry-edit">
+            <p class="sub">
+              Area:
+              @if (editGeometry()?.area) {
+                New shape drawn
+              } @else {
+                Unchanged
+              }
+            </p>
+            <button
+              type="button"
+              class="secondary"
+              (click)="startRedrawDistrict()"
+              [disabled]="editGeometryMode() === 'redraw'"
+            >
+              Redraw district
+            </button>
+          </div>
+        }
+
+        @if (editGeometryHint()) {
+          <p class="hint">{{ editGeometryHint() }}</p>
+        }
+
         <div class="actions">
           <button type="button" class="secondary" (click)="cancelEditProposal()">Cancel</button>
           <button type="submit" [disabled]="editSubmitting()">

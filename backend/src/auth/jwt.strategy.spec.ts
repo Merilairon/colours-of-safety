@@ -48,6 +48,7 @@ describe('JwtStrategy', () => {
         sub: 'user-1',
         email: 'test@example.com',
         role: UserRole.USER,
+        banned: false,
       };
 
       const user: User = {
@@ -60,6 +61,9 @@ describe('JwtStrategy', () => {
         emailVerified: false,
         emailVerificationToken: null,
         emailVerificationExpires: null,
+        banned: false,
+        bannedAt: null,
+        banReason: null,
         createdAt: new Date(),
       };
 
@@ -74,6 +78,7 @@ describe('JwtStrategy', () => {
         displayName: 'Test User',
         role: UserRole.USER,
         emailVerified: false,
+        banned: false,
       });
     });
 
@@ -82,6 +87,7 @@ describe('JwtStrategy', () => {
         sub: 'nonexistent',
         email: 'test@example.com',
         role: UserRole.USER,
+        banned: false,
       };
 
       usersService.findById.mockResolvedValueOnce(null);
@@ -92,11 +98,44 @@ describe('JwtStrategy', () => {
       expect(usersService.findById).toHaveBeenCalledWith('nonexistent');
     });
 
+    it('throws UnauthorizedException when user is banned', async () => {
+      const payload: JwtPayload = {
+        sub: 'banned-user',
+        email: 'banned@example.com',
+        role: UserRole.USER,
+        banned: false,
+      };
+
+      const user: User = {
+        id: 'banned-user',
+        email: 'banned@example.com',
+        displayName: 'Banned User',
+        role: UserRole.USER,
+        passwordHash: 'hash',
+        pronouns: null,
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
+        banned: true,
+        bannedAt: new Date(),
+        banReason: 'Spam',
+        createdAt: new Date(),
+      };
+
+      usersService.findById.mockResolvedValueOnce(user);
+
+      await expect(strategy.validate(payload)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+      expect(usersService.findById).toHaveBeenCalledWith('banned-user');
+    });
+
     it('preserves role information from token', async () => {
       const payload: JwtPayload = {
         sub: 'user-1',
         email: 'admin@example.com',
         role: UserRole.ADMIN,
+        banned: false,
       };
 
       const user: User = {
@@ -109,6 +148,9 @@ describe('JwtStrategy', () => {
         emailVerified: false,
         emailVerificationToken: null,
         emailVerificationExpires: null,
+        banned: false,
+        bannedAt: null,
+        banReason: null,
         createdAt: new Date(),
       };
 
@@ -124,6 +166,7 @@ describe('JwtStrategy', () => {
         sub: 'user-1',
         email: 'reviewer@example.com',
         role: UserRole.REVIEWER,
+        banned: false,
       };
 
       const user: User = {
@@ -136,6 +179,9 @@ describe('JwtStrategy', () => {
         emailVerified: false,
         emailVerificationToken: null,
         emailVerificationExpires: null,
+        banned: false,
+        bannedAt: null,
+        banReason: null,
         createdAt: new Date(),
       };
 
@@ -151,6 +197,7 @@ describe('JwtStrategy', () => {
         sub: 'user-1',
         email: 'super@example.com',
         role: UserRole.SUPER_ADMIN,
+        banned: false,
       };
 
       const user: User = {
@@ -163,6 +210,9 @@ describe('JwtStrategy', () => {
         emailVerified: false,
         emailVerificationToken: null,
         emailVerificationExpires: null,
+        banned: false,
+        bannedAt: null,
+        banReason: null,
         createdAt: new Date(),
       };
 

@@ -146,7 +146,7 @@ describe('DistrictsService', () => {
 
       expect(repo.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { status: ReviewStatus.APPROVED },
+          where: { status: ReviewStatus.APPROVED, banned: false },
           order: { createdAt: 'DESC' },
         }),
       );
@@ -159,7 +159,7 @@ describe('DistrictsService', () => {
 
       expect(repo.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { status: ReviewStatus.PENDING },
+          where: { status: ReviewStatus.PENDING, banned: false },
           order: { createdAt: 'ASC' },
         }),
       );

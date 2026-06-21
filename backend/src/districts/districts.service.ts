@@ -35,14 +35,14 @@ export class DistrictsService {
 
   findApproved(): Promise<District[]> {
     return this.districts.find({
-      where: { status: ReviewStatus.APPROVED },
+      where: { status: ReviewStatus.APPROVED, banned: false },
       order: { createdAt: 'DESC' },
     });
   }
 
   findByStatus(status: ReviewStatus): Promise<District[]> {
     return this.districts.find({
-      where: { status },
+      where: { status, banned: false },
       order: { createdAt: 'ASC' },
     });
   }

@@ -58,6 +58,9 @@ export class AuthService {
     if (!valid) {
       throw new UnauthorizedException('Invalid credentials');
     }
+    if (user.banned) {
+      throw new UnauthorizedException('Account suspended');
+    }
     return this.buildResult(user);
   }
 
@@ -119,6 +122,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      banned: user.banned,
     };
     return {
       accessToken: this.jwt.sign(payload),
@@ -128,6 +132,7 @@ export class AuthService {
         displayName: user.displayName,
         role: user.role,
         emailVerified: user.emailVerified,
+        banned: user.banned,
       },
     };
   }

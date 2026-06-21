@@ -60,6 +60,15 @@ export class User {
   @Column({ type: 'timestamptz', nullable: true })
   emailVerificationExpires: Date | null;
 
+  @Column({ default: false })
+  banned: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  bannedAt: Date | null;
+
+  @Column({ type: 'text', nullable: true })
+  banReason: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 }

@@ -218,6 +218,51 @@
     accent-color: #e84393;
   }
 
+  .geometry-edit {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+
+    .sub {
+      margin: 0;
+      flex: 1;
+    }
+
+    button {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+      border: 1px solid #d4d6e0;
+      background: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #3a3d4d;
+
+      &:hover:not(:disabled) {
+        border-color: #e84393;
+        color: #e84393;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+    }
+  }
+
+  .hint {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    background: #fff4e5;
+    border-radius: 6px;
+    color: #b07d00;
+    font-size: 0.8rem;
+  }
+
   .actions {
     display: flex;
     justify-content: flex-end;

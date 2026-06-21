@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
+import { District } from '../districts/district.entity';
+import { Poi } from '../pois/poi.entity';
 import { Pronouns, User, UserRole } from './user.entity';
 
 export interface CreateUserData {
@@ -24,6 +26,10 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly users: Repository<User>,
+    @InjectRepository(Poi)
+    private readonly pois: Repository<Poi>,
+    @InjectRepository(District)
+    private readonly districts: Repository<District>,
   ) {}
 
   create(data: CreateUserData): Promise<User> {
@@ -58,6 +64,21 @@ export class UsersService {
 
   async assignRole(id: string, role: UserRole): Promise<User> {
     await this.users.update(id, { role });
+    return this.users.findOneOrFail({ where: { id } });
+  }
+
+  async setBanStatus(
+    id: string,
+    banned: boolean,
+    reason?: string,
+  ): Promise<User> {
+    await this.users.update(id, {
+      banned,
+      bannedAt: banned ? new Date() : null,
+      banReason: banned ? (reason ?? null) : null,
+    });
+    await this.pois.update({ createdById: id }, { banned });
+    await this.districts.update({ createdById: id }, { banned });
     return this.users.findOneOrFail({ where: { id } });
   }
 

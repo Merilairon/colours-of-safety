@@ -101,17 +101,52 @@ export class AdminComponent implements OnInit {
         this.items.update((list) =>
           list.map((u) => (u.id === user.id ? { ...updated, busy: false, saved: true } : u)),
         );
-        setTimeout(() => {
-          this.items.update((list) =>
-            list.map((u) => (u.id === user.id ? { ...u, saved: false } : u)),
-          );
-        }, 2000);
+        this.clearSaved(user.id);
       },
       error: () => {
         this.setBusy(user, false);
         this.error.set('Could not update role. Please try again.');
       },
     });
+  }
+
+  protected ban(user: UserRow, reason?: string): void {
+    if (user.id === this.currentUserId()) return;
+    this.setBusy(user, true);
+    this.users.banUser(user.id, reason).subscribe({
+      next: (updated) => {
+        this.items.update((list) =>
+          list.map((u) => (u.id === user.id ? { ...updated, busy: false, saved: true } : u)),
+        );
+        this.clearSaved(user.id);
+      },
+      error: () => {
+        this.setBusy(user, false);
+        this.error.set('Could not ban user. Please try again.');
+      },
+    });
+  }
+
+  protected unban(user: UserRow): void {
+    this.setBusy(user, true);
+    this.users.unbanUser(user.id).subscribe({
+      next: (updated) => {
+        this.items.update((list) =>
+          list.map((u) => (u.id === user.id ? { ...updated, busy: false, saved: true } : u)),
+        );
+        this.clearSaved(user.id);
+      },
+      error: () => {
+        this.setBusy(user, false);
+        this.error.set('Could not unban user. Please try again.');
+      },
+    });
+  }
+
+  private clearSaved(id: string): void {
+    setTimeout(() => {
+      this.items.update((list) => list.map((u) => (u.id === id ? { ...u, saved: false } : u)));
+    }, 2000);
   }
 
   protected isCurrentUser(user: UserRow): boolean {

@@ -55,7 +55,7 @@ describe('PoisService', () => {
     await service.findApproved();
     expect(repo.find).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { status: ReviewStatus.APPROVED },
+        where: { status: ReviewStatus.APPROVED, banned: false },
       }),
     );
   });

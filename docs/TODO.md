@@ -146,13 +146,13 @@
 
 ### Admin Ban & Content Sweep (PRD P1)
 
-| Task                                                              | Files                                                                        | Effort  |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------- |
-| [ ] Add `banned` boolean + `bannedAt` timestamp to user entity    | `@/backend/src/users/user.entity.ts`                                         | 0.5 day |
-| [ ] Ban/unban controls in admin panel                             | `@/frontend/src/app/admin/`                                                  | 0.5 day |
-| [ ] Block banned users from login and all authenticated actions   | `@/backend/src/auth/`, `@/backend/src/guards/`                               | 0.5 day |
-| [ ] Hide all POIs/districts owned by banned users from public map | `@/backend/src/pois/`, `@/backend/src/districts/`, `@/frontend/src/app/map/` | 1 day   |
-| [ ] Soft-delete / unban restore path                              | `@/backend/src/users/`                                                       | 0.5 day |
+| Task                                                                         | Files                                                                                                                        | Effort  |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------- |
+| [x] Add `banned` boolean + `bannedAt` timestamp + `banReason` to user entity | `@/backend/src/users/user.entity.ts`, `@/backend/src/migrations/1718200000000-AddUserBanAndSubmissionBan.ts`                 | 0.5 day |
+| [x] Ban/unban controls in admin panel                                        | `@/frontend/src/app/admin/`, `@/backend/src/users/dto/ban-user.dto.ts`                                                       | 0.5 day |
+| [x] Block banned users from login and all authenticated actions              | `@/backend/src/auth/auth.service.ts`, `@/backend/src/auth/jwt.strategy.ts`                                                   | 0.5 day |
+| [x] Hide all POIs/districts owned by banned users from public map            | `@/backend/src/users/users.service.ts`, `@/backend/src/pois/pois.service.ts`, `@/backend/src/districts/districts.service.ts` | 1 day   |
+| [x] Soft-delete / unban restore path                                         | `@/backend/src/users/users.service.ts`, `@/backend/src/users/users.controller.ts`                                            | 0.5 day |
 
 ### Quick Wins (< 1 week total)
 

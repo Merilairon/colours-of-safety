@@ -16,6 +16,7 @@ import type { AuthUser } from '../auth/jwt-payload.interface';
 import { UserRole } from './user.entity';
 import { UsersService } from './users.service';
 import { AssignRoleDto } from './dto/assign-role.dto';
+import { BanUserDto } from './dto/ban-user.dto';
 
 const ASSIGNABLE_BY_ADMIN: UserRole[] = [UserRole.USER, UserRole.REVIEWER];
 const ASSIGNABLE_BY_SUPER_ADMIN: UserRole[] = [
@@ -64,5 +65,35 @@ export class UsersController {
     }
 
     return this.users.assignRole(id, dto.role);
+  }
+
+  @Patch(':id/ban')
+  @Roles(UserRole.ADMIN)
+  async ban(
+    @Param('id') id: string,
+    @Body() dto: BanUserDto,
+    @CurrentUser() actor: AuthUser,
+  ) {
+    if (actor.id === id) {
+      throw new BadRequestException('Cannot ban yourself');
+    }
+
+    const target = await this.users.findById(id);
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.users.setBanStatus(id, true, dto.reason);
+  }
+
+  @Patch(':id/unban')
+  @Roles(UserRole.ADMIN)
+  async unban(@Param('id') id: string) {
+    const target = await this.users.findById(id);
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.users.setBanStatus(id, false);
   }
 }

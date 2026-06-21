@@ -69,6 +69,9 @@
               @if (!user.emailVerified) {
                 <span class="chip unverified">⚠ Unverified</span>
               }
+              @if (user.banned) {
+                <span class="chip banned">🚫 Banned</span>
+              }
               <span class="role-badge" [class]="user.role">{{ roleLabels[user.role] }}</span>
             </div>
           </div>
@@ -99,6 +102,15 @@
             @if (user.saved) {
               <span class="saved-feedback">Saved ✓</span>
             }
+            <button
+              type="button"
+              class="ban-btn"
+              [disabled]="user.busy || isCurrentUser(user)"
+              [attr.aria-label]="(user.banned ? 'Unban ' : 'Ban ') + user.displayName"
+              (click)="user.banned ? unban(user) : ban(user)"
+            >
+              {{ user.banned ? 'Unban' : 'Ban' }}
+            </button>
           </div>
         </li>
       }

@@ -138,14 +138,23 @@
   font-size: 0.85rem;
 }
 
-.chip.unverified {
+.chip.unverified,
+.chip.banned {
   font-size: 0.7rem;
   padding: 3px 8px;
   border-radius: 4px;
-  background: #fff3e0;
-  color: #e65100;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.chip.unverified {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.chip.banned {
+  background: #ffebee;
+  color: #c62828;
 }
 
 .role-badge {
@@ -208,6 +217,26 @@
   font-size: 0.85rem;
   font-weight: 600;
   animation: fade-in 0.2s ease;
+}
+
+.ban-btn {
+  padding: 8px 14px;
+  border-radius: 4px;
+  border: 1px solid #c62828;
+  background: #fff;
+  color: #c62828;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: #ffebee;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
 @keyframes fade-in {

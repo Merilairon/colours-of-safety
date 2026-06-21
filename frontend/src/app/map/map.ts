@@ -75,8 +75,16 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     description: string;
     safetyRating: number;
     wheelchairAccessible?: boolean;
+    location?: { type: 'Point'; coordinates: [number, number] };
+    area?: GeoPolygon;
   } | null>(null);
   protected readonly editSubmitting = signal(false);
+  protected readonly editGeometry = signal<{
+    location?: [number, number];
+    area?: GeoPolygon;
+  } | null>(null);
+  protected readonly editGeometryMode = signal<'move' | 'redraw' | null>(null);
+  protected readonly editGeometryHint = signal<string | null>(null);
 
   // Filters
   protected readonly selectedCategory = signal<string>('all');
@@ -124,6 +132,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private poiClusterLayer!: any;
   private districtLayer!: L.LayerGroup;
   private draftLayer!: L.LayerGroup;
+  private editGeometryLayer!: L.LayerGroup;
   private blendedPane!: HTMLElement;
 
   ngAfterViewInit(): void {
@@ -176,6 +185,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.districtLayer = L.layerGroup().addTo(this.map);
     this.pendingLayer = L.layerGroup().addTo(this.map);
     this.draftLayer = L.layerGroup().addTo(this.map);
+    this.editGeometryLayer = L.layerGroup().addTo(this.map);
     this.initBlendedPane();
 
     console.log('Map init - isLoggedIn:', this.isLoggedIn(), 'user:', this.auth.user());
@@ -291,6 +301,24 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private onShapeCreated(event: L.DrawEvents.Created): void {
+    if (this.editGeometryMode() === 'redraw' && this.editingTarget()) {
+      const layer = event.layer;
+      if (event.layerType === 'polygon' && layer instanceof L.Polygon) {
+        const area = this.polygonToGeoJson(layer);
+        if (!area) {
+          return;
+        }
+        this.editGeometryLayer.clearLayers();
+        this.editGeometryLayer.addLayer(layer);
+        this.editGeometry.update((g) => ({ ...g, area }));
+        this.editGeometryMode.set(null);
+        this.editGeometryHint.set(null);
+      } else {
+        this.editGeometryHint.set('Please draw a polygon for the new district area.');
+      }
+      return;
+    }
+
     this.clearDraft();
     const layer = event.layer;
 
@@ -397,7 +425,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     description: string;
     safetyRating: number;
     wheelchairAccessible?: boolean;
+    location?: { type: 'Point'; coordinates: [number, number] };
+    area?: GeoPolygon;
   }): void {
+    this.clearEditGeometry();
     this.editingTarget.set(target);
     this.editForm.reset({
       name: target.name,
@@ -406,6 +437,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       safetyRating: target.safetyRating,
       wheelchairAccessible: target.wheelchairAccessible ?? false,
     });
+    if (target.kind === 'poi' && target.location) {
+      this.editGeometry.set({
+        location: [...target.location.coordinates] as [number, number],
+      });
+    } else if (target.kind === 'district' && target.area) {
+      this.editGeometry.set({ area: target.area });
+    }
   }
 
   protected submitEditProposal(): void {
@@ -416,6 +454,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     this.editSubmitting.set(true);
     const value = this.editForm.getRawValue();
+    const geometry = this.editGeometry();
     const proposedData: EditProposalData = {
       name: value.name,
       description: value.description,
@@ -424,6 +463,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     };
     if (target.kind === 'poi') {
       proposedData.category = value.category;
+      if (geometry?.location) {
+        proposedData.location = { type: 'Point', coordinates: geometry.location };
+      }
+    } else if (target.kind === 'district' && geometry?.area) {
+      proposedData.area = geometry.area;
     }
     const payload: CreateEditProposalPayload = {
       targetType: target.kind,
@@ -433,6 +477,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.markings.createEditProposal(payload).subscribe({
       next: () => {
         this.editSubmitting.set(false);
+        this.clearEditGeometry();
         this.editingTarget.set(null);
         this.showSuccessToast('Edit proposal submitted. It will be reviewed soon.');
       },
@@ -444,7 +489,46 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   protected cancelEditProposal(): void {
+    this.clearEditGeometry();
     this.editingTarget.set(null);
+  }
+
+  protected formatLocation(coords?: [number, number]): string {
+    if (!coords) return 'Not set';
+    return `${coords[1].toFixed(4)}, ${coords[0].toFixed(4)}`;
+  }
+
+  protected startMovePoi(): void {
+    const target = this.editingTarget();
+    const geometry = this.editGeometry();
+    if (!target || target.kind !== 'poi' || !geometry?.location) return;
+    this.editGeometryLayer.clearLayers();
+    this.editGeometryMode.set('move');
+    this.editGeometryHint.set('Drag the pin to the new location.');
+    const [lng, lat] = geometry.location;
+    const marker = L.marker([lat, lng], { draggable: true });
+    marker.addTo(this.editGeometryLayer);
+    marker.on('dragend', (e) => {
+      const { lat: newLat, lng: newLng } = (e.target as L.Marker).getLatLng();
+      this.editGeometry.update((g) => (g ? { ...g, location: [newLng, newLat] } : g));
+    });
+  }
+
+  protected startRedrawDistrict(): void {
+    const target = this.editingTarget();
+    if (!target || target.kind !== 'district') return;
+    this.editGeometryLayer.clearLayers();
+    this.editGeometryMode.set('redraw');
+    this.editGeometryHint.set(
+      'Draw a new polygon on the map. It replaces the current district area.',
+    );
+  }
+
+  private clearEditGeometry(): void {
+    this.editGeometry.set(null);
+    this.editGeometryMode.set(null);
+    this.editGeometryHint.set(null);
+    this.editGeometryLayer.clearLayers();
   }
 
   protected cancelDraft(): void {
@@ -740,6 +824,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         description: target.description,
         safetyRating: target.safetyRating,
         wheelchairAccessible: target.wheelchairAccessible,
+        location: (target as Poi).location,
+        area: (target as District).area,
       });
     });
   }

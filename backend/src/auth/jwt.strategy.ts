@@ -23,12 +23,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
+    if (user.banned) {
+      throw new UnauthorizedException('Account suspended');
+    }
     return {
       id: user.id,
       email: user.email,
       displayName: user.displayName,
       role: user.role,
       emailVerified: user.emailVerified,
+      banned: user.banned,
     };
   }
 }

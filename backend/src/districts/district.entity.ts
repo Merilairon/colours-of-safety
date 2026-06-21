@@ -48,6 +48,9 @@ export class District {
   @Column({ type: 'enum', enum: ReviewStatus, default: ReviewStatus.PENDING })
   status: ReviewStatus;
 
+  @Column({ default: false })
+  banned: boolean;
+
   @Column({ type: 'int', default: 0 })
   voteCount: number;
 

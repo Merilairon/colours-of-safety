@@ -8,6 +8,9 @@ export interface AuthUser {
   displayName: string;
   role: UserRole;
   emailVerified: boolean;
+  banned?: boolean;
+  bannedAt?: string;
+  banReason?: string;
 }
 
 export interface AuthResult {

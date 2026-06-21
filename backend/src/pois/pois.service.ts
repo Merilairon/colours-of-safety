@@ -35,14 +35,14 @@ export class PoisService {
 
   findApproved(): Promise<Poi[]> {
     return this.pois.find({
-      where: { status: ReviewStatus.APPROVED },
+      where: { status: ReviewStatus.APPROVED, banned: false },
       order: { createdAt: 'DESC' },
     });
   }
 
   findByStatus(status: ReviewStatus): Promise<Poi[]> {
     return this.pois.find({
-      where: { status },
+      where: { status, banned: false },
       order: { createdAt: 'ASC' },
     });
   }

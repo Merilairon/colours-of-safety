@@ -7,6 +7,10 @@ export interface UpdateRolePayload {
   role: UserRole;
 }
 
+export interface BanPayload {
+  reason?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UserService {
   constructor(private readonly http: HttpClient) {}
@@ -17,5 +21,13 @@ export class UserService {
 
   updateUserRole(id: string, role: UserRole): Observable<AuthUser> {
     return this.http.patch<AuthUser>(`/api/users/${id}/role`, { role });
+  }
+
+  banUser(id: string, reason?: string): Observable<AuthUser> {
+    return this.http.patch<AuthUser>(`/api/users/${id}/ban`, { reason });
+  }
+
+  unbanUser(id: string): Observable<AuthUser> {
+    return this.http.patch<AuthUser>(`/api/users/${id}/unban`, {});
   }
 }

@@ -4,6 +4,7 @@ export interface JwtPayload {
   sub: string;
   email: string;
   role: UserRole;
+  banned: boolean;
 }
 
 export interface AuthUser {
@@ -12,4 +13,5 @@ export interface AuthUser {
   displayName: string;
   role: UserRole;
   emailVerified: boolean;
+  banned: boolean;
 }

@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { District } from '../districts/district.entity';
+import { Poi } from '../pois/poi.entity';
 import { User, UserRole } from './user.entity';
 import { UsersService } from './users.service';
 
@@ -34,10 +36,19 @@ describe('UsersService', () => {
       ),
     };
 
+    const poiRepo = {
+      update: jest.fn(() => Promise.resolve({ affected: 1 } as never)),
+    };
+    const districtRepo = {
+      update: jest.fn(() => Promise.resolve({ affected: 1 } as never)),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
         { provide: getRepositoryToken(User), useValue: repo },
+        { provide: getRepositoryToken(Poi), useValue: poiRepo },
+        { provide: getRepositoryToken(District), useValue: districtRepo },
       ],
     }).compile();
 
@@ -185,6 +196,36 @@ describe('UsersService', () => {
 
       expect(repo.update).toHaveBeenCalledWith('user-1', {
         role: UserRole.REVIEWER,
+      });
+      expect(result).toBe(updatedUser);
+    });
+  });
+
+  describe('setBanStatus', () => {
+    it('bans user and cascades to POIs and districts', async () => {
+      const updatedUser = { id: 'user-1', banned: true } as User;
+      repo.findOneOrFail.mockResolvedValueOnce(updatedUser);
+
+      const result = await service.setBanStatus('user-1', true, 'Spam');
+
+      expect(repo.update).toHaveBeenCalledWith('user-1', {
+        banned: true,
+        bannedAt: expect.any(Date),
+        banReason: 'Spam',
+      });
+      expect(result).toBe(updatedUser);
+    });
+
+    it('unbans user and clears submissions', async () => {
+      const updatedUser = { id: 'user-1', banned: false } as User;
+      repo.findOneOrFail.mockResolvedValueOnce(updatedUser);
+
+      const result = await service.setBanStatus('user-1', false);
+
+      expect(repo.update).toHaveBeenCalledWith('user-1', {
+        banned: false,
+        bannedAt: null,
+        banReason: null,
       });
       expect(result).toBe(updatedUser);
     });
