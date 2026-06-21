@@ -332,6 +332,24 @@
   }
 }
 
+// Edit proposal button in approved popups
+:host ::ng-deep .edit-proposal-btn {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: #1d1f2b;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #343748;
+  }
+}
+
 // Search + Filters Panel
 .search-panel {
   position: absolute;

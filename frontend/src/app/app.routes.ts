@@ -46,6 +46,17 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'my-edits',
+    canActivate: [authGuard],
+    loadComponent: () => import('./submissions/my-edits/my-edits').then((m) => m.MyEditsComponent),
+    resolve: { seo: seoResolver },
+    data: {
+      title: 'My Edits | Colours of Safety',
+      description: 'Track your proposed edits to existing places and districts.',
+      robots: 'noindex,nofollow',
+    },
+  },
+  {
     path: 'review',
     canActivate: [reviewerGuard],
     loadComponent: () => import('./review/review').then((m) => m.ReviewComponent),

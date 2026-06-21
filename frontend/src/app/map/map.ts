@@ -15,7 +15,15 @@ import 'leaflet-draw';
 import 'leaflet.markercluster';
 import { AuthService } from '../core/auth.service';
 import { MarkingsService } from '../core/markings.service';
-import { CreateDistrictPayload, CreatePoiPayload, GeoPolygon, Poi, District } from '../core/models';
+import {
+  CreateDistrictPayload,
+  CreateEditProposalPayload,
+  CreatePoiPayload,
+  GeoPolygon,
+  Poi,
+  District,
+  EditProposalData,
+} from '../core/models';
 import {
   POI_CATEGORIES,
   POI_CATEGORY_LABELS,
@@ -59,6 +67,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   protected readonly loadError = signal<string | null>(null);
   protected readonly submitting = signal(false);
 
+  protected readonly editingTarget = signal<{
+    kind: 'poi' | 'district';
+    id: string;
+    name: string;
+    category?: string;
+    description: string;
+    safetyRating: number;
+    wheelchairAccessible?: boolean;
+  } | null>(null);
+  protected readonly editSubmitting = signal(false);
+
   // Filters
   protected readonly selectedCategory = signal<string>('all');
   protected readonly minSafetyRating = signal<number>(1);
@@ -91,6 +110,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     safetyRating: [5, [Validators.required]],
     wheelchairAccessible: [false],
     isAnonymous: [false],
+  });
+
+  protected readonly editForm = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    description: [''],
+    category: ['other'],
+    safetyRating: [5, [Validators.required]],
+    wheelchairAccessible: [false],
   });
 
   private map!: L.Map;
@@ -362,6 +389,64 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.showToast('Could not save your submission. Please try again.');
   }
 
+  protected startEditProposal(target: {
+    kind: 'poi' | 'district';
+    id: string;
+    name: string;
+    category?: string;
+    description: string;
+    safetyRating: number;
+    wheelchairAccessible?: boolean;
+  }): void {
+    this.editingTarget.set(target);
+    this.editForm.reset({
+      name: target.name,
+      description: target.description,
+      category: target.category ?? 'other',
+      safetyRating: target.safetyRating,
+      wheelchairAccessible: target.wheelchairAccessible ?? false,
+    });
+  }
+
+  protected submitEditProposal(): void {
+    const target = this.editingTarget();
+    if (!target || this.editForm.invalid || this.editSubmitting()) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+    this.editSubmitting.set(true);
+    const value = this.editForm.getRawValue();
+    const proposedData: EditProposalData = {
+      name: value.name,
+      description: value.description,
+      safetyRating: value.safetyRating,
+      wheelchairAccessible: value.wheelchairAccessible,
+    };
+    if (target.kind === 'poi') {
+      proposedData.category = value.category;
+    }
+    const payload: CreateEditProposalPayload = {
+      targetType: target.kind,
+      targetId: target.id,
+      proposedData,
+    };
+    this.markings.createEditProposal(payload).subscribe({
+      next: () => {
+        this.editSubmitting.set(false);
+        this.editingTarget.set(null);
+        this.showSuccessToast('Edit proposal submitted. It will be reviewed soon.');
+      },
+      error: () => {
+        this.editSubmitting.set(false);
+        this.showToast('Could not submit edit proposal. Please try again.');
+      },
+    });
+  }
+
+  protected cancelEditProposal(): void {
+    this.editingTarget.set(null);
+  }
+
   protected cancelDraft(): void {
     this.clearDraft();
   }
@@ -417,7 +502,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         fillOpacity: 0.85,
         weight: 2,
       });
-      marker.bindPopup(this.poiPopup(poi.name, poi));
+      marker.bindPopup(this.poiPopup(poi.name, poi, poi.id));
+      if (this.isLoggedIn()) {
+        marker.on('popupopen', () => this.attachEditHandler(marker, poi, 'poi'));
+      }
       this.poiClusterLayer.addLayer(marker);
     }
 
@@ -443,8 +531,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           district.description,
           district.safetyRating,
           district.wheelchairAccessible,
+          district.id,
         ),
       );
+      if (this.isLoggedIn()) {
+        polygon.on('popupopen', () => this.attachEditHandler(polygon, district, 'district'));
+      }
       this.districtLayer.addLayer(polygon);
     }
   }
@@ -630,6 +722,28 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  private attachEditHandler(
+    layer: L.Layer,
+    target: Poi | District,
+    kind: 'poi' | 'district',
+  ): void {
+    const id = kind === 'poi' ? (target as Poi).id : (target as District).id;
+    const btn = document.getElementById(`edit-proposal-${id}`);
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      this.startEditProposal({
+        kind,
+        id,
+        name: target.name,
+        category: (target as Poi).category,
+        description: target.description,
+        safetyRating: target.safetyRating,
+        wheelchairAccessible: target.wheelchairAccessible,
+      });
+    });
+  }
+
   private pendingPoiPopup(poi: Poi): string {
     const indicator = safetyIndicator(poi.safetyRating);
     const wheelchairBadge = poi.wheelchairAccessible ? ' ♿' : '';
@@ -677,6 +791,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       safetyRating: number;
       wheelchairAccessible?: boolean;
     },
+    id?: string,
   ): string {
     const indicator = safetyIndicator(poi.safetyRating);
     const wheelchairBadge = poi.wheelchairAccessible ? ' ♿' : '';
@@ -688,6 +803,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         · ${safetyLabel(poi.safetyRating)}
       </div>
       ${poi.description ? `<p>${this.escape(poi.description)}</p>` : ''}
+      ${this.editProposalButton(id)}
       ${this.reportLink()}
     `;
   }
@@ -697,6 +813,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     description: string,
     rating: number,
     wheelchairAccessible?: boolean,
+    id?: string,
   ): string {
     const indicator = safetyIndicator(rating);
     const wheelchairBadge = wheelchairAccessible ? ' ♿' : '';
@@ -707,8 +824,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         District · ${safetyLabel(rating)}
       </div>
       ${description ? `<p>${this.escape(description)}</p>` : ''}
+      ${this.editProposalButton(id)}
       ${this.reportLink()}
     `;
+  }
+
+  private editProposalButton(id?: string): string {
+    if (!id || !this.isLoggedIn()) return '';
+    return `<button class="edit-proposal-btn" id="edit-proposal-${id}">✎ Suggest edit</button>`;
   }
 
   private reportLink(): string {

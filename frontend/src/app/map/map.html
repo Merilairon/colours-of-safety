@@ -181,4 +181,58 @@
       </form>
     </div>
   }
+
+  @if (editingTarget(); as t) {
+    <div class="draft-panel edit-panel">
+      <h2>Suggest edit for {{ t.name }}</h2>
+      <p class="sub">Your proposed changes will be reviewed before they are published.</p>
+
+      <form [formGroup]="editForm" (ngSubmit)="submitEditProposal()">
+        <label>
+          Name
+          <input type="text" formControlName="name" />
+        </label>
+
+        @if (t.kind === 'poi') {
+          <label>
+            Category
+            <select formControlName="category">
+              @for (c of categories; track c) {
+                <option [value]="c">{{ categoryLabels[c] || c }}</option>
+              }
+            </select>
+          </label>
+        }
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="wheelchairAccessible" />
+          ♿ Wheelchair accessible
+        </label>
+
+        <label>
+          Safety rating: <strong>{{ safetyLabel(editForm.controls.safetyRating.value) }}</strong>
+          <input
+            type="range"
+            min="1"
+            max="5"
+            step="1"
+            formControlName="safetyRating"
+            [attr.aria-valuetext]="safetyLabel(editForm.controls.safetyRating.value)"
+          />
+        </label>
+
+        <label>
+          Notes (optional)
+          <textarea rows="3" formControlName="description"></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="button" class="secondary" (click)="cancelEditProposal()">Cancel</button>
+          <button type="submit" [disabled]="editSubmitting()">
+            {{ editSubmitting() ? 'Submitting…' : 'Submit edit proposal' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
 </div>

@@ -9,14 +9,21 @@ describe('UsersService', () => {
   let repo: jest.Mocked<
     Pick<
       Repository<User>,
-      'create' | 'save' | 'findOne' | 'findOneOrFail' | 'count' | 'find' | 'update' | 'createQueryBuilder'
+      | 'create'
+      | 'save'
+      | 'findOne'
+      | 'findOneOrFail'
+      | 'count'
+      | 'find'
+      | 'update'
+      | 'createQueryBuilder'
     >
   >;
 
   beforeEach(async () => {
     repo = {
       create: jest.fn((dto: Partial<User>) => dto as User),
-      save: jest.fn((user: User) => Promise.resolve({ id: 'user-1', ...user } as User)),
+      save: jest.fn((user: User) => Promise.resolve({ id: 'user-1', ...user })),
       findOne: jest.fn(() => Promise.resolve(null)),
       findOneOrFail: jest.fn(() => Promise.resolve({ id: 'user-1' } as User)),
       count: jest.fn(() => Promise.resolve(0)),
@@ -103,7 +110,9 @@ describe('UsersService', () => {
       const result = await service.findByEmail('test@example.com');
 
       expect(result).toBe(user);
-      expect(repo.findOne).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
+      expect(repo.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+      });
     });
 
     it('returns null when email not found', async () => {
@@ -117,7 +126,11 @@ describe('UsersService', () => {
 
   describe('findByEmailWithPassword', () => {
     it('queries with password hash exposed', async () => {
-      const user = { id: 'user-1', email: 'test@example.com', passwordHash: 'secret' } as User;
+      const user = {
+        id: 'user-1',
+        email: 'test@example.com',
+        passwordHash: 'secret',
+      } as User;
       const mockGetOne = jest.fn().mockResolvedValue(user);
       repo.createQueryBuilder.mockReturnValueOnce(
         createMockQueryBuilder({ getOne: mockGetOne }),
@@ -132,7 +145,9 @@ describe('UsersService', () => {
     it('returns null when email not found with password query', async () => {
       repo.createQueryBuilder.mockReturnValueOnce(createMockQueryBuilder());
 
-      const result = await service.findByEmailWithPassword('nonexistent@example.com');
+      const result = await service.findByEmailWithPassword(
+        'nonexistent@example.com',
+      );
 
       expect(result).toBeNull();
     });
@@ -168,7 +183,9 @@ describe('UsersService', () => {
 
       const result = await service.assignRole('user-1', UserRole.REVIEWER);
 
-      expect(repo.update).toHaveBeenCalledWith('user-1', { role: UserRole.REVIEWER });
+      expect(repo.update).toHaveBeenCalledWith('user-1', {
+        role: UserRole.REVIEWER,
+      });
       expect(result).toBe(updatedUser);
     });
   });

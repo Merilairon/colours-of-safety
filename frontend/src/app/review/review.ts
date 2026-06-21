@@ -1,12 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { MarkingsService } from '../core/markings.service';
-import { District, Poi, ReviewStatus } from '../core/models';
+import { District, EditProposal, EditProposalData, Poi, ReviewStatus } from '../core/models';
 import { safetyColor, safetyLabel } from '../core/safety';
 
 interface QueueItem {
   id: string;
   kind: 'poi' | 'district';
+  isEdit: boolean;
   name: string;
   description: string;
   category?: string;
@@ -15,6 +16,8 @@ interface QueueItem {
   note: string;
   busy: boolean;
   voteCount: number;
+  originalData?: EditProposalData;
+  proposedData?: EditProposalData;
 }
 
 @Component({
@@ -49,9 +52,10 @@ export class ReviewComponent implements OnInit {
     Promise.all([
       this.fetch(this.markings.getPendingPois(), 'poi'),
       this.fetch(this.markings.getPendingDistricts(), 'district'),
+      this.fetchEdits(),
     ])
-      .then(([pois, districts]) => {
-        const all = [...pois, ...districts];
+      .then(([pois, districts, edits]) => {
+        const all = [...pois, ...districts, ...edits];
         this.items.set(all);
         this.applyFilter();
         this.loading.set(false);
@@ -88,6 +92,7 @@ export class ReviewComponent implements OnInit {
             rows.map((row) => ({
               id: row.id,
               kind,
+              isEdit: false,
               name: row.name,
               description: row.description,
               category: kind === 'poi' ? (row as Poi).category : undefined,
@@ -96,6 +101,35 @@ export class ReviewComponent implements OnInit {
               note: '',
               busy: false,
               voteCount: row.voteCount || 0,
+            })),
+          ),
+        error: reject,
+      });
+    });
+  }
+
+  private fetchEdits(): Promise<QueueItem[]> {
+    return new Promise((resolve, reject) => {
+      this.markings.getPendingEdits().subscribe({
+        next: (edits) =>
+          resolve(
+            edits.map((edit) => ({
+              id: edit.id,
+              kind: edit.targetType,
+              isEdit: true,
+              name: edit.proposedData.name ?? edit.originalData.name ?? 'Unknown',
+              description: edit.proposedData.description ?? edit.originalData.description ?? '',
+              category:
+                edit.targetType === 'poi'
+                  ? (edit.proposedData.category ?? edit.originalData.category)
+                  : undefined,
+              safetyRating: edit.proposedData.safetyRating ?? edit.originalData.safetyRating ?? 0,
+              author: edit.createdBy?.displayName ?? 'Unknown',
+              note: '',
+              busy: false,
+              voteCount: 0,
+              originalData: edit.originalData,
+              proposedData: edit.proposedData,
             })),
           ),
         error: reject,
@@ -115,8 +149,9 @@ export class ReviewComponent implements OnInit {
     }
     this.setBusy(item, true);
     const payload = { status, reviewNote: item.note || undefined };
-    const obs: Observable<Poi | District> =
-      item.kind === 'poi'
+    const obs: Observable<unknown> = item.isEdit
+      ? this.markings.reviewEdit(item.id, payload)
+      : item.kind === 'poi'
         ? this.markings.reviewPoi(item.id, payload)
         : this.markings.reviewDistrict(item.id, payload);
 
@@ -134,6 +169,50 @@ export class ReviewComponent implements OnInit {
 
   private setBusy(item: QueueItem, busy: boolean): void {
     this.items.update((list) => list.map((it) => (it.id === item.id ? { ...it, busy } : it)));
+  }
+
+  protected diff(item: QueueItem): Array<{ label: string; before: string; after: string }> {
+    if (!item.originalData || !item.proposedData) return [];
+    const o = item.originalData;
+    const p = item.proposedData;
+    const changes: Array<{ label: string; before: string; after: string }> = [];
+    if (p.name !== undefined && p.name !== o.name) {
+      changes.push({ label: 'Name', before: o.name ?? '', after: p.name });
+    }
+    if (p.category !== undefined && p.category !== o.category) {
+      changes.push({ label: 'Category', before: o.category ?? '', after: p.category });
+    }
+    if (p.description !== undefined && p.description !== o.description) {
+      changes.push({ label: 'Description', before: o.description ?? '', after: p.description });
+    }
+    if (p.safetyRating !== undefined && p.safetyRating !== o.safetyRating) {
+      changes.push({
+        label: 'Safety rating',
+        before: String(o.safetyRating ?? ''),
+        after: String(p.safetyRating),
+      });
+    }
+    if (p.wheelchairAccessible !== undefined && p.wheelchairAccessible !== o.wheelchairAccessible) {
+      changes.push({
+        label: 'Wheelchair accessible',
+        before: o.wheelchairAccessible ? 'Yes' : 'No',
+        after: p.wheelchairAccessible ? 'Yes' : 'No',
+      });
+    }
+    if (p.location !== undefined && JSON.stringify(p.location) !== JSON.stringify(o.location)) {
+      changes.push({ label: 'Location', before: 'changed', after: 'changed' });
+    }
+    if (p.area !== undefined && JSON.stringify(p.area) !== JSON.stringify(o.area)) {
+      changes.push({ label: 'Area', before: 'changed', after: 'changed' });
+    }
+    if (p.blendEdges !== undefined && p.blendEdges !== o.blendEdges) {
+      changes.push({
+        label: 'Blend edges',
+        before: o.blendEdges ? 'Yes' : 'No',
+        after: p.blendEdges ? 'Yes' : 'No',
+      });
+    }
+    return changes;
   }
 
   protected toggleSelection(id: string): void {
@@ -177,8 +256,9 @@ export class ReviewComponent implements OnInit {
 
       this.setBusy(item, true);
       const payload = { status, reviewNote: item.note || undefined };
-      const obs: Observable<unknown> =
-        item.kind === 'poi'
+      const obs: Observable<unknown> = item.isEdit
+        ? this.markings.reviewEdit(item.id, payload)
+        : item.kind === 'poi'
           ? this.markings.reviewPoi(item.id, payload)
           : this.markings.reviewDistrict(item.id, payload);
 

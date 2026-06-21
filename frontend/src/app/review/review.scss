@@ -183,6 +183,57 @@ h1 {
     font-size: 0.95rem;
   }
 
+  .diff {
+    margin: 0 0 0.75rem;
+    display: grid;
+    gap: 0.35rem;
+
+    .diff-row {
+      display: grid;
+      grid-template-columns: 7rem 1fr auto 1fr;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid #e8e9ef;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .diff-label {
+      font-weight: 600;
+      color: #3a3d4d;
+    }
+
+    .diff-before,
+    .diff-after {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .diff-before {
+      background: #f3e3e6;
+      color: #d7263d;
+      text-decoration: line-through;
+    }
+
+    .diff-after {
+      background: #e8f5e9;
+      color: #2e933c;
+    }
+
+    .diff-arrow {
+      color: #6b6f80;
+      font-weight: 600;
+    }
+  }
+
   textarea {
     width: 100%;
     padding: 0.5rem 0.6rem;

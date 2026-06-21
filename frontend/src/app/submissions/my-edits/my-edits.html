@@ -1,0 +1,45 @@
+<div class="page">
+  <h1>My edits</h1>
+  <p class="sub">Track the status of your proposed edits to places and districts.</p>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else if (edits().length === 0) {
+    <p class="muted">You have not submitted any edit proposals yet.</p>
+  } @else {
+    <ul class="edits-list">
+      @for (edit of edits(); track edit.id) {
+        <li class="card">
+          <div class="card-head">
+            <span class="kind">{{ edit.targetType === 'poi' ? 'Place' : 'District' }}</span>
+            <span class="status" [class]="statusClass(edit.status)">{{ edit.status }}</span>
+          </div>
+
+          <h2>{{ targetName(edit) }}</h2>
+          <p class="meta">Proposed {{ formatDate(edit.createdAt) }}</p>
+
+          @if (edit.proposedData.safetyRating !== undefined) {
+            <p class="meta">
+              Safety rating:
+              <span class="rating" [style.background]="colorFor(edit.proposedData.safetyRating)">
+                {{ safetyLabel(edit.proposedData.safetyRating) }}
+              </span>
+            </p>
+          }
+
+          @if (edit.reviewNote) {
+            <p class="review-note">Reviewer note: {{ edit.reviewNote }}</p>
+          }
+
+          <a [routerLink]="edit.targetType === 'poi' ? ['/place', edit.targetId] : ['/']">
+            View current {{ edit.targetType === 'poi' ? 'place' : 'district' }}
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</div>

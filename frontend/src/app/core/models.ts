@@ -81,3 +81,33 @@ export interface ReviewPayload {
   status: 'approved' | 'rejected';
   reviewNote?: string;
 }
+
+export interface EditProposalData {
+  name?: string;
+  category?: string;
+  description?: string;
+  safetyRating?: number;
+  wheelchairAccessible?: boolean;
+  location?: GeoPoint;
+  area?: GeoPolygon;
+  blendEdges?: boolean;
+}
+
+export interface EditProposal {
+  id: string;
+  targetType: 'poi' | 'district';
+  targetId: string;
+  originalData: EditProposalData;
+  proposedData: EditProposalData;
+  status: ReviewStatus;
+  reviewNote: string | null;
+  createdBy?: AuthUser;
+  reviewedBy?: AuthUser;
+  createdAt: string;
+}
+
+export interface CreateEditProposalPayload {
+  targetType: 'poi' | 'district';
+  targetId: string;
+  proposedData: EditProposalData;
+}

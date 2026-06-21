@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { Pronouns, User, UserRole } from './user.entity';
 
 export interface CreateUserData {
@@ -69,7 +69,7 @@ export class UsersService {
     return this.users.findOne({
       where: {
         emailVerificationToken: token,
-        emailVerificationExpires: { $gt: new Date() } as any,
+        emailVerificationExpires: MoreThan(new Date()),
       },
     });
   }

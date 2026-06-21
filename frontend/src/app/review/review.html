@@ -70,21 +70,42 @@
               [checked]="selectedIds().has(item.id)"
               (change)="toggleSelection(item.id)"
             />
-            <span class="kind">{{ item.kind === 'poi' ? 'Place' : 'District' }}</span>
+            <span class="kind">{{
+              item.isEdit ? 'Edit' : item.kind === 'poi' ? 'Place' : 'District'
+            }}</span>
             <span class="rating" [style.background]="colorFor(item.safetyRating)">{{
               safetyLabel(item.safetyRating)
             }}</span>
           </div>
 
-          <h2>{{ item.name }}</h2>
+          <h2>{{ item.isEdit ? 'Proposed edit for ' + item.name : item.name }}</h2>
           <p class="meta">
             @if (item.category) {
               <span>{{ item.category }}</span> ·
             }
-            <span>by {{ item.author }}</span> ·
-            <span class="vote-badge">{{ item.voteCount }} 👍</span>
+            <span>by {{ item.author }}</span>
+            @if (!item.isEdit) {
+              · <span class="vote-badge">{{ item.voteCount }} 👍</span>
+            }
           </p>
-          @if (item.description) {
+          @if (item.isEdit) {
+            <div class="diff">
+              @for (change of diff(item); track change.label) {
+                <div class="diff-row">
+                  <span class="diff-label">{{ change.label }}</span>
+                  <span class="diff-before" [title]="'Before: ' + change.before">{{
+                    change.before
+                  }}</span>
+                  <span class="diff-arrow">→</span>
+                  <span class="diff-after" [title]="'After: ' + change.after">{{
+                    change.after
+                  }}</span>
+                </div>
+              } @empty {
+                <p class="muted">No changes detected.</p>
+              }
+            </div>
+          } @else if (item.description) {
             <p class="desc">{{ item.description }}</p>
           }
 

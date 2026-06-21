@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { DistrictsModule } from './districts/districts.module';
+import { EditsModule } from './edits/edits.module';
 import { PoisModule } from './pois/pois.module';
 import { SeedService } from './seed/seed.service';
 import { UsersModule } from './users/users.module';
@@ -47,6 +48,7 @@ import { VotesModule } from './common/votes.module';
     PoisModule,
     DistrictsModule,
     VotesModule,
+    EditsModule,
   ],
   providers: [
     SeedService,

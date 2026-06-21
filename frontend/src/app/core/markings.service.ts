@@ -1,7 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CreateDistrictPayload, CreatePoiPayload, District, Poi, ReviewPayload } from './models';
+import {
+  CreateDistrictPayload,
+  CreateEditProposalPayload,
+  CreatePoiPayload,
+  District,
+  EditProposal,
+  Poi,
+  ReviewPayload,
+} from './models';
 
 export interface VoteResponse {
   success: boolean;
@@ -98,5 +106,22 @@ export class MarkingsService {
 
   hasVotedDistrict(id: string): Observable<VoteStatusResponse> {
     return this.http.get<VoteStatusResponse>(`/api/districts/${id}/voted`);
+  }
+
+  // ----- Edit proposals -----
+  createEditProposal(payload: CreateEditProposalPayload): Observable<EditProposal> {
+    return this.http.post<EditProposal>('/api/edits', payload);
+  }
+
+  getPendingEdits(): Observable<EditProposal[]> {
+    return this.http.get<EditProposal[]>('/api/edits/pending');
+  }
+
+  getMyEdits(): Observable<EditProposal[]> {
+    return this.http.get<EditProposal[]>('/api/edits/mine');
+  }
+
+  reviewEdit(id: string, payload: ReviewPayload): Observable<EditProposal> {
+    return this.http.patch<EditProposal>(`/api/edits/${id}/review`, payload);
   }
 }

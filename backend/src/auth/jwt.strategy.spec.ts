@@ -79,7 +79,9 @@ describe('JwtStrategy', () => {
 
       usersService.findById.mockResolvedValueOnce(null);
 
-      await expect(strategy.validate(payload)).rejects.toBeInstanceOf(UnauthorizedException);
+      await expect(strategy.validate(payload)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
       expect(usersService.findById).toHaveBeenCalledWith('nonexistent');
     });
 
