@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import * as Sentry from '@sentry/angular';
 import { AuthService } from './core/auth.service';
 import { CookieConsentComponent } from './core/cookie-consent.component';
 import { ThemeService } from './core/theme.service';
@@ -30,5 +31,13 @@ export class App {
 
   toggleTheme(): void {
     this.theme.toggleHighContrast();
+  }
+
+  throwTestError(): void {
+    Sentry.logger.info(Sentry.logger.fmt`User ${'sentry-test'} triggered test error button`, {
+      action: 'test_error_button_click',
+    });
+    (Sentry as any).metrics?.count('test_counter', 1);
+    throw new Error('Sentry Test Error');
   }
 }

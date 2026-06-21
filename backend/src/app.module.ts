@@ -2,17 +2,21 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { SentryModule } from '@sentry/nestjs/setup';
+import { SentryGlobalFilter } from '@sentry/nestjs/setup';
 import { AuthModule } from './auth/auth.module';
 import { DistrictsModule } from './districts/districts.module';
 import { EditsModule } from './edits/edits.module';
 import { PoisModule } from './pois/pois.module';
+import { AppController } from './app.controller';
 import { SeedService } from './seed/seed.service';
 import { UsersModule } from './users/users.module';
 import { VotesModule } from './common/votes.module';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot({
       throttlers: [
@@ -50,11 +54,16 @@ import { VotesModule } from './common/votes.module';
     VotesModule,
     EditsModule,
   ],
+  controllers: [AppController],
   providers: [
     SeedService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: SentryGlobalFilter,
     },
   ],
 })
