@@ -73,6 +73,7 @@ describe('JwtStrategy', () => {
         email: 'test@example.com',
         displayName: 'Test User',
         role: UserRole.USER,
+        emailVerified: false,
       });
     });
 
