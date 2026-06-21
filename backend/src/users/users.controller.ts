@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -17,6 +18,8 @@ import { UserRole } from './user.entity';
 import { UsersService } from './users.service';
 import { AssignRoleDto } from './dto/assign-role.dto';
 import { BanUserDto } from './dto/ban-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { User } from './user.entity';
 
 const ASSIGNABLE_BY_ADMIN: UserRole[] = [UserRole.USER, UserRole.REVIEWER];
 const ASSIGNABLE_BY_SUPER_ADMIN: UserRole[] = [
@@ -95,5 +98,48 @@ export class UsersController {
     }
 
     return this.users.setBanStatus(id, false);
+  }
+
+  @Get('me')
+  async getProfile(@CurrentUser() user: AuthUser) {
+    const profile = await this.users.findProfileById(user.id);
+    if (!profile) {
+      throw new NotFoundException('User not found');
+    }
+    return this.toProfileResponse(profile);
+  }
+
+  @Patch('me')
+  async updateProfile(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    const updated = await this.users.updateProfile(user.id, dto);
+    return this.toProfileResponse(updated);
+  }
+
+  @Delete('me')
+  async deleteAccount(@CurrentUser() user: AuthUser) {
+    await this.users.deleteAccount(user.id);
+    return { message: 'Account deleted' };
+  }
+
+  private toProfileResponse(user: User) {
+    return {
+      id: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      role: user.role,
+      pronouns: user.pronouns,
+      emailVerified: user.emailVerified,
+      banned: user.banned,
+      bannedAt: user.bannedAt,
+      banReason: user.banReason,
+      avatar: user.avatar,
+      bio: user.bio,
+      notificationPreferences: user.notificationPreferences,
+      pendingEmail: user.pendingEmail,
+      createdAt: user.createdAt,
+    };
   }
 }

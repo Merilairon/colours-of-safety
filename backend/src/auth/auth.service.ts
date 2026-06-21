@@ -3,6 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -108,6 +109,76 @@ export class AuthService {
     console.log(`New verification token for ${email}: ${verificationToken}`);
 
     return { message: 'Verification email sent' };
+  }
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const user = await this.users.findByIdWithPassword(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.users.update(userId, { passwordHash });
+    return { message: 'Password changed successfully' };
+  }
+
+  async requestEmailChange(
+    userId: string,
+    newEmail: string,
+    password: string,
+  ): Promise<{ message: string }> {
+    const user = await this.users.findByIdWithPassword(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (user.email === newEmail) {
+      throw new BadRequestException(
+        'New email must be different from current email',
+      );
+    }
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      throw new UnauthorizedException('Password is incorrect');
+    }
+    const existing = await this.users.findByEmail(newEmail);
+    if (existing && existing.id !== userId) {
+      throw new ConflictException('Email is already registered');
+    }
+    const token = this.generateVerificationToken();
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await this.users.update(userId, {
+      pendingEmail: newEmail,
+      emailChangeToken: token,
+      emailChangeExpires: expires,
+    });
+    // TODO: Send verification email to newEmail
+    console.log(`Email change token for ${newEmail}: ${token}`);
+    return { message: 'Verification email sent' };
+  }
+
+  async confirmEmailChange(token: string): Promise<{ message: string }> {
+    const user = await this.users.findByEmailChangeToken(token);
+    if (!user || !user.pendingEmail) {
+      throw new NotFoundException('Invalid or expired email change token');
+    }
+    const existing = await this.users.findByEmail(user.pendingEmail);
+    if (existing && existing.id !== user.id) {
+      throw new ConflictException('Email is already registered');
+    }
+    await this.users.update(user.id, {
+      email: user.pendingEmail,
+      pendingEmail: null,
+      emailChangeToken: null,
+      emailChangeExpires: null,
+    });
+    return { message: 'Email updated successfully' };
   }
 
   private generateVerificationToken(): string {

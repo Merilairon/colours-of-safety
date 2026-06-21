@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, reviewerGuard } from './core/guards';
-import { adminGuard } from './core/guards';
+import { authGuard, reviewerGuard, adminGuard } from './core/guards';
 import { seoResolver } from './core/seo.resolver';
 
 export const routes: Routes = [
@@ -53,6 +52,17 @@ export const routes: Routes = [
     data: {
       title: 'My Edits | Colours of Safety',
       description: 'Track your proposed edits to existing places and districts.',
+      robots: 'noindex,nofollow',
+    },
+  },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./profile/profile').then((m) => m.ProfileComponent),
+    resolve: { seo: seoResolver },
+    data: {
+      title: 'Profile | Colours of Safety',
+      description: 'Manage your profile, password, email, and account settings.',
       robots: 'noindex,nofollow',
     },
   },

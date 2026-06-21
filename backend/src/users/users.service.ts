@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
+import { Vote } from '../common/vote.entity';
 import { District } from '../districts/district.entity';
 import { Poi } from '../pois/poi.entity';
-import { Pronouns, User, UserRole } from './user.entity';
+import {
+  NotificationPreferences,
+  Pronouns,
+  User,
+  UserRole,
+} from './user.entity';
 
 export interface CreateUserData {
   email: string;
@@ -21,6 +27,13 @@ export interface UpdateUserData {
   emailVerificationExpires?: Date | null;
 }
 
+export interface UpdateProfileData {
+  displayName?: string;
+  avatar?: string | null;
+  bio?: string | null;
+  notificationPreferences?: NotificationPreferences;
+}
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -30,6 +43,8 @@ export class UsersService {
     private readonly pois: Repository<Poi>,
     @InjectRepository(District)
     private readonly districts: Repository<District>,
+    @InjectRepository(Vote)
+    private readonly votes: Repository<Vote>,
   ) {}
 
   create(data: CreateUserData): Promise<User> {
@@ -51,6 +66,15 @@ export class UsersService {
       .createQueryBuilder('user')
       .addSelect('user.passwordHash')
       .where('user.email = :email', { email })
+      .getOne();
+  }
+
+  /** Includes the normally-hidden passwordHash column, for auth checks. */
+  findByIdWithPassword(id: string): Promise<User | null> {
+    return this.users
+      .createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('user.id = :id', { id })
       .getOne();
   }
 
@@ -82,8 +106,22 @@ export class UsersService {
     return this.users.findOneOrFail({ where: { id } });
   }
 
-  async update(id: string, data: UpdateUserData): Promise<void> {
+  async update(id: string, data: Partial<User>): Promise<void> {
     await this.users.update(id, data);
+  }
+
+  async findProfileById(id: string): Promise<User | null> {
+    return this.users.findOne({ where: { id } });
+  }
+
+  async updateProfile(id: string, data: UpdateProfileData): Promise<User> {
+    await this.users.update(id, data);
+    return this.users.findOneOrFail({ where: { id } });
+  }
+
+  async deleteAccount(id: string): Promise<void> {
+    await this.votes.delete({ userId: id });
+    await this.users.delete(id);
   }
 
   findByVerificationToken(token: string): Promise<User | null> {
@@ -91,6 +129,15 @@ export class UsersService {
       where: {
         emailVerificationToken: token,
         emailVerificationExpires: MoreThan(new Date()),
+      },
+    });
+  }
+
+  async findByEmailChangeToken(token: string): Promise<User | null> {
+    return this.users.findOne({
+      where: {
+        emailChangeToken: token,
+        emailChangeExpires: MoreThan(new Date()),
       },
     });
   }

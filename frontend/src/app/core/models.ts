@@ -18,6 +18,27 @@ export interface AuthResult {
   user: AuthUser;
 }
 
+export interface NotificationPreferences {
+  emailUpdates: boolean;
+}
+
+export interface Profile {
+  id: string;
+  email: string;
+  displayName: string;
+  role: UserRole;
+  emailVerified: boolean;
+  banned: boolean;
+  bannedAt?: string;
+  banReason?: string;
+  pronouns: string | null;
+  avatar: string | null;
+  bio: string | null;
+  notificationPreferences: NotificationPreferences;
+  pendingEmail: string | null;
+  createdAt: string;
+}
+
 export interface GeoPoint {
   type: 'Point';
   coordinates: [number, number]; // [lng, lat]

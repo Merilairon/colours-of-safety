@@ -51,7 +51,7 @@ describe('JwtStrategy', () => {
         banned: false,
       };
 
-      const user: User = {
+      const user = {
         id: 'user-1',
         email: 'test@example.com',
         displayName: 'Test User',
@@ -65,7 +65,7 @@ describe('JwtStrategy', () => {
         bannedAt: null,
         banReason: null,
         createdAt: new Date(),
-      };
+      } as User;
 
       usersService.findById.mockResolvedValueOnce(user);
 
@@ -106,7 +106,7 @@ describe('JwtStrategy', () => {
         banned: false,
       };
 
-      const user: User = {
+      const user = {
         id: 'banned-user',
         email: 'banned@example.com',
         displayName: 'Banned User',
@@ -120,7 +120,7 @@ describe('JwtStrategy', () => {
         bannedAt: new Date(),
         banReason: 'Spam',
         createdAt: new Date(),
-      };
+      } as User;
 
       usersService.findById.mockResolvedValueOnce(user);
 
@@ -138,7 +138,7 @@ describe('JwtStrategy', () => {
         banned: false,
       };
 
-      const user: User = {
+      const user = {
         id: 'user-1',
         email: 'admin@example.com',
         displayName: 'Admin User',
@@ -152,7 +152,7 @@ describe('JwtStrategy', () => {
         bannedAt: null,
         banReason: null,
         createdAt: new Date(),
-      };
+      } as User;
 
       usersService.findById.mockResolvedValueOnce(user);
 
@@ -169,7 +169,7 @@ describe('JwtStrategy', () => {
         banned: false,
       };
 
-      const user: User = {
+      const user = {
         id: 'user-1',
         email: 'reviewer@example.com',
         displayName: 'Reviewer User',
@@ -183,7 +183,7 @@ describe('JwtStrategy', () => {
         bannedAt: null,
         banReason: null,
         createdAt: new Date(),
-      };
+      } as User;
 
       usersService.findById.mockResolvedValueOnce(user);
 
@@ -200,7 +200,7 @@ describe('JwtStrategy', () => {
         banned: false,
       };
 
-      const user: User = {
+      const user = {
         id: 'user-1',
         email: 'super@example.com',
         displayName: 'Super Admin',
@@ -214,7 +214,7 @@ describe('JwtStrategy', () => {
         bannedAt: null,
         banReason: null,
         createdAt: new Date(),
-      };
+      } as User;
 
       usersService.findById.mockResolvedValueOnce(user);
 

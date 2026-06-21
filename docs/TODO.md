@@ -138,11 +138,11 @@
 
 | Task                                                        | Files                                                                        | Effort   |
 | ----------------------------------------------------------- | ---------------------------------------------------------------------------- | -------- |
-| [ ] User profile page — view/edit display name, avatar, bio | `@/frontend/src/app/profile/`, `@/backend/src/users/`                        | 1–2 days |
-| [ ] Change password with current-password confirmation      | `@/frontend/src/app/profile/`, `@/backend/src/auth/`                         | 0.5 day  |
-| [ ] Update email address with verification flow             | `@/frontend/src/app/profile/`, `@/backend/src/users/`, `@/backend/src/auth/` | 1 day    |
-| [ ] Notification preferences toggle                         | `@/frontend/src/app/profile/`, `@/backend/src/users/user.entity.ts`          | 0.5 day  |
-| [ ] Account deletion (GDPR Art. 17)                         | `@/frontend/src/app/profile/`, `@/backend/src/users/`                        | 1 day    |
+| [x] User profile page — view/edit display name, avatar, bio | `@/frontend/src/app/profile/`, `@/backend/src/users/`                        | 1–2 days |
+| [x] Change password with current-password confirmation      | `@/frontend/src/app/profile/`, `@/backend/src/auth/`                         | 0.5 day  |
+| [x] Update email address with verification flow             | `@/frontend/src/app/profile/`, `@/backend/src/users/`, `@/backend/src/auth/` | 1 day    |
+| [x] Notification preferences toggle                         | `@/frontend/src/app/profile/`, `@/backend/src/users/user.entity.ts`          | 0.5 day  |
+| [x] Account deletion (GDPR Art. 17)                         | `@/frontend/src/app/profile/`, `@/backend/src/users/`                        | 1 day    |
 
 ### Admin Ban & Content Sweep (PRD P1)
 

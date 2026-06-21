@@ -47,6 +47,14 @@ export class AuthService {
     this._user.set(null);
   }
 
+  patchUser(partial: Partial<AuthUser>): void {
+    const current = this._user();
+    if (!current) return;
+    const updated = { ...current, ...partial };
+    localStorage.setItem(USER_KEY, JSON.stringify(updated));
+    this._user.set(updated);
+  }
+
   get token(): string | null {
     return localStorage.getItem(TOKEN_KEY);
   }

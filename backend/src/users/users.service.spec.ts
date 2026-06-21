@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Vote } from '../common/vote.entity';
 import { District } from '../districts/district.entity';
 import { Poi } from '../pois/poi.entity';
 import { User, UserRole } from './user.entity';
@@ -42,6 +43,9 @@ describe('UsersService', () => {
     const districtRepo = {
       update: jest.fn(() => Promise.resolve({ affected: 1 } as never)),
     };
+    const voteRepo = {
+      delete: jest.fn(() => Promise.resolve({ affected: 1 } as never)),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -49,6 +53,7 @@ describe('UsersService', () => {
         { provide: getRepositoryToken(User), useValue: repo },
         { provide: getRepositoryToken(Poi), useValue: poiRepo },
         { provide: getRepositoryToken(District), useValue: districtRepo },
+        { provide: getRepositoryToken(Vote), useValue: voteRepo },
       ],
     }).compile();
 

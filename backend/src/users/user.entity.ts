@@ -22,6 +22,10 @@ export enum Pronouns {
   CUSTOM = 'custom',
 }
 
+export interface NotificationPreferences {
+  emailUpdates: boolean;
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -68,6 +72,24 @@ export class User {
 
   @Column({ type: 'text', nullable: true })
   banReason: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  avatar: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  bio: string | null;
+
+  @Column({ type: 'jsonb', default: { emailUpdates: true } })
+  notificationPreferences: NotificationPreferences;
+
+  @Column({ type: 'varchar', nullable: true })
+  pendingEmail: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  emailChangeToken: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  emailChangeExpires: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
