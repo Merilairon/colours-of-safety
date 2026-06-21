@@ -3,7 +3,7 @@
 **Product:** Colours of Safety  
 **URL:** coloursofsafety.com  
 **Purpose:** Community map for LGBTQIA+ safe places and districts  
-**Last updated:** 2026-06-07 (rev 3)
+**Last updated:** 2026-06-21 (rev 4)
 
 ---
 
@@ -61,10 +61,13 @@
 - Receive a confirmation (toast/notification) after submitting, so I know the action succeeded
 - Filter the map by category (bar, healthcare, etc.) or minimum safety rating, so I find relevant places faster
 - See my pending submissions rendered on the map in a translucent style, so I know where they are while awaiting review
+- Propose an edit to any existing POI or district, so outdated or incorrect information can be corrected
+- See the status of my proposed edits and any reviewer feedback, so I can track whether they were accepted
 
 **AS A reviewer, I want to:**
 
 - Filter the queue by type (place vs district) or category, so I can batch-process related items
+- Review proposed edits to existing POIs or districts, so I can approve or reject changes before they are published
 
 **AS AN admin, I want to:**
 
@@ -115,19 +118,23 @@
 
 ## 3. Acceptance Criteria — P0 Stories
 
-| Story                        | Acceptance Criteria                                                                                                                                                                                                                                                                              |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Browse map (guest)           | Approved POIs and districts load within 3 s on a standard connection; colour-coded by safety rating; POIs cluster when zoomed out with count badges                                                                                                                                              |
-| Register                     | Email uniqueness enforced; password min 8 chars; inline error on duplicate email                                                                                                                                                                                                                 |
-| Submit POI                   | Name required (min 2 chars); category required; rating 1–5; submission created with `pending` status; not visible on public map                                                                                                                                                                  |
-| Submit district              | Polygon drawn on map; same form fields as POI minus category                                                                                                                                                                                                                                     |
-| Review approval              | Reviewer can approve/reject from queue; optional note saved; approved marking appears on map; contributor sees updated status in "My submissions"                                                                                                                                                |
-| My submissions               | Lists all own POIs and districts with status badge and reviewer note if present; newest-first                                                                                                                                                                                                    |
-| Admin user management        | Admin can list users and change roles via `/admin` route                                                                                                                                                                                                                                         |
-| Pending on map (contributor) | Own `pending` POIs render on map at 40% opacity; own `pending` districts render with hatched/translucent fill; popup labels them "Pending — awaiting review"; not visible to other logged-out users or other contributors                                                                        |
-| Pending on map (public)      | All `pending` submissions visible to logged-in users at 40% opacity; guests see none; popup shows vote tally + upvote/downvote buttons (logged-in only)                                                                                                                                          |
-| Community voting             | Each logged-in user casts ≤1 vote (up or down) per submission; vote count stored on entity; reaching configurable threshold (default: **10 net upvotes**) triggers auto-approval and sets `status = approved`; submission then renders at full opacity; reviewer queue shows vote score per item |
-| POI clustering               | POIs cluster within 50px radius when zoomed out; cluster size (small/medium/large) reflects child count; clicking cluster zooms to bounds; at max zoom clusters spiderfy to show individual markers; cluster icons use brand colour gradient (pink → dark pink)                                  |
+| Story                        | Acceptance Criteria                                                                                                                                                                                                                                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Browse map (guest)           | Approved POIs and districts load within 3 s on a standard connection; colour-coded by safety rating; POIs cluster when zoomed out with count badges                                                                                                                                                                 |
+| Register                     | Email uniqueness enforced; password min 8 chars; inline error on duplicate email                                                                                                                                                                                                                                    |
+| Submit POI                   | Name required (min 2 chars); category required; rating 1–5; submission created with `pending` status; not visible on public map                                                                                                                                                                                     |
+| Submit district              | Polygon drawn on map; same form fields as POI minus category                                                                                                                                                                                                                                                        |
+| Review approval              | Reviewer can approve/reject from queue; optional note saved; approved marking appears on map; contributor sees updated status in "My submissions"                                                                                                                                                                   |
+| My submissions               | Lists all own POIs and districts with status badge and reviewer note if present; newest-first                                                                                                                                                                                                                       |
+| Admin user management        | Admin can list users and change roles via `/admin` route                                                                                                                                                                                                                                                            |
+| Pending on map (contributor) | Own `pending` POIs render on map at 40% opacity; own `pending` districts render with hatched/translucent fill; popup labels them "Pending — awaiting review"; not visible to other logged-out users or other contributors                                                                                           |
+| Pending on map (public)      | All `pending` submissions visible to logged-in users at 40% opacity; guests see none; popup shows vote tally + upvote/downvote buttons (logged-in only)                                                                                                                                                             |
+| Community voting             | Each logged-in user casts ≤1 vote (up or down) per submission; vote count stored on entity; reaching configurable threshold (default: **10 net upvotes**) triggers auto-approval and sets `status = approved`; submission then renders at full opacity; reviewer queue shows vote score per item                    |
+| POI clustering               | POIs cluster within 50px radius when zoomed out; cluster size (small/medium/large) reflects child count; clicking cluster zooms to bounds; at max zoom clusters spiderfy to show individual markers; cluster icons use brand colour gradient (pink → dark pink)                                                     |
+| Propose POI edit             | Logged-in user can open any POI/district and submit an edit proposal; changes include name, category, rating, description, and/or location; original entity remains unchanged; proposal is created with `pending` status and linked to the target entity                                                            |
+| Propose district edit        | Same as POI edit proposal; polygon geometry can also be modified; proposal is queued for review without affecting the currently approved district                                                                                                                                                                   |
+| Review edit proposal         | Reviewer sees edit proposals in queue with diff (old vs new values) and original author; can approve or reject with an optional note; on approval, the target entity is updated and the proposal status becomes `approved`; on rejection, the target entity is unchanged and the proposal status becomes `rejected` |
+| My edits                     | Contributor can list all own edit proposals with target name, status badge, and reviewer note; newest-first; linked to the current version of the target entity                                                                                                                                                     |
 
 ---
 
