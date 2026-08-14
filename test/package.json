@@ -1,0 +1,20 @@
+{
+  "name": "ui-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "pretest": "tsc && mkdir -p reports",
+    "test": "cucumber-js --require 'dist/support/*.js' --require 'dist/steps/**/*.js' 'features/**/*.feature' --format json:reports/cucumber.json; CUCUMBER_STATUS=$?; node scripts/generateReport.js; exit $CUCUMBER_STATUS",
+    "compile": "tsc"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^13.2.1",
+    "@types/node": "^26.2.0",
+    "@types/selenium-webdriver": "^4.35.6",
+    "cucumber-html-reporter": "^7.2.0",
+    "dotenv": "^17.4.2",
+    "selenium-webdriver": "^4.47.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2"
+  }
+}
