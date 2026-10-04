@@ -28,8 +28,26 @@ data:
             try_files $uri $uri/ /index.html;
         }
 
+        # Requests for a file (anything with an extension) that does not exist get a
+        # real 404 instead of the SPA shell, so crawlers and caches never see a 200
+        # for missing assets (LSA-B10). Unknown app routes still get index.html and
+        # the client-side 404 page, which sets noindex.
+        location ~* \.[a-z0-9]+$ {
+            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+            add_header X-Content-Type-Options "nosniff" always;
+            try_files $uri =404;
+        }
+
+        # nginx's mime.types has no entry for web app manifests.
+        location = /manifest.webmanifest {
+            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+            add_header X-Content-Type-Options "nosniff" always;
+            default_type application/manifest+json;
+            try_files $uri =404;
+        }
+
         # Serve /.well-known/ files as-is (e.g. security.txt); never fall back to the SPA.
-        location /.well-known/ {
+        location ^~ /.well-known/ {
             add_header X-Content-Type-Options "nosniff" always;
             add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
             default_type text/plain;
@@ -37,7 +55,7 @@ data:
         }
 
         # Proxy API calls to the NestJS backend service.
-        location /api/ {
+        location ^~ /api/ {
             proxy_pass http://backend:3000;
             proxy_http_version 1.1;
             proxy_set_header Host $host;

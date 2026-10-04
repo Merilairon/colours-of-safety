@@ -158,5 +158,14 @@ export const routes: Routes = [
       description: 'View detailed information about this queer-friendly safe space.',
     },
   },
-  { path: '**', redirectTo: '' },
+  {
+    path: '**',
+    loadComponent: () => import('./not-found/not-found').then((m) => m.NotFoundComponent),
+    resolve: { seo: seoResolver },
+    data: {
+      title: 'Page Not Found | Colours of Safety',
+      description: 'The page you were looking for does not exist.',
+      robots: 'noindex,nofollow',
+    },
+  },
 ];

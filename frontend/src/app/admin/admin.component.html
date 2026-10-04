@@ -78,40 +78,43 @@
 
           <p class="meta">{{ user.email }}</p>
 
-          <div class="actions">
-            <select
-              [disabled]="user.busy || isCurrentUser(user)"
-              [attr.aria-label]="'Change role for ' + user.displayName"
-              [title]="isCurrentUser(user) ? 'You cannot change your own role' : ''"
-              (change)="setRole(user, $any($event.target).value)"
-            >
-              @for (role of availableRoles(); track role) {
-                <option [value]="role" [selected]="role === user.role">
-                  {{ roleLabels[role] }}
-                </option>
+          @if (isCurrentUser(user)) {
+            <p class="self-note">This is your account. Another admin has to change your role or ban status.</p>
+          } @else {
+            <div class="actions">
+              <select
+                [disabled]="user.busy"
+                [attr.aria-label]="'Change role for ' + user.displayName"
+                (change)="setRole(user, $any($event.target).value)"
+              >
+                @for (role of availableRoles(); track role) {
+                  <option [value]="role" [selected]="role === user.role">
+                    {{ roleLabels[role] }}
+                  </option>
+                }
+                @if (!availableRoles().includes(user.role)) {
+                  <option [value]="user.role" [selected]="true" disabled>
+                    {{ roleLabels[user.role] }}
+                  </option>
+                }
+              </select>
+              @if (user.busy) {
+                <span class="spinner">Saving…</span>
               }
-              @if (!availableRoles().includes(user.role)) {
-                <option [value]="user.role" [selected]="true" disabled>
-                  {{ roleLabels[user.role] }}
-                </option>
+              @if (user.saved) {
+                <span class="saved-feedback">Saved ✓</span>
               }
-            </select>
-            @if (user.busy) {
-              <span class="spinner">Saving…</span>
-            }
-            @if (user.saved) {
-              <span class="saved-feedback">Saved ✓</span>
-            }
-            <button
-              type="button"
-              class="ban-btn"
-              [disabled]="user.busy || isCurrentUser(user)"
-              [attr.aria-label]="(user.banned ? 'Unban ' : 'Ban ') + user.displayName"
-              (click)="user.banned ? unban(user) : ban(user)"
-            >
-              {{ user.banned ? 'Unban' : 'Ban' }}
-            </button>
-          </div>
+              <button
+                type="button"
+                class="ban-btn"
+                [disabled]="user.busy"
+                [attr.aria-label]="(user.banned ? 'Unban ' : 'Ban ') + user.displayName"
+                (click)="user.banned ? unban(user) : ban(user)"
+              >
+                {{ user.banned ? 'Unban' : 'Ban' }}
+              </button>
+            </div>
+          }
         </li>
       }
     </ul>

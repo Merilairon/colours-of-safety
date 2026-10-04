@@ -8,7 +8,7 @@ import {
 } from '@angular/router';
 import { Location } from '@angular/common';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { authGuard, reviewerGuard, adminGuard } from './guards';
+import { authGuard, reviewerGuard, adminGuard, safeReturnUrl } from './guards';
 import { AuthService } from './auth.service';
 import { signal, computed } from '@angular/core';
 
@@ -106,7 +106,8 @@ describe('Route Guards', () => {
       expect(result).toBe(true);
     });
 
-    it('redirects to home when user is not reviewer', () => {
+    it('redirects to home when a logged-in user is not reviewer', () => {
+      isLoggedInSignal.set(true);
       isReviewerSignal.set(false);
 
       const result = TestBed.runInInjectionContext(() =>
@@ -138,7 +139,8 @@ describe('Route Guards', () => {
       expect(result).toBe(true);
     });
 
-    it('redirects to home when user is not admin', () => {
+    it('redirects to home when a logged-in user is not admin', () => {
+      isLoggedInSignal.set(true);
       isAdminSignal.set(false);
       isReviewerSignal.set(true);
 
@@ -150,6 +152,7 @@ describe('Route Guards', () => {
     });
 
     it('redirects to home when user is regular user', () => {
+      isLoggedInSignal.set(true);
       isAdminSignal.set(false);
       isReviewerSignal.set(false);
 
@@ -158,6 +161,48 @@ describe('Route Guards', () => {
       );
 
       expect(result).toEqual(router.createUrlTree(['/']));
+    });
+  });
+
+  describe('returnUrl', () => {
+    const state = (url: string) => ({ url }) as RouterStateSnapshot;
+
+    it('authGuard keeps the requested url for after login', () => {
+      const result = TestBed.runInInjectionContext(() =>
+        authGuard({} as ActivatedRouteSnapshot, state('/my-edits')),
+      );
+
+      expect(result).toEqual(
+        router.createUrlTree(['/login'], { queryParams: { returnUrl: '/my-edits' } }),
+      );
+    });
+
+    it('reviewerGuard sends logged-out visitors to login instead of home', () => {
+      const result = TestBed.runInInjectionContext(() =>
+        reviewerGuard({} as ActivatedRouteSnapshot, state('/review')),
+      );
+
+      expect(result).toEqual(
+        router.createUrlTree(['/login'], { queryParams: { returnUrl: '/review' } }),
+      );
+    });
+
+    it('adminGuard sends logged-out visitors to login instead of home', () => {
+      const result = TestBed.runInInjectionContext(() =>
+        adminGuard({} as ActivatedRouteSnapshot, state('/admin')),
+      );
+
+      expect(result).toEqual(
+        router.createUrlTree(['/login'], { queryParams: { returnUrl: '/admin' } }),
+      );
+    });
+
+    it('safeReturnUrl only allows in-app paths', () => {
+      expect(safeReturnUrl('/review?tab=edits')).toBe('/review?tab=edits');
+      expect(safeReturnUrl('https://evil.example')).toBe('/');
+      expect(safeReturnUrl('//evil.example')).toBe('/');
+      expect(safeReturnUrl('/\\evil.example')).toBe('/');
+      expect(safeReturnUrl(null)).toBe('/');
     });
   });
 });

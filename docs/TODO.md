@@ -1,7 +1,7 @@
 # Colours of Safety — Project TODOs
 
 > Sources: PRD (rev 4), ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT, UI-DESIGN (rev 3), LIVE_SITE_AUDIT (2026-09-29)  
-> Last updated: 2026-09-29
+> Last updated: 2026-10-04
 >
 > **IDs:** `LSA-Bx` / `LSA-Ax` / `LSA-Fx` refer to bugs, accessibility issues and missing features in [LIVE_SITE_AUDIT.md](LIVE_SITE_AUDIT.md).
 > Items marked **⚠ Reopened** were previously ticked `[x]`, but the live audit found them broken or inactive in production. Keep them open until they are verified on coloursofsafety.com, not just merged.
@@ -136,7 +136,7 @@
 | LSA-A2      | [ ] Render rating symbol (✕ △ ◆ ✓ ★) *inside* each map marker (`divIcon`) or vary shape — markers are colour-only today                                       | `@/frontend/src/app/map/map.ts`, `@/frontend/src/app/core/safety.ts`          | 1 day    |
 | LSA-A3      | [ ] Brand pink `#e84393` fails contrast (3.71:1 with white) — darken to ~`#c2185b` for buttons/CTAs/links; fix `.footer-donate` (4.4:1)                       | `@/frontend/src/styles.scss`, `@/frontend/src/app/app.scss`                   | 0.5 day  |
 | LSA-A4      | [ ] Fix remaining contrast: hint text `#9498a8` (2.87:1), status chips on `/my-edits`, role/unverified badges on `/admin`, active tab on `/review`          | `@/frontend/src/app/auth/`, `submissions/my-edits/`, `admin/`, `review/`      | 0.5 day  |
-| LSA-A5      | [ ] Cookie banner: `aria-label`, first in focus order / focus on show, underline "Learn more", reduce height on mobile                                         | `@/frontend/src/app/core/cookie-consent.component.ts`                          | 2 hours  |
+| LSA-A5      | [~] **Code done 2026-10-04** (first in DOM/tab order, labelled region, underlined link, compact on mobile). Cookie banner: `aria-label`, first in focus order / focus on show, underline "Learn more", reduce height on mobile                                         | `@/frontend/src/app/core/cookie-consent.component.ts`                          | 2 hours  |
 | LSA-A6      | [ ] Add visually-hidden `<h1>` on map page; legend heading → `h2`                                                                                            | `@/frontend/src/app/map/map.html`                                             | 15 min   |
 | LSA-A7      | [ ] Popup focus management — move focus into popup on open, restore on close                                                                                | `@/frontend/src/app/map/map.ts`                                               | 0.5 day  |
 | LSA-A8      | [ ] Tab order — search/filters before map; remove Leaflet attribution link from early tab stops                                                              | `@/frontend/src/app/map/map.html`                                             | 1 hour   |
@@ -149,11 +149,11 @@
 
 | ID      | Task                                                                                                                                                  | Files                                                            | Effort  |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------- |
-| LSA-B14 | [ ] Don't load GTM until consent is accepted (currently loads before and after *Reject*); list Sentry as processor in privacy policy; fix banner copy ("cookies" → local storage) | `@/frontend/src/index.html`, `@/frontend/src/main.ts`, `@/frontend/src/app/privacy/` | 0.5 day |
-| LSA-B10 | [ ] Real 404 page (`noindex`) instead of `**` → map redirect; nginx 404 for missing static files                                                      | `@/frontend/src/app/app.routes.ts`, `@/frontend/nginx.conf`      | 2 hours |
-| LSA-B11 | [ ] Guard UX — redirect logged-out `/review` & `/admin` to login; preserve `returnUrl` after login; add `/my-edits` to robots Disallow                  | `@/frontend/src/app/core/guards.ts`, `@/frontend/public/robots.txt` | 2 hours |
-| LSA-B13 | [ ] Add missing `logo.png` (JSON-LD), `apple-touch-icon.png`, web manifest; shrink 134 KB favicon + add SVG icon                                        | `@/frontend/public/`                                             | 2 hours |
-| LSA-B16 | [ ] Remove test accounts (`Tester …`, `Devin Evidence`) from prod DB, point e2e at staging; hide (not just disable) self role/ban controls; check duplicate "Ixelles" edit | prod DB, `@/test/`, `@/frontend/src/app/admin/`                  | 2 hours |
+| LSA-B14 | [~] **Code done 2026-10-04, verify in prod** (GA only loads after *Accept*; a *Reject* is now remembered; policy lists Sentry, GA, OSM/Nominatim, Cloudflare). Don't load GTM until consent is accepted (currently loads before and after *Reject*); list Sentry as processor in privacy policy; fix banner copy ("cookies" → local storage) | `@/frontend/src/index.html`, `@/frontend/src/main.ts`, `@/frontend/src/app/privacy/` | 0.5 day |
+| LSA-B10 | [~] **Code done 2026-10-04, verify in prod** (k8s ConfigMap updated too). Real 404 page (`noindex`) instead of `**` → map redirect; nginx 404 for missing static files                                                      | `@/frontend/src/app/app.routes.ts`, `@/frontend/nginx.conf`      | 2 hours |
+| LSA-B11 | [~] **Code done 2026-10-04, verify in prod** (`returnUrl` restricted to in-app paths; `/profile` and `/admin` also disallowed). Guard UX — redirect logged-out `/review` & `/admin` to login; preserve `returnUrl` after login; add `/my-edits` to robots Disallow                  | `@/frontend/src/app/core/guards.ts`, `@/frontend/public/robots.txt` | 2 hours |
+| LSA-B13 | [~] **Code done 2026-10-04, verify in prod** (favicon 134 KB → 15 KB). Add missing `logo.png` (JSON-LD), `apple-touch-icon.png`, web manifest; shrink 134 KB favicon + add SVG icon                                        | `@/frontend/public/`                                             | 2 hours |
+| LSA-B16 | [~] **Code done 2026-10-04** (own role/ban controls hidden). **Ops left:** delete test accounts from prod DB, point e2e at staging, check the duplicate "Ixelles" edit. Remove test accounts (`Tester …`, `Devin Evidence`) from prod DB, point e2e at staging; hide (not just disable) self role/ban controls; check duplicate "Ixelles" edit | prod DB, `@/test/`, `@/frontend/src/app/admin/`                  | 2 hours |
 
 ### SEO (Phase 2 — High Impact)
 

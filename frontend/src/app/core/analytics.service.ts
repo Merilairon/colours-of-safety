@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { hasAnalyticsConsent } from './consent';
 
 declare global {
   interface Window {
@@ -14,7 +15,12 @@ export class AnalyticsService {
   private readonly router = inject(Router);
   private readonly gaId = 'G-0W8XWVR4LF';
 
+  /**
+   * Google Analytics only loads after the visitor accepts the banner (LSA-B14).
+   * Accepting reloads the page, so this runs again with consent in place.
+   */
   init(): void {
+    if (!hasAnalyticsConsent()) return;
     this.loadGtag();
     this.trackPageViews();
   }

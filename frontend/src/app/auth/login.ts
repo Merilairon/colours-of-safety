@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../core/auth.service';
+import { safeReturnUrl } from '../core/guards';
 import { FormFeedback } from './form-feedback';
 
 @Component({
@@ -15,12 +16,13 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
   /** Set when arriving from a successful password reset. */
   protected readonly notice = signal<string | null>(
-    inject(ActivatedRoute).snapshot.queryParamMap.get('reset') === 'ok'
+    this.route.snapshot.queryParamMap.get('reset') === 'ok'
       ? 'Your password was reset. Log in with your new password.'
       : null,
   );
@@ -41,7 +43,9 @@ export class LoginComponent {
     this.auth.login(email, password).subscribe({
       next: () => {
         this.submitting.set(false);
-        void this.router.navigate(['/']);
+        void this.router.navigateByUrl(
+          safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl')),
+        );
       },
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);

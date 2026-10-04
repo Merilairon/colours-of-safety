@@ -3,9 +3,9 @@ import * as Sentry from '@sentry/angular';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';
+import { hasAnalyticsConsent } from './app/core/consent';
 
-const hasConsent =
-  typeof localStorage !== 'undefined' && localStorage.getItem('cookie-consent') === 'true';
+const hasConsent = hasAnalyticsConsent();
 
 Sentry.init({
   dsn: 'https://40b930115f72134dc145f82ea4208894@o4511603599540224.ingest.de.sentry.io/4511603666124880',

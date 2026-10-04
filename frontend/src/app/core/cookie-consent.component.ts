@@ -1,21 +1,25 @@
 import { Component, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { readConsent, writeConsent } from './consent';
 
 @Component({
   selector: 'app-cookie-consent',
+  imports: [RouterLink],
   template: `
     @if (!hasConsented()) {
-      <div class="cookie-consent" role="dialog" aria-live="polite">
+      <section class="cookie-consent" aria-label="Privacy choices">
         <div class="cookie-content">
           <p>
-            We use cookies for essential features and analytics. Your privacy matters.
-            <a href="/privacy" class="cookie-link">Learn more</a>
+            We keep you logged in with one essential cookie and save your settings in this browser.
+            With your OK we also use Google Analytics and Sentry session replay to improve the site.
+            <a routerLink="/privacy" class="cookie-link">Learn more</a>
           </p>
           <div class="cookie-actions">
-            <button class="cookie-btn secondary" (click)="reject()">Reject</button>
-            <button class="cookie-btn primary" (click)="accept()">Accept</button>
+            <button type="button" class="cookie-btn secondary" (click)="reject()">Reject</button>
+            <button type="button" class="cookie-btn primary" (click)="accept()">Accept</button>
           </div>
         </div>
-      </div>
+      </section>
     }
   `,
   styles: [
@@ -48,12 +52,14 @@ import { Component, signal } from '@angular/core';
       }
 
       .cookie-link {
-        color: #74b9ff;
-        text-decoration: none;
+        color: #a5d8ff;
+        text-decoration: underline;
       }
 
-      .cookie-link:hover {
-        text-decoration: underline;
+      .cookie-link:focus-visible,
+      .cookie-btn:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 2px;
       }
 
       .cookie-actions {
@@ -81,19 +87,34 @@ import { Component, signal } from '@angular/core';
       }
 
       .cookie-btn.primary {
-        background: #e84393;
+        background: #c2185b;
         color: white;
       }
 
       @media (max-width: 768px) {
         .cookie-content {
           flex-direction: column;
-          text-align: center;
+          align-items: stretch;
+          gap: 0.5rem;
+          padding: 0.6rem 0.75rem;
         }
 
-        .cookie-actions {
-          width: 100%;
-          justify-content: center;
+        .cookie-content p {
+          font-size: 0.8rem;
+        }
+
+        .cookie-actions .cookie-btn {
+          flex: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .cookie-btn {
+          transition: none;
+        }
+
+        .cookie-btn:hover {
+          transform: none;
         }
       }
     `,
@@ -101,23 +122,20 @@ import { Component, signal } from '@angular/core';
   standalone: true,
 })
 export class CookieConsentComponent {
-  protected readonly hasConsented = signal<boolean>(false);
-
-  constructor() {
-    this.hasConsented.set(localStorage.getItem('cookie-consent') === 'true');
-  }
+  protected readonly hasConsented = signal<boolean>(readConsent() !== null);
 
   protected accept(): void {
-    const wasAlreadyConsented = localStorage.getItem('cookie-consent') === 'true';
-    localStorage.setItem('cookie-consent', 'true');
+    const wasAlreadyConsented = readConsent() === 'accepted';
+    writeConsent(true);
     this.hasConsented.set(true);
+    // Analytics and replay are configured at startup, so a reload turns them on.
     if (!wasAlreadyConsented && typeof location !== 'undefined') {
       location.reload();
     }
   }
 
   protected reject(): void {
-    localStorage.setItem('cookie-consent', 'false');
+    writeConsent(false);
     this.hasConsented.set(true);
   }
 }

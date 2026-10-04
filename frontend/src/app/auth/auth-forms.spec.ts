@@ -2,6 +2,7 @@
  * LSA-B15 (auth form feedback) and LSA-F1 (password reset) behaviour.
  */
 import '@angular/compiler';
+import { Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -24,7 +25,7 @@ function submit(fixture: ComponentFixture<unknown>): void {
   fixture.detectChanges();
 }
 
-async function setup<T>(component: new (...args: never[]) => T, fragment: string | null = null) {
+async function setup<T>(component: Type<T>, fragment: string | null = null) {
   await TestBed.configureTestingModule({
     imports: [component],
     providers: [

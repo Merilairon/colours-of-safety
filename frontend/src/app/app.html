@@ -1,3 +1,7 @@
+<!-- First in the DOM so keyboard and screen-reader users meet it before the page. -->
+<app-cookie-consent />
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
 <header class="topbar">
   <a class="brand" routerLink="/" aria-label="Colours of Safety – home">
     <span class="brand-mark" aria-hidden="true">🏳️‍🌈</span>
@@ -62,7 +66,7 @@
   </div>
 </header>
 
-<main class="content" id="main-content">
+<main class="content" id="main-content" tabindex="-1">
   <router-outlet />
 </main>
 
@@ -89,4 +93,3 @@
   >
 </footer>
 
-<app-cookie-consent />

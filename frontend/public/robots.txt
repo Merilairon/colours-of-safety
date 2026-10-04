@@ -1,7 +1,10 @@
 User-agent: *
 Allow: /
 Disallow: /mine
+Disallow: /my-edits
+Disallow: /profile
 Disallow: /review
+Disallow: /admin
 Disallow: /api/
 
 Sitemap: https://coloursofsafety.com/sitemap.xml
