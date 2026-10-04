@@ -1,0 +1,7 @@
+# Security contact for Colours of Safety (RFC 9116).
+# Please report vulnerabilities privately; do not open public issues.
+Contact: https://github.com/Merilairon/colours-of-safety/security/advisories/new
+Contact: mailto:security@coloursofsafety.com
+Expires: 2027-09-29T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://coloursofsafety.com/.well-known/security.txt

@@ -13,9 +13,17 @@ export interface AuthUser {
   banReason?: string;
 }
 
+/** The session token is set as an HttpOnly cookie, never returned in the body. */
 export interface AuthResult {
-  accessToken: string;
   user: AuthUser;
+}
+
+/** The only user fields the API embeds in public data (e.g. a place's author). */
+export interface PublicUser {
+  id: string;
+  displayName: string;
+  pronouns: string | null;
+  avatar: string | null;
 }
 
 export interface NotificationPreferences {
@@ -59,8 +67,11 @@ export interface Poi {
   location: GeoPoint;
   status: ReviewStatus;
   voteCount: number;
-  reviewNote: string | null;
-  createdBy?: AuthUser;
+  /** Only present for the author and moderators. */
+  reviewNote?: string | null;
+  /** Null when the author chose to stay anonymous (hidden from other users). */
+  createdBy?: PublicUser | null;
+  createdById?: string | null;
   createdAt: string;
   isAnonymous: boolean;
 }
@@ -74,8 +85,11 @@ export interface District {
   area: GeoPolygon;
   status: ReviewStatus;
   voteCount: number;
-  reviewNote: string | null;
-  createdBy?: AuthUser;
+  /** Only present for the author and moderators. */
+  reviewNote?: string | null;
+  /** Null when the author chose to stay anonymous (hidden from other users). */
+  createdBy?: PublicUser | null;
+  createdById?: string | null;
   createdAt: string;
   isAnonymous: boolean;
   blendEdges: boolean;
@@ -125,8 +139,8 @@ export interface EditProposal {
   proposedData: EditProposalData;
   status: ReviewStatus;
   reviewNote: string | null;
-  createdBy?: AuthUser;
-  reviewedBy?: AuthUser;
+  createdBy?: PublicUser | null;
+  reviewedBy?: PublicUser | null;
   createdAt: string;
 }
 

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { isModerator, Viewer } from '../common/public-serializer';
 import { ReviewDto } from '../common/review.dto';
 import { ReviewStatus } from '../common/review-status.enum';
 import { UserRole } from '../users/user.entity';
@@ -45,6 +46,17 @@ export class DistrictsService {
       where: { status, banned: false },
       order: { createdAt: 'ASC' },
     });
+  }
+
+  async findVisibleById(id: string, viewer: Viewer): Promise<District> {
+    const district = await this.districts.findOne({ where: { id } });
+    const isPublic =
+      district?.status === ReviewStatus.APPROVED && district.banned === false;
+    const isOwner = !!viewer && district?.createdById === viewer.id;
+    if (!district || !(isPublic || isOwner || isModerator(viewer))) {
+      throw new NotFoundException('District not found');
+    }
+    return district;
   }
 
   findMine(userId: string): Promise<District[]> {

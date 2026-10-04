@@ -7,13 +7,20 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import type { Response } from 'express';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import type { AuthUser } from '../auth/jwt-payload.interface';
+import {
+  clearSessionCookieOptions,
+  SESSION_COOKIE,
+} from '../auth/session-cookie';
 import { UserRole } from './user.entity';
 import { UsersService } from './users.service';
 import { AssignRoleDto } from './dto/assign-role.dto';
@@ -32,7 +39,10 @@ const ASSIGNABLE_BY_SUPER_ADMIN: UserRole[] = [
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
-  constructor(private readonly users: UsersService) {}
+  constructor(
+    private readonly users: UsersService,
+    private readonly config: ConfigService,
+  ) {}
 
   @Get()
   @Roles(UserRole.ADMIN)
@@ -119,8 +129,12 @@ export class UsersController {
   }
 
   @Delete('me')
-  async deleteAccount(@CurrentUser() user: AuthUser) {
+  async deleteAccount(
+    @CurrentUser() user: AuthUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     await this.users.deleteAccount(user.id);
+    res.clearCookie(SESSION_COOKIE, clearSessionCookieOptions(this.config));
     return { message: 'Account deleted' };
   }
 

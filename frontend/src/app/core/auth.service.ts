@@ -1,14 +1,19 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, Injectable, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { catchError, firstValueFrom, map, Observable, of, tap } from 'rxjs';
 import { AuthResult, AuthUser } from './models';
 
-const TOKEN_KEY = 'cos.token';
-const USER_KEY = 'cos.user';
+/** Keys from before the session moved to an HttpOnly cookie (LSA-B8). */
+const LEGACY_STORAGE_KEYS = ['cos.token', 'cos.user'];
 
+/**
+ * The session JWT lives in an HttpOnly cookie that page scripts cannot read,
+ * so this service only keeps the (non-secret) user profile in memory and
+ * restores it from `/api/auth/me` on startup.
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly _user = signal<AuthUser | null>(this.restoreUser());
+  private readonly _user = signal<AuthUser | null>(null);
 
   readonly user = this._user.asReadonly();
   readonly isLoggedIn = computed(() => this._user() !== null);
@@ -19,6 +24,25 @@ export class AuthService {
   readonly isSuperAdmin = computed(() => this._user()?.role === 'super_admin');
 
   constructor(private readonly http: HttpClient) {}
+
+  /** Runs once at app start, before routing, so guards see the real session. */
+  restoreSession(): Promise<void> {
+    this.purgeLegacyStorage();
+    return firstValueFrom(
+      this.http.get<AuthUser>('/api/auth/me').pipe(
+        catchError(() => of(null)),
+        map((user) => this._user.set(user)),
+      ),
+    );
+  }
+
+  /** Re-reads the current user, e.g. after the email address changed. */
+  refresh(): Observable<AuthUser | null> {
+    return this.http.get<AuthUser>('/api/auth/me').pipe(
+      catchError(() => of(null)),
+      tap((user) => this._user.set(user)),
+    );
+  }
 
   register(
     email: string,
@@ -32,56 +56,55 @@ export class AuthService {
     }
     return this.http
       .post<AuthResult>('/api/auth/register', body)
-      .pipe(tap((res) => this.persist(res)));
+      .pipe(tap((res) => this._user.set(res.user)));
   }
 
   login(email: string, password: string): Observable<AuthResult> {
     return this.http
       .post<AuthResult>('/api/auth/login', { email, password })
-      .pipe(tap((res) => this.persist(res)));
+      .pipe(tap((res) => this._user.set(res.user)));
   }
 
-  logout(): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+  /** Clears the local state immediately; the server clears the cookie. */
+  logout(): Observable<void> {
+    this._user.set(null);
+    return this.http.post<void>('/api/auth/logout', {}).pipe(catchError(() => of(undefined)));
+  }
+
+  /** For when the server already ended the session (e.g. account deletion). */
+  clearSession(): void {
     this._user.set(null);
   }
 
   patchUser(partial: Partial<AuthUser>): void {
     const current = this._user();
     if (!current) return;
-    const updated = { ...current, ...partial };
-    localStorage.setItem(USER_KEY, JSON.stringify(updated));
-    this._user.set(updated);
+    this._user.set({ ...current, ...partial });
   }
 
-  get token(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>('/api/auth/forgot-password', { email });
   }
 
-  private persist(res: AuthResult): void {
-    localStorage.setItem(TOKEN_KEY, res.accessToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(res.user));
-    this._user.set(res.user);
+  resetPassword(token: string, password: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>('/api/auth/reset-password', { token, password });
   }
 
-  private restoreUser(): AuthUser | null {
-    const raw = localStorage.getItem(USER_KEY);
-    if (!raw) {
-      return null;
-    }
+  verifyEmail(token: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>('/api/auth/verify-email', { token });
+  }
+
+  resendVerification(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>('/api/auth/resend-verification', {});
+  }
+
+  private purgeLegacyStorage(): void {
     try {
-      const user = JSON.parse(raw) as Partial<AuthUser>;
-      // Handle missing fields from old localStorage data
-      if (user.emailVerified === undefined) {
-        user.emailVerified = true; // Assume verified for existing users
+      for (const key of LEGACY_STORAGE_KEYS) {
+        localStorage.removeItem(key);
       }
-      if (!user.id || !user.email || !user.displayName || !user.role) {
-        return null; // Invalid user data
-      }
-      return user as AuthUser;
     } catch {
-      return null;
+      // Storage can be unavailable (private mode, blocked site data).
     }
   }
 }

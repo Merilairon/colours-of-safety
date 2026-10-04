@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ReviewStatus } from '../common/review-status.enum';
+import { UserRole } from '../users/user.entity';
 import { Poi } from './poi.entity';
 import { PoisService } from './pois.service';
 
@@ -98,5 +99,53 @@ describe('PoisService', () => {
     );
     expect(result.status).toBe(ReviewStatus.APPROVED);
     expect(result.reviewedById).toBe('reviewer-1');
+  });
+  describe('findVisibleById', () => {
+    const stored = (status: ReviewStatus, banned = false) =>
+      ({ id: 'poi-1', status, banned, createdById: 'owner-1' }) as Poi;
+    const owner = { id: 'owner-1', role: UserRole.USER };
+    const stranger = { id: 'someone', role: UserRole.USER };
+    const reviewer = { id: 'rev-1', role: UserRole.REVIEWER };
+
+    it('returns approved POIs to guests', async () => {
+      repo.findOne.mockResolvedValueOnce(stored(ReviewStatus.APPROVED));
+      await expect(
+        service.findVisibleById('poi-1', undefined),
+      ).resolves.toBeTruthy();
+    });
+
+    it('returns 404 for a missing POI', async () => {
+      await expect(
+        service.findVisibleById('poi-1', undefined),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it.each([
+      [ReviewStatus.PENDING, false],
+      [ReviewStatus.REJECTED, false],
+      [ReviewStatus.APPROVED, true],
+    ])(
+      'hides %s (banned=%s) POIs from guests and other users',
+      async (status, banned) => {
+        for (const viewer of [undefined, stranger]) {
+          repo.findOne.mockResolvedValueOnce(stored(status, banned));
+          await expect(
+            service.findVisibleById('poi-1', viewer),
+          ).rejects.toBeInstanceOf(NotFoundException);
+        }
+      },
+    );
+
+    it.each([ReviewStatus.PENDING, ReviewStatus.REJECTED])(
+      'shows %s POIs to the owner and reviewers',
+      async (status) => {
+        for (const viewer of [owner, reviewer]) {
+          repo.findOne.mockResolvedValueOnce(stored(status));
+          await expect(
+            service.findVisibleById('poi-1', viewer),
+          ).resolves.toBeTruthy();
+        }
+      },
+    );
   });
 });

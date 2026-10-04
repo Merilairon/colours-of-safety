@@ -144,7 +144,7 @@ describe('AC-2 Register', () => {
     await new Promise<void>((r) => setTimeout(r, 0));
     fixture.detectChanges();
 
-    expect((component as any).error()).toBe('That email is already registered.');
+    expect((component as any).error()).toContain('That email is already registered.');
     expect(qs(fixture, 'p.error[role="alert"]')).not.toBeNull();
   });
 

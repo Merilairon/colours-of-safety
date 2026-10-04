@@ -1,12 +1,21 @@
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import type { Response } from 'express';
 import { AuthController } from './auth.controller';
 import { AuthService, AuthResult } from './auth.service';
 import { UserRole } from '../users/user.entity';
 import type { AuthUser } from './jwt-payload.interface';
+import { SESSION_COOKIE } from './session-cookie';
 
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: jest.Mocked<Pick<AuthService, 'register' | 'login'>>;
+  let res: { cookie: jest.Mock; clearCookie: jest.Mock };
+
+  const config = {
+    get: (key: string, fallback?: string) =>
+      ({ NODE_ENV: 'production', JWT_EXPIRES_IN: '7d' })[key] ?? fallback,
+  };
 
   beforeEach(async () => {
     const mockAuthResult: AuthResult = {
@@ -16,6 +25,8 @@ describe('AuthController', () => {
         email: 'test@example.com',
         displayName: 'Test User',
         role: UserRole.USER,
+        emailVerified: false,
+        banned: false,
       },
     };
 
@@ -23,76 +34,87 @@ describe('AuthController', () => {
       register: jest.fn().mockResolvedValue(mockAuthResult),
       login: jest.fn().mockResolvedValue(mockAuthResult),
     };
+    res = { cookie: jest.fn(), clearCookie: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [{ provide: AuthService, useValue: authService }],
+      providers: [
+        { provide: AuthService, useValue: authService },
+        { provide: ConfigService, useValue: config },
+      ],
     }).compile();
 
     controller = module.get(AuthController);
   });
 
-  describe('register', () => {
-    it('delegates to auth service', async () => {
-      const dto = {
-        email: 'test@example.com',
-        displayName: 'Test User',
-        password: 'password123',
-      };
+  const asResponse = () => res as unknown as Response;
 
-      const result = await controller.register(dto);
+  const expectSessionCookie = () => {
+    expect(res.cookie).toHaveBeenCalledWith(
+      SESSION_COOKIE,
+      'test-token',
+      expect.objectContaining({
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/api',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      }),
+    );
+  };
+
+  describe('register', () => {
+    const dto = {
+      email: 'test@example.com',
+      displayName: 'Test User',
+      password: 'password123',
+    };
+
+    it('delegates to auth service and returns the user', async () => {
+      const result = await controller.register(dto, asResponse());
 
       expect(authService.register).toHaveBeenCalledWith(dto);
       expect(result).toEqual({
-        accessToken: 'test-token',
         user: expect.objectContaining({
           email: 'test@example.com',
         }) as AuthUser,
       });
     });
 
-    it('returns auth result with token', async () => {
-      const dto = {
-        email: 'new@example.com',
-        displayName: 'New User',
-        password: 'password123',
-      };
+    it('sets the JWT as an HttpOnly cookie and never returns it', async () => {
+      const result = await controller.register(dto, asResponse());
 
-      const result = await controller.register(dto);
-
-      expect(result.accessToken).toBe('test-token');
-      expect(result.user).toBeDefined();
+      expectSessionCookie();
+      expect(result).not.toHaveProperty('accessToken');
     });
   });
 
   describe('login', () => {
-    it('delegates to auth service', async () => {
-      const dto = {
-        email: 'test@example.com',
-        password: 'password123',
-      };
+    const dto = { email: 'test@example.com', password: 'password123' };
 
-      const result = await controller.login(dto);
+    it('delegates to auth service and returns the user', async () => {
+      const result = await controller.login(dto, asResponse());
 
       expect(authService.login).toHaveBeenCalledWith(dto);
-      expect(result).toEqual({
-        accessToken: 'test-token',
-        user: expect.objectContaining({
-          email: 'test@example.com',
-        }) as AuthUser,
-      });
+      expect(result.user.email).toBe('test@example.com');
     });
 
-    it('returns auth result with token', async () => {
-      const dto = {
-        email: 'test@example.com',
-        password: 'password123',
-      };
+    it('sets the JWT as an HttpOnly cookie and never returns it', async () => {
+      const result = await controller.login(dto, asResponse());
 
-      const result = await controller.login(dto);
+      expectSessionCookie();
+      expect(result).not.toHaveProperty('accessToken');
+    });
+  });
 
-      expect(result.accessToken).toBe('test-token');
-      expect(result.user).toBeDefined();
+  describe('logout', () => {
+    it('clears the session cookie', () => {
+      controller.logout(asResponse());
+
+      expect(res.clearCookie).toHaveBeenCalledWith(
+        SESSION_COOKIE,
+        expect.objectContaining({ path: '/api', httpOnly: true }),
+      );
     });
   });
 
@@ -103,6 +125,8 @@ describe('AuthController', () => {
         email: 'test@example.com',
         displayName: 'Test User',
         role: UserRole.USER,
+        emailVerified: true,
+        banned: false,
       };
 
       const result = controller.me(currentUser);
@@ -116,6 +140,8 @@ describe('AuthController', () => {
         email: 'admin@example.com',
         displayName: 'Admin User',
         role: UserRole.ADMIN,
+        emailVerified: true,
+        banned: false,
       };
 
       const result = controller.me(adminUser);
@@ -129,6 +155,8 @@ describe('AuthController', () => {
         email: 'reviewer@example.com',
         displayName: 'Reviewer User',
         role: UserRole.REVIEWER,
+        emailVerified: true,
+        banned: false,
       };
 
       const result = controller.me(reviewerUser);

@@ -13,12 +13,12 @@
 .error {
   text-align: center;
   padding: 4rem 1rem;
-  
+
   h1 {
     margin: 0 0 1rem;
     color: #3a3d4d;
   }
-  
+
   p {
     margin: 0 0 1.5rem;
     color: #6b6f80;
@@ -35,7 +35,7 @@
   h1 {
     color: #d7263d;
   }
-  
+
   p {
     color: #d7263d;
   }
@@ -255,6 +255,16 @@ section {
 
   .status-approved {
     color: #2e933c;
+    font-weight: 600;
+  }
+
+  .status-pending {
+    color: #8a5a00;
+    font-weight: 600;
+  }
+
+  .status-rejected {
+    color: #b3261e;
     font-weight: 600;
   }
 }

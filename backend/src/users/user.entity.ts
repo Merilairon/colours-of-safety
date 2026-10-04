@@ -58,9 +58,14 @@ export class User {
   @Column({ default: false })
   emailVerified: boolean;
 
+  // Secrets and private account state. Only ever returned through explicit
+  // DTOs (e.g. the profile response), never via entity serialisation.
+  // Tokens are stored as SHA-256 hashes.
+  @Exclude()
   @Column({ type: 'varchar', nullable: true })
   emailVerificationToken: string | null;
 
+  @Exclude()
   @Column({ type: 'timestamptz', nullable: true })
   emailVerificationExpires: Date | null;
 
@@ -79,17 +84,34 @@ export class User {
   @Column({ type: 'text', nullable: true })
   bio: string | null;
 
+  @Exclude()
   @Column({ type: 'jsonb', default: { emailUpdates: true } })
   notificationPreferences: NotificationPreferences;
 
+  @Exclude()
   @Column({ type: 'varchar', nullable: true })
   pendingEmail: string | null;
 
+  @Exclude()
   @Column({ type: 'varchar', nullable: true })
   emailChangeToken: string | null;
 
+  @Exclude()
   @Column({ type: 'timestamptz', nullable: true })
   emailChangeExpires: Date | null;
+
+  @Exclude()
+  @Column({ type: 'varchar', nullable: true })
+  passwordResetToken: string | null;
+
+  @Exclude()
+  @Column({ type: 'timestamptz', nullable: true })
+  passwordResetExpires: Date | null;
+
+  /** Sessions issued before this moment are rejected by the JWT strategy. */
+  @Exclude()
+  @Column({ type: 'timestamptz', nullable: true })
+  passwordChangedAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

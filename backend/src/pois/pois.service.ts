@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { isModerator, Viewer } from '../common/public-serializer';
 import { ReviewDto } from '../common/review.dto';
 import { ReviewStatus } from '../common/review-status.enum';
 import { UserRole } from '../users/user.entity';
@@ -45,6 +46,17 @@ export class PoisService {
       where: { status, banned: false },
       order: { createdAt: 'ASC' },
     });
+  }
+
+  async findVisibleById(id: string, viewer: Viewer): Promise<Poi> {
+    const poi = await this.pois.findOne({ where: { id } });
+    const isPublic =
+      poi?.status === ReviewStatus.APPROVED && poi.banned === false;
+    const isOwner = !!viewer && poi?.createdById === viewer.id;
+    if (!poi || !(isPublic || isOwner || isModerator(viewer))) {
+      throw new NotFoundException('POI not found');
+    }
+    return poi;
   }
 
   findMine(userId: string): Promise<Poi[]> {

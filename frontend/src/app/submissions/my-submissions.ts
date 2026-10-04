@@ -100,7 +100,7 @@ export class MySubmissionsComponent implements OnInit {
               category: kind === 'poi' ? (item as Poi).category : undefined,
               safetyRating: item.safetyRating,
               status: item.status,
-              reviewNote: item.reviewNote,
+              reviewNote: item.reviewNote ?? null,
               createdAt: item.createdAt,
               description: item.description,
               location: kind === 'poi' ? (item as Poi).location : undefined,

@@ -63,7 +63,7 @@ export class Poi {
   @Column()
   createdById: string;
 
-  @ManyToOne(() => User, { eager: true, nullable: true, onDelete: 'SET NULL' })
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'reviewedById' })
   reviewedBy: User | null;
 

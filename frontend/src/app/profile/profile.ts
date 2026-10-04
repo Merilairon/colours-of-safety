@@ -27,6 +27,7 @@ export class ProfileComponent implements OnInit {
   protected readonly savingEmail = signal(false);
   protected readonly deleting = signal(false);
   protected readonly emailTokenSent = signal(false);
+  protected readonly resending = signal(false);
 
   protected readonly profileForm = this.fb.nonNullable.group({
     displayName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -44,7 +45,6 @@ export class ProfileComponent implements OnInit {
   protected readonly emailForm = this.fb.nonNullable.group({
     newEmail: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
-    token: [''],
   });
 
   ngOnInit(): void {
@@ -134,7 +134,7 @@ export class ProfileComponent implements OnInit {
       next: () => {
         this.savingEmail.set(false);
         this.emailTokenSent.set(true);
-        this.success.set('Verification email sent. Enter the token below to confirm.');
+        this.success.set('Confirmation link sent to your new email address.');
       },
       error: (err: HttpErrorResponse) => {
         this.savingEmail.set(false);
@@ -143,23 +143,18 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  protected confirmEmailChange(): void {
-    const token = this.emailForm.getRawValue().token.trim();
-    if (!token) return;
-    this.savingEmail.set(true);
+  protected resendVerification(): void {
+    this.resending.set(true);
     this.error.set(null);
     this.success.set(null);
-    this.profileService.confirmEmailChange({ token }).subscribe({
+    this.auth.resendVerification().subscribe({
       next: () => {
-        this.emailForm.patchValue({ token: '' });
-        this.emailTokenSent.set(false);
-        this.savingEmail.set(false);
-        this.success.set('Email updated.');
-        this.loadProfile();
+        this.resending.set(false);
+        this.success.set('A new confirmation link is on its way.');
         this.clearSuccess();
       },
       error: (err: HttpErrorResponse) => {
-        this.savingEmail.set(false);
+        this.resending.set(false);
         this.error.set(this.extractError(err));
       },
     });
@@ -172,7 +167,8 @@ export class ProfileComponent implements OnInit {
     this.success.set(null);
     this.profileService.deleteAccount().subscribe({
       next: () => {
-        this.auth.logout();
+        // The server already cleared the session cookie.
+        this.auth.clearSession();
         void this.router.navigate(['/']);
       },
       error: (err: HttpErrorResponse) => {

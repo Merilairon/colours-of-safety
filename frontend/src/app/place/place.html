@@ -1,6 +1,6 @@
 <div class="page">
   @if (loading()) {
-    <div class="loading">Loading place details…</div>
+    <div class="loading" role="status">Loading place details…</div>
   } @else if (notFound()) {
     <div class="not-found">
       <h1>Place not found</h1>
@@ -9,8 +9,8 @@
     </div>
   } @else if (error()) {
     <div class="error">
-      <h1>Error</h1>
-      <p>{{ error() }}</p>
+      <h1>Place unavailable</h1>
+      <p role="alert">{{ error() }}</p>
       <a routerLink="/" class="back-link">← Back to map</a>
     </div>
   } @else if (place(); as place) {
@@ -27,7 +27,7 @@
           </span>
         </div>
       </div>
-      <a [href]="getMapUrl(place)" class="view-on-map">View on map →</a>
+      <a routerLink="/" [queryParams]="mapQueryParams(place)" class="view-on-map">View on map →</a>
     </div>
 
     <div class="place-content">
@@ -83,15 +83,30 @@
         <h2>Contribution details</h2>
         <div class="contribution-info">
           <p><strong>Added by:</strong> {{ place.createdBy?.displayName || 'Anonymous' }}</p>
-          <p><strong>Date added:</strong> {{ place.createdAt | date:'mediumDate' }}</p>
-          <p><strong>Status:</strong> <span class="status-approved">Approved</span></p>
+          <p><strong>Date added:</strong> {{ place.createdAt | date: 'mediumDate' }}</p>
+          <p>
+            <strong>Status:</strong>
+            @switch (place.status) {
+              @case ('approved') {
+                <span class="status-approved">Approved</span>
+              }
+              @case ('pending') {
+                <span class="status-pending">Pending review</span>
+              }
+              @default {
+                <span class="status-rejected">Not published</span>
+              }
+            }
+          </p>
         </div>
       </section>
 
       <section class="actions">
         <h2>What to do</h2>
         <div class="action-buttons">
-          <a [href]="getMapUrl(place)" class="primary-action">View on map</a>
+          <a routerLink="/" [queryParams]="mapQueryParams(place)" class="primary-action"
+            >View on map</a
+          >
           <a routerLink="/" class="secondary-action">Browse other places</a>
         </div>
       </section>

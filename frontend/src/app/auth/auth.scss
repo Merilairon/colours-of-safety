@@ -27,35 +27,97 @@
     gap: 1rem;
   }
 
-  label {
+  .field {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+  }
+
+  .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  label {
     font-size: 0.85rem;
     font-weight: 600;
     color: #3a3d4d;
+  }
 
-    input {
-      padding: 0.6rem 0.7rem;
-      border: 1px solid #d4d6e0;
-      border-radius: 8px;
-      font-size: 1rem;
+  input,
+  select {
+    padding: 0.6rem 0.7rem;
+    border: 1px solid #d4d6e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fff;
+    color: inherit;
 
-      &:focus {
-        outline: 2px solid #e84393;
-        outline-offset: 2px;
-        border-color: #e84393;
-        box-shadow: 0 0 0 3px rgba(232, 67, 147, 0.15);
+    &:focus {
+      outline: 2px solid #e84393;
+      outline-offset: 2px;
+      border-color: #e84393;
+      box-shadow: 0 0 0 3px rgba(232, 67, 147, 0.15);
 
-        @media (forced-colors: active) {
-          outline: 2px solid ButtonText;
-        }
+      @media (forced-colors: active) {
+        outline: 2px solid ButtonText;
       }
     }
 
-    small {
-      font-weight: 400;
-      color: #9498a8;
+    &[aria-invalid='true'] {
+      border-color: #b3261e;
+      border-width: 2px;
+    }
+  }
+
+  small {
+    font-size: 0.8rem;
+    font-weight: 400;
+    // #5f6373 on white is 5.9:1 (the previous #9498a8 was 2.87:1, LSA-A4).
+    color: #5f6373;
+  }
+
+  .field-link {
+    font-size: 0.8rem;
+    color: #c2185b;
+  }
+
+  .field-error {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #b3261e;
+
+    &::before {
+      content: '⚠ ';
+    }
+  }
+
+  .notice {
+    margin: 0 0 1rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 8px;
+    background: #e8f5e9;
+    color: #1b5e20;
+    font-size: 0.9rem;
+
+    p {
+      margin: 0 0 0.5rem;
+
+      &:last-child {
+        margin: 0;
+      }
+    }
+  }
+
+  .legal {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #5f6373;
+
+    a {
+      color: #c2185b;
     }
   }
 
@@ -78,8 +140,17 @@
 
   .error {
     margin: 0;
-    color: #d7263d;
+    color: #b3261e;
     font-size: 0.85rem;
+
+    &:focus {
+      outline: 2px solid #b3261e;
+      outline-offset: 2px;
+    }
+
+    a {
+      color: inherit;
+    }
   }
 
   .switch {

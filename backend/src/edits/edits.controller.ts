@@ -14,10 +14,13 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import type { AuthUser } from '../auth/jwt-payload.interface';
+import {
+  PublicEditProposal,
+  serializeEditProposal,
+} from '../common/public-serializer';
 import { ReviewDto } from '../common/review.dto';
 import { UserRole } from '../users/user.entity';
 import { CreateEditProposalDto } from './dto/create-edit-proposal.dto';
-import { EditProposal } from './edit-proposal.entity';
 import { EditsService } from './edits.service';
 
 @Controller('edits')
@@ -27,34 +30,34 @@ export class EditsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
-  create(
+  async create(
     @Body() dto: CreateEditProposalDto,
     @CurrentUser() user: AuthUser,
-  ): Promise<EditProposal> {
-    return this.edits.create(dto, user.id);
+  ): Promise<PublicEditProposal> {
+    return serializeEditProposal(await this.edits.create(dto, user.id));
   }
 
   @Get('pending')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.REVIEWER, UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  findPending(): Promise<EditProposal[]> {
-    return this.edits.findPending();
+  async findPending(): Promise<PublicEditProposal[]> {
+    return (await this.edits.findPending()).map(serializeEditProposal);
   }
 
   @Get('mine')
   @UseGuards(JwtAuthGuard)
-  findMine(@CurrentUser() user: AuthUser): Promise<EditProposal[]> {
-    return this.edits.findMine(user.id);
+  async findMine(@CurrentUser() user: AuthUser): Promise<PublicEditProposal[]> {
+    return (await this.edits.findMine(user.id)).map(serializeEditProposal);
   }
 
   @Patch(':id/review')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.REVIEWER, UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  review(
+  async review(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ReviewDto,
     @CurrentUser() user: AuthUser,
-  ): Promise<EditProposal> {
-    return this.edits.review(id, dto, user.id);
+  ): Promise<PublicEditProposal> {
+    return serializeEditProposal(await this.edits.review(id, dto, user.id));
   }
 }

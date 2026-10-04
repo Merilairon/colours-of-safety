@@ -5,6 +5,8 @@ export interface JwtPayload {
   email: string;
   role: UserRole;
   banned: boolean;
+  /** Issued-at (seconds), set by the JWT library when signing. */
+  iat?: number;
 }
 
 export interface AuthUser {

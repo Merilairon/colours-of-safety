@@ -14,8 +14,13 @@ import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import type { AuthUser } from '../auth/jwt-payload.interface';
+import {
+  serializeSubmission,
+  serializeSubmissions,
+} from '../common/public-serializer';
 import { ReviewDto } from '../common/review.dto';
 import { ReviewStatus } from '../common/review-status.enum';
 import { UserRole } from '../users/user.entity';
@@ -28,50 +33,72 @@ export class PoisController {
 
   /** Public: only approved POIs are visible to everyone. */
   @Get()
-  findApproved() {
-    return this.pois.findApproved();
+  @UseGuards(OptionalJwtAuthGuard)
+  async findApproved(@CurrentUser() viewer?: AuthUser) {
+    return serializeSubmissions(await this.pois.findApproved(), viewer);
   }
 
   /** Current user's own submissions (any status). */
   @Get('mine')
   @UseGuards(JwtAuthGuard)
-  findMine(@CurrentUser() user: AuthUser) {
-    return this.pois.findMine(user.id);
+  async findMine(@CurrentUser() user: AuthUser) {
+    return serializeSubmissions(await this.pois.findMine(user.id), user);
   }
 
   /** Public: all pending POIs visible to everyone while in review. */
   @Get('pending')
-  findPending() {
-    return this.pois.findByStatus(ReviewStatus.PENDING);
+  @UseGuards(OptionalJwtAuthGuard)
+  async findPending(@CurrentUser() viewer?: AuthUser) {
+    return serializeSubmissions(
+      await this.pois.findByStatus(ReviewStatus.PENDING),
+      viewer,
+    );
+  }
+
+  /**
+   * Public for approved POIs. Pending, rejected or banned POIs are only
+   * visible to their owner and moderators; everyone else gets a 404.
+   * Declared after the literal `mine`/`pending` routes so those win.
+   */
+  @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() viewer?: AuthUser,
+  ) {
+    return serializeSubmission(
+      await this.pois.findVisibleById(id, viewer),
+      viewer,
+    );
   }
 
   @Post()
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
-  create(@Body() dto: CreatePoiDto, @CurrentUser() user: AuthUser) {
-    return this.pois.create(dto, user.id);
+  async create(@Body() dto: CreatePoiDto, @CurrentUser() user: AuthUser) {
+    return serializeSubmission(await this.pois.create(dto, user.id), user);
   }
 
   @Patch(':id/review')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.REVIEWER)
-  review(
+  async review(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ReviewDto,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.pois.review(id, dto, user.id);
+    return serializeSubmission(await this.pois.review(id, dto, user.id), user);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
-  update(
+  async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreatePoiDto,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.pois.update(id, dto, user.id);
+    return serializeSubmission(await this.pois.update(id, dto, user.id), user);
   }
 
   @Delete(':id')

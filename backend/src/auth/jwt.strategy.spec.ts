@@ -98,6 +98,46 @@ describe('JwtStrategy', () => {
       expect(usersService.findById).toHaveBeenCalledWith('nonexistent');
     });
 
+    it('rejects a session issued before the last password change', async () => {
+      const changedAt = new Date('2026-09-29T12:00:00Z');
+      usersService.findById.mockResolvedValueOnce({
+        id: 'user-1',
+        role: UserRole.USER,
+        banned: false,
+        passwordChangedAt: changedAt,
+      } as User);
+
+      await expect(
+        strategy.validate({
+          sub: 'user-1',
+          email: 'test@example.com',
+          role: UserRole.USER,
+          banned: false,
+          iat: changedAt.getTime() / 1000 - 60,
+        }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('accepts a session issued after the last password change', async () => {
+      const changedAt = new Date('2026-09-29T12:00:00Z');
+      usersService.findById.mockResolvedValueOnce({
+        id: 'user-1',
+        role: UserRole.USER,
+        banned: false,
+        passwordChangedAt: changedAt,
+      } as User);
+
+      await expect(
+        strategy.validate({
+          sub: 'user-1',
+          email: 'test@example.com',
+          role: UserRole.USER,
+          banned: false,
+          iat: changedAt.getTime() / 1000,
+        }),
+      ).resolves.toMatchObject({ id: 'user-1' });
+    });
+
     it('throws UnauthorizedException when user is banned', async () => {
       const payload: JwtPayload = {
         sub: 'banned-user',

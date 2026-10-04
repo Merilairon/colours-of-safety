@@ -1,12 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../core/auth.service';
+import { FormFeedback } from './form-feedback';
 
 @Component({
   selector: 'app-login',
@@ -21,15 +18,21 @@ export class LoginComponent {
 
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
+  /** Set when arriving from a successful password reset. */
+  protected readonly notice = signal<string | null>(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('reset') === 'ok'
+      ? 'Your password was reset. Log in with your new password.'
+      : null,
+  );
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
+  protected readonly feedback = new FormFeedback(this.form);
 
   submit(): void {
-    if (this.form.invalid || this.submitting()) {
-      this.form.markAllAsTouched();
+    if (this.submitting() || !this.feedback.validate()) {
       return;
     }
     this.submitting.set(true);
@@ -47,6 +50,7 @@ export class LoginComponent {
             ? 'Invalid email or password.'
             : 'Something went wrong. Please try again.',
         );
+        this.feedback.focusError();
       },
     });
   }

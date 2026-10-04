@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth.service';
+import { FormFeedback } from './form-feedback';
 
 @Component({
   selector: 'app-register',
@@ -24,10 +25,10 @@ export class RegisterComponent {
     password: ['', [Validators.required, Validators.minLength(8)]],
     pronouns: [''],
   });
+  protected readonly feedback = new FormFeedback(this.form);
 
   submit(): void {
-    if (this.form.invalid || this.submitting()) {
-      this.form.markAllAsTouched();
+    if (this.submitting() || !this.feedback.validate()) {
       return;
     }
     this.submitting.set(true);
@@ -42,9 +43,10 @@ export class RegisterComponent {
         this.submitting.set(false);
         this.error.set(
           err.status === 409
-            ? 'That email is already registered.'
+            ? 'That email is already registered. Log in or reset your password instead.'
             : 'Something went wrong. Please try again.',
         );
+        this.feedback.focusError();
       },
     });
   }

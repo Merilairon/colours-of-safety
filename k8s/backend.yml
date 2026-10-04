@@ -60,6 +60,37 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: REVIEWER_PASSWORD
+            - name: APP_URL
+              value: https://coloursofsafety.com
+            - name: MAIL_FROM
+              value: Colours of Safety <no-reply@coloursofsafety.com>
+            # Transactional email (LSA-B4). Optional so the pod still starts
+            # before the SMTP credentials are added to app-secrets; until
+            # then the backend logs an error and sends no email.
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: SMTP_HOST
+                  optional: true
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: SMTP_PORT
+                  optional: true
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: SMTP_USER
+                  optional: true
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: SMTP_PASS
+                  optional: true
           readinessProbe:
             tcpSocket:
               port: 3000

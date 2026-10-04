@@ -26,8 +26,7 @@ export class App {
   protected readonly showSentryTest = isDevMode();
 
   logout(): void {
-    this.auth.logout();
-    void this.router.navigate(['/']);
+    this.auth.logout().subscribe(() => void this.router.navigate(['/']));
   }
 
   toggleTheme(): void {

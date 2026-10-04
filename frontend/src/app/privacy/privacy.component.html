@@ -83,7 +83,10 @@
       <li>Object to processing</li>
       <li>Data portability</li>
     </ul>
-    <p>To exercise these rights, contact us at: privacy@coloursofsafety.com</p>
+    <p>
+      To exercise these rights, contact us at:
+      <a [href]="'mailto:' + privacyEmail">{{ privacyEmail }}</a>
+    </p>
   </section>
 
   <section>
@@ -155,6 +158,8 @@
   <section>
     <h2>11. Contact Us</h2>
     <p>For questions about this Privacy Policy or our data practices:</p>
-    <p>Email: privacy@coloursofsafety.com</p>
+    <p>
+      Email: <a [href]="'mailto:' + privacyEmail">{{ privacyEmail }}</a>
+    </p>
   </section>
 </div>

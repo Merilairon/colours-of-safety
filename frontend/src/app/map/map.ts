@@ -14,6 +14,7 @@ import * as L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet.markercluster';
 import { AuthService } from '../core/auth.service';
+import { SUPPORT_EMAIL } from '../core/contact';
 import { MarkingsService } from '../core/markings.service';
 import {
   CreateDistrictPayload,
@@ -199,8 +200,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     this.loadData();
 
-    // Auto-locate user on first load
-    this.attemptAutoLocate();
+    // A deep link (e.g. "View on map" from a place page) wins over auto-locate.
+    if (!this.applyViewFromUrl()) {
+      this.attemptAutoLocate();
+    }
 
     // Check for welcome query param (post-registration)
     this.route.queryParams.subscribe((params) => {
@@ -401,15 +404,26 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private reloadStats(): void {
-    this.markings.getApprovedPois().subscribe((pois) => {
-      this.allPois = pois;
-      this.approvedCount.update((c) => ({ ...c, pois: pois.length }));
-      this.applyFilters();
+    this.loadApproved();
+  }
+
+  /** Loads approved places and districts and keeps the legend counter in sync. */
+  private loadApproved(): void {
+    this.markings.getApprovedPois().subscribe({
+      next: (pois) => {
+        this.allPois = pois;
+        this.approvedCount.update((c) => ({ ...c, pois: pois.length }));
+        this.applyFilters();
+      },
+      error: () => this.loadError.set('Could not load places.'),
     });
-    this.markings.getApprovedDistricts().subscribe((districts) => {
-      this.allDistricts = districts;
-      this.approvedCount.update((c) => ({ ...c, districts: districts.length }));
-      this.applyFilters();
+    this.markings.getApprovedDistricts().subscribe({
+      next: (districts) => {
+        this.allDistricts = districts;
+        this.approvedCount.update((c) => ({ ...c, districts: districts.length }));
+        this.applyFilters();
+      },
+      error: () => this.loadError.set('Could not load districts.'),
     });
   }
 
@@ -675,6 +689,26 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     );
   }
 
+  /** Centres the map on `?lat=&lng=&z=` when present and valid. */
+  private applyViewFromUrl(): boolean {
+    const params = this.route.snapshot.queryParamMap;
+    const lat = Number(params.get('lat'));
+    const lng = Number(params.get('lng'));
+    const zoom = Number(params.get('z') ?? 17);
+    const valid =
+      params.has('lat') &&
+      params.has('lng') &&
+      Number.isFinite(lat) &&
+      Number.isFinite(lng) &&
+      Math.abs(lat) <= 90 &&
+      Math.abs(lng) <= 180;
+    if (!valid) {
+      return false;
+    }
+    this.map.setView([lat, lng], Number.isFinite(zoom) ? Math.min(Math.max(zoom, 3), 19) : 17);
+    return true;
+  }
+
   private attemptAutoLocate(): void {
     if (!navigator.geolocation) return;
 
@@ -718,22 +752,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private loadData(): void {
-    this.markings.getApprovedPois().subscribe({
-      next: (pois) => {
-        this.allPois = pois;
-        this.applyFilters();
-      },
-      error: () => this.loadError.set('Could not load places.'),
-    });
-
-    this.markings.getApprovedDistricts().subscribe({
-      next: (districts) => {
-        this.allDistricts = districts;
-        this.applyFilters();
-      },
-      error: () => this.loadError.set('Could not load districts.'),
-    });
-
+    this.loadApproved();
     this.loadPendingData();
   }
 
@@ -940,7 +959,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       ${poi.description ? `<p>${this.escape(poi.description)}</p>` : ''}
       ${this.editProposalButton(id)}
       ${this.removeButton(id)}
-      ${this.reportLink()}
+      ${this.reportLink(name, id)}
     `;
   }
 
@@ -962,7 +981,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       ${description ? `<p>${this.escape(description)}</p>` : ''}
       ${this.editProposalButton(id)}
       ${this.removeButton(id)}
-      ${this.reportLink()}
+      ${this.reportLink(name, id)}
     `;
   }
 
@@ -976,8 +995,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return `<button class="remove-btn" id="remove-${id}" aria-label="Remove submission">🗑 Remove</button>`;
   }
 
-  private reportLink(): string {
-    return `<div class="pop-report"><a href="mailto:support@colours-of-safety.org?subject=Report inappropriate content">🚩 Flag</a></div>`;
+  /** Mail-based until the in-app report flow (LSA-F4) replaces it. */
+  private reportLink(name: string, id?: string): string {
+    const subject = `Report: ${name}${id ? ` (${id})` : ''}`;
+    const body = `Place: ${name}\nID: ${id ?? 'unknown'}\n\nWhat is wrong with this listing?\n`;
+    const href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    return `<div class="pop-report"><a href="${this.escape(href)}"><span aria-hidden="true">🚩</span> Flag</a></div>`;
   }
 
   private escape(value: string): string {

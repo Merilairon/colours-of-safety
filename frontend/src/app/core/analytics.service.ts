@@ -44,9 +44,11 @@ export class AnalyticsService {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((event) => {
+        // Never report query strings or fragments: email links carry
+        // single-use account tokens in the fragment (#token=…).
         window.gtag?.('event', 'page_view', {
-          page_path: event.urlAfterRedirects,
-          page_location: window.location.href,
+          page_path: event.urlAfterRedirects.split(/[?#]/)[0],
+          page_location: window.location.origin + window.location.pathname,
           page_title: document.title,
         });
       });

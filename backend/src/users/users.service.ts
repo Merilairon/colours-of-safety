@@ -133,6 +133,15 @@ export class UsersService {
     });
   }
 
+  findByPasswordResetToken(tokenHash: string): Promise<User | null> {
+    return this.users.findOne({
+      where: {
+        passwordResetToken: tokenHash,
+        passwordResetExpires: MoreThan(new Date()),
+      },
+    });
+  }
+
   async findByEmailChangeToken(token: string): Promise<User | null> {
     return this.users.findOne({
       where: {

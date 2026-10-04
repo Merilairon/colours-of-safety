@@ -1,4 +1,4 @@
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import {
   APP_INITIALIZER,
   ApplicationConfig,
@@ -9,15 +9,18 @@ import {
 } from '@angular/core';
 import { Router, provideRouter } from '@angular/router';
 import * as Sentry from '@sentry/angular';
-import { authInterceptor } from './core/auth.interceptor';
 import { AnalyticsService } from './core/analytics.service';
+import { AuthService } from './core/auth.service';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    // The session is an HttpOnly cookie sent automatically on same-origin
+    // /api requests, so no auth interceptor is needed.
+    provideHttpClient(),
+    provideAppInitializer(() => inject(AuthService).restoreSession()),
     AnalyticsService,
     provideAppInitializer(() => {
       const analytics = inject(AnalyticsService);

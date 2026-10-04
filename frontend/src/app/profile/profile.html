@@ -23,12 +23,22 @@
 
         <label>
           Avatar URL
-          <input type="url" formControlName="avatar" autocomplete="url" placeholder="https://example.com/avatar.png" />
+          <input
+            type="url"
+            formControlName="avatar"
+            autocomplete="url"
+            placeholder="https://example.com/avatar.png"
+          />
         </label>
 
         <label>
           Bio
-          <textarea formControlName="bio" rows="4" maxlength="2000" placeholder="Tell the community a little about yourself…"></textarea>
+          <textarea
+            formControlName="bio"
+            rows="4"
+            maxlength="2000"
+            placeholder="Tell the community a little about yourself…"
+          ></textarea>
         </label>
 
         <label class="checkbox">
@@ -48,7 +58,11 @@
       <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
         <label>
           Current password
-          <input type="password" formControlName="currentPassword" autocomplete="current-password" />
+          <input
+            type="password"
+            formControlName="currentPassword"
+            autocomplete="current-password"
+          />
         </label>
 
         <label>
@@ -70,9 +84,21 @@
 
     <section class="card" aria-labelledby="email-heading">
       <h2 id="email-heading">Update email</h2>
-      <p class="sub">Current email: <strong>{{ profile()?.email }}</strong></p>
+      <p class="sub">
+        Current email: <strong>{{ profile()?.email }}</strong>
+      </p>
+      @if (profile() && !profile()!.emailVerified) {
+        <div class="pending">
+          <p>Your email address isn't confirmed yet. Check your inbox for the confirmation link.</p>
+          <button type="button" (click)="resendVerification()" [disabled]="resending()">
+            {{ resending() ? 'Sending…' : 'Send a new confirmation link' }}
+          </button>
+        </div>
+      }
       @if (profile()?.pendingEmail) {
-        <p class="pending">Pending email: <strong>{{ profile()?.pendingEmail }}</strong></p>
+        <p class="pending">
+          Pending email: <strong>{{ profile()?.pendingEmail }}</strong>
+        </p>
       }
 
       <form [formGroup]="emailForm" (ngSubmit)="requestEmailChange()">
@@ -92,27 +118,17 @@
       </form>
 
       @if (emailTokenSent()) {
-        <div class="confirm-token">
-          <label>
-            Verification token
-            <input type="text" formControlName="token" placeholder="Paste token from your email" />
-          </label>
-          <button type="button" (click)="confirmEmailChange()" [disabled]="savingEmail()">
-            Confirm email change
-          </button>
-        </div>
+        <p class="pending" role="status">
+          We sent a confirmation link to your new address. Open it to finish the change; it expires
+          in 24 hours.
+        </p>
       }
     </section>
 
     <section class="card danger" aria-labelledby="delete-heading">
       <h2 id="delete-heading">Danger zone</h2>
       <p class="sub">Delete your account and all personal data permanently.</p>
-      <button
-        type="button"
-        class="delete-btn"
-        (click)="deleteAccount()"
-        [disabled]="deleting()"
-      >
+      <button type="button" class="delete-btn" (click)="deleteAccount()" [disabled]="deleting()">
         {{ deleting() ? 'Deleting…' : 'Delete my account' }}
       </button>
     </section>

@@ -1,7 +1,10 @@
 # Colours of Safety — Project TODOs
 
-> Sources: PRD (rev 4), ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT, UI-DESIGN (rev 3)  
-> Last updated: 2026-06-21
+> Sources: PRD (rev 4), ARCHITECTURE, SEO_DOCUMENTATION, BEHAVIORAL_NUDGES, GROWTH_HACKING, TREND_RESEARCH_FINDINGS, ACCESSIBILITY_AUDIT, LGBTQIA_INCLUSIVITY_REPORT, UI-DESIGN (rev 3), LIVE_SITE_AUDIT (2026-09-29)  
+> Last updated: 2026-09-29
+>
+> **IDs:** `LSA-Bx` / `LSA-Ax` / `LSA-Fx` refer to bugs, accessibility issues and missing features in [LIVE_SITE_AUDIT.md](LIVE_SITE_AUDIT.md).
+> Items marked **⚠ Reopened** were previously ticked `[x]`, but the live audit found them broken or inactive in production. Keep them open until they are verified on coloursofsafety.com, not just merged.
 
 ---
 
@@ -27,6 +30,30 @@
 
 ## P0 — Critical / Blocking Production
 
+### 🚨 Live Site Audit — Security & Privacy (do first)
+
+> Source: LIVE_SITE_AUDIT (2026-09-29). These put users at risk *today*, and on an LGBTQIA+ safety map a privacy leak can out people. Ship as hotfixes ahead of any feature work.
+
+| ID      | Task                                                                                                                                                                                                                                | Files                                                                                                                            | Effort  |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| LSA-B1  | [~] **Code done 2026-09-29, verify in prod.** Stop leaking user internals in public API — return a public user DTO (`id`, `displayName`, `pronouns`, `avatar`) for `createdBy`; drop `reviewedBy` from public responses; `@Exclude()` all token/ban/pendingEmail fields. Add an e2e allow-list test on `/api/pois` + `/api/districts` payload keys | `@/backend/src/users/user.entity.ts`, `@/backend/src/pois/`, `@/backend/src/districts/`, `@/backend/src/edits/`                   | 1 day   |
+| LSA-B2  | [~] **Code done 2026-09-29, verify in prod.** Enforce `isAnonymous` server-side — null `createdBy`/`createdById` for anonymous items (except owner, reviewers, admins) + test                                                                                                 | `@/backend/src/pois/`, `@/backend/src/districts/`                                                                                | 0.5 day |
+| LSA-B4a | [~] **Code done 2026-09-29.** Remove `console.log` of verification / email-change tokens and user emails; tokens now stored as SHA-256 hashes and old plaintext tokens nulled by migration. **Ops left:** purge existing backend logs (pod logs, any log shipping, Sentry breadcrumbs)                                                                                                                                 | `@/backend/src/auth/auth.service.ts:48,109,162`                                                                                  | 1 hour  |
+| LSA-B5  | [~] **Code done 2026-09-29** (Flag → `support@coloursofsafety.com` with place name/id prefilled; `security.txt` lists `security@`). **Ops left:** Cloudflare Email Routing for `support@`, `privacy@`, `security@`, then send a test to each. Fix undeliverable addresses — set up MX / email routing for `coloursofsafety.com`; replace `support@colours-of-safety.org` (NXDOMAIN) in the Flag link; verify `privacy@` receives mail                                        | DNS (Cloudflare), `@/frontend/src/app/map/map.ts:980`, `@/frontend/src/app/privacy/`                                              | 2 hours |
+| LSA-B9  | [~] **Code done 2026-09-29, verify in prod** (headers are in the k8s ConfigMap too; check Cloudflare doesn't inject scripts the CSP blocks). Add security headers — HSTS, CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`; `helmet` + disable `X-Powered-By` in backend; publish `/.well-known/security.txt`                        | `@/frontend/nginx.conf`, `@/backend/src/main.ts`, `@/frontend/public/.well-known/`                                                | 0.5 day |
+| LSA-B8  | [~] **Code done 2026-09-29, verify in prod** (existing users are logged out once; password change/reset now revokes older sessions). Move session token from `localStorage` to `HttpOnly; Secure; SameSite=Strict` cookie (depends on CSP from LSA-B9 as interim mitigation)                                                                                          | `@/frontend/src/app/core/auth.service.ts`, `@/backend/src/auth/`                                                                  | 2 days  |
+
+### 🚨 Live Site Audit — Broken Core Features
+
+| ID       | Task                                                                                                                                                                             | Files                                                                                              | Effort   |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------- |
+| LSA-B3   | [~] **Code done 2026-09-29, verify in prod** (also added `GET /api/districts/:id`; "View on map" now deep-links via `?lat=&lng=&z=`). Add `GET /api/pois/:id` (public for approved; owner/reviewer for pending). `/place/:id` currently shows "Could not load place details" for **every** place. Per-place title/description; not-found state for bad ids | `@/backend/src/pois/pois.controller.ts`, `@/frontend/src/app/place/`                               | 1 day    |
+| LSA-B4b  | [~] **Code done 2026-09-29** (SMTP via nodemailer; `/verify-email` and `/confirm-email` link pages; resend button on Profile). **Ops left:** pick a provider, verify SPF/DKIM for `coloursofsafety.com`, add `SMTP_HOST/PORT/USER/PASS` to `app-secrets`. Integrate transactional email provider — verification and email-change emails are never sent, so no user can verify and email change can't complete                                        | `@/backend/src/auth/`, new mail module, k8s secrets                                                | 2 days   |
+| LSA-F1   | [~] **Code done 2026-09-29; live once LSA-B4b SMTP is configured.** Password reset flow — "Forgot password?" link, token email, reset page (depends on LSA-B4b)                                                                                  | `@/backend/src/auth/`, `@/frontend/src/app/auth/`                                                  | 1–2 days |
+| LSA-B6   | [~] **Code done 2026-09-29, verify in prod.** Fix malformed canonical / `og:url` (`https://coloursofsafety.comlogin/`) — add missing `/` and map `UrlSegment.path`                                                           | `@/frontend/src/app/core/seo.resolver.ts`                                                          | 15 min   |
+| LSA-B7   | [~] **Code done 2026-09-29, verify in prod.** "0 safe spaces mapped" counter — set `approvedCount` on initial load, not only in `reloadStats()`                                                                            | `@/frontend/src/app/map/map.ts:721`                                                                | 15 min   |
+| LSA-B15  | [~] **Code done 2026-09-29, verify in prod.** Auth form validation — `required`/`minlength`, visible errors + `aria-invalid` on empty/weak submit; move focus to error after failed login; remove duplicate "Prefer not to say" pronoun option | `@/frontend/src/app/auth/login.*`, `@/frontend/src/app/auth/register.*`                            | 0.5 day  |
+
 ### Security & Infrastructure (Deploy Checklist)
 
 | Task                          | Location                      | Note                                                     |
@@ -45,7 +72,7 @@
 | [x] Mobile-responsive layout | `@/frontend/src/app/app.scss`, `@/frontend/src/app/map/map.scss` | ✅     |
 | [x] Rate limiting            | `@/backend/src/app.module.ts` — `@nestjs/throttler`              | ✅     |
 | [x] Privacy policy page      | `@/frontend/src/app/privacy/` + route + footer                   | ✅     |
-| [x] POI clustering           | `@/frontend/src/app/map/map.ts` — `leaflet.markercluster`        | ✅     |
+| [ ] POI clustering — **⚠ Reopened 2026-09-29** (LSA-F6): prod renders 2 320 unclustered shapes; `markerClusterGroup` fallback path is taken | `@/frontend/src/app/map/map.ts:156` — `leaflet.markercluster` | 0.5 day |
 
 ### Accessibility — Critical (WCAG 2.1 Level A violations)
 
@@ -63,13 +90,13 @@
 | C9  | [x] Add `outline: 2px solid #e84393` + `@media (forced-colors: active)` to focus styles                                    | `@/frontend/src/app/map/map.scss:170`, `@/frontend/src/app/auth/auth.scss:44` | CSS only |
 | M2  | [x] Add `role="alert"` to error `<p>` in login/register; `aria-describedby` on inputs                                      | `login.html:15`, `register.html:20`                                           | 5 min    |
 | M3  | [x] Bind `[attr.aria-valuetext]` on safety rating range inputs                                                             | `@/frontend/src/app/map/map.html:115`, `my-submissions.html:93`               | 15 min   |
-| C1  | [x] Add `role="application" aria-label="Interactive safety map"` to map div; visually-hidden place list for screen readers | `@/frontend/src/app/map/map.html:2`                                           | 1 day    |
+| C1  | [ ] Add `role="application" aria-label="Interactive safety map"` to map div; visually-hidden place list for screen readers — **⚠ Reopened 2026-09-29** (LSA-A1): no reachable place list in prod | `@/frontend/src/app/map/map.html:2`                                           | 1 day    |
 | M10 | [x] Replace `display:none` on `.brand-name` (mobile) with visually-hidden class or `aria-label` on brand link              | `@/frontend/src/app/app.scss:119`                                             | 15 min   |
 | M11 | [x] Replace `display:none` on non-active nav links (mobile ≤480px) with accessible hamburger/disclosure pattern            | `@/frontend/src/app/app.scss:148`                                             | Medium   |
 | M9  | [x] Add `[attr.aria-label]="'Change role for ' + user.displayName"` to admin role select                                   | `@/frontend/src/app/admin/admin.component.html:25`                            | 1 line   |
 | M5  | [x] Add `:focus-visible` outline to review filter buttons                                                                  | `@/frontend/src/app/review/review.scss`                                       | CSS only |
 | M8  | [x] Add `:focus-visible` to footer links                                                                                   | `@/frontend/src/app/app.scss:169`                                             | CSS only |
-| C5  | [x] Add `aria-hidden="true"` to legend swatches; add visually-hidden rating text in marker popups                          | `@/frontend/src/app/map/map.html:55`                                          | 15 min   |
+| C5  | [~] Add `aria-hidden="true"` to legend swatches; add visually-hidden rating text in marker popups — markers themselves still colour-only, see LSA-A2 | `@/frontend/src/app/map/map.html:55`                                          | 15 min   |
 | N1  | [x] Add `aria-hidden="true"` to decorative legend swatches `<span class="swatch">`                                         | `@/frontend/src/app/map/map.html:55`                                          | 1 line   |
 | C7  | [x] Wrap review note textarea in `<label>` or add `aria-label`                                                             | `@/frontend/src/app/review/review.html:52`                                    | 1 line   |
 | C8  | [x] Add `aria-label="Main navigation"` to `<nav>`                                                                          | `@/frontend/src/app/app.html:7`                                               | 1 line   |
@@ -80,12 +107,53 @@
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- | ------ |
 | [x] Expand POI categories — add: `bookstore`, `youth_center`, `support_group`, `transgender_services`, `crisis_shelter`, `hiv_sti_testing`, `legal_aid`, `religious_spiritual`, `sexual_health_clinic` | `@/frontend/src/app/core/safety.ts`, `@/backend/src/pois/poi.entity.ts`            | ✅     |
 | [x] Add wheelchair accessibility checkbox to submission form + filter                                                                                                                                  | `@/frontend/src/app/map/map.html`, `@/backend/src/pois/poi.entity.ts`              | ✅     |
-| [x] Add anonymous submission toggle (hide `displayName` on contributions per-submission)                                                                                                               | `@/frontend/src/app/map/map.ts`, `@/backend/src/pois/`, `@/backend/src/districts/` | ✅     |
-| [x] Add secondary visual indicators (icons/patterns) to safety colour scale for colour-blind users                                                                                                     | `@/frontend/src/app/core/safety.ts`, `@/frontend/src/app/map/map.html`             | ✅     |
+| [ ] Add anonymous submission toggle (hide `displayName` on contributions per-submission) — **⚠ Reopened 2026-09-29** (LSA-B2): toggle stored but not enforced by API                                                                                                               | `@/frontend/src/app/map/map.ts`, `@/backend/src/pois/`, `@/backend/src/districts/` | ✅     |
+| [ ] Add secondary visual indicators (icons/patterns) to safety colour scale for colour-blind users — **⚠ Reopened 2026-09-29** (LSA-A2): only in legend/popup, not on map markers                                                                                                     | `@/frontend/src/app/core/safety.ts`, `@/frontend/src/app/map/map.html`             | ✅     |
 
 ---
 
 ## P1 — Should Have (Quality & Trust)
+
+### Live Site Audit — Trust & Data Quality
+
+> A safety label nobody verified is a liability. Fix how seeded data is presented before growth marketing drives traffic to it.
+
+| ID      | Task                                                                                                                                                                                                                         | Files                                                                          | Effort   |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------- |
+| LSA-B12 | [ ] Re-audit Wikidata seed (790 items incl. general art museums as "Community Space · Friendly"); badge seeded items "Imported — not yet community-verified"; hide seeder-assigned rating until community votes exist; render source as link; de-duplicate (3 dupes) | `@/backend/src/seed/geo-data-seed.service.ts`, `@/frontend/src/app/map/map.ts` | 2–3 days |
+| LSA-F4  | [ ] In-app report/flag — `POST /reports` feeding the review queue with reason picker; replaces mailto                                                                                                                         | `@/backend/src/`, `@/frontend/src/app/map/`, `@/frontend/src/app/review/`      | 2 days   |
+| LSA-F5  | [ ] Community ratings & reviews on places — expose voting UI (`voteCount` is 0 everywhere) and short text reviews (promoted from P3 "User reviews on places")                                                               | `@/backend/src/pois/`, `@/frontend/src/app/place/`, map popup                  | 1 week   |
+| LSA-F2  | [ ] Rich place detail page — address, opening hours, website, directions link, link from popup (depends on LSA-B3)                                                                                                          | `@/frontend/src/app/place/`, `@/backend/src/pois/poi.entity.ts`                | 2 days   |
+| LSA-F13 | [ ] Show "Last verified" date + source ("Community" / "Imported") on each place                                                                                                                                             | `@/frontend/src/app/place/`, map popup                                         | 0.5 day  |
+
+### Live Site Audit — Accessibility (WCAG 2.2 AA)
+
+> Source: LIVE_SITE_AUDIT, from axe-core plus manual keyboard testing on production. A1 and A2 are Level A failures; do those first.
+
+| ID          | Task                                                                                                                                                         | Files                                                                         | Effort   |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | -------- |
+| LSA-A1 / F3 | [ ] Keyboard + screen-reader access to places — synchronized, keyboard-operable **list view** of places in viewport (name, category, rating, distance) that opens the popup | `@/frontend/src/app/map/`                                                     | 3 days   |
+| LSA-A2      | [ ] Render rating symbol (✕ △ ◆ ✓ ★) *inside* each map marker (`divIcon`) or vary shape — markers are colour-only today                                       | `@/frontend/src/app/map/map.ts`, `@/frontend/src/app/core/safety.ts`          | 1 day    |
+| LSA-A3      | [ ] Brand pink `#e84393` fails contrast (3.71:1 with white) — darken to ~`#c2185b` for buttons/CTAs/links; fix `.footer-donate` (4.4:1)                       | `@/frontend/src/styles.scss`, `@/frontend/src/app/app.scss`                   | 0.5 day  |
+| LSA-A4      | [ ] Fix remaining contrast: hint text `#9498a8` (2.87:1), status chips on `/my-edits`, role/unverified badges on `/admin`, active tab on `/review`          | `@/frontend/src/app/auth/`, `submissions/my-edits/`, `admin/`, `review/`      | 0.5 day  |
+| LSA-A5      | [ ] Cookie banner: `aria-label`, first in focus order / focus on show, underline "Learn more", reduce height on mobile                                         | `@/frontend/src/app/core/cookie-consent.component.ts`                          | 2 hours  |
+| LSA-A6      | [ ] Add visually-hidden `<h1>` on map page; legend heading → `h2`                                                                                            | `@/frontend/src/app/map/map.html`                                             | 15 min   |
+| LSA-A7      | [ ] Popup focus management — move focus into popup on open, restore on close                                                                                | `@/frontend/src/app/map/map.ts`                                               | 0.5 day  |
+| LSA-A8      | [ ] Tab order — search/filters before map; remove Leaflet attribution link from early tab stops                                                              | `@/frontend/src/app/map/map.html`                                             | 1 hour   |
+| LSA-A9      | [ ] `aria-live` announcements for search/filter/locate results ("Showing 42 places near Berlin"); `role="alert"` on "Location not found."                     | `@/frontend/src/app/map/`                                                     | 2 hours  |
+| LSA-A10     | [ ] Replace emoji UI icons with SVG; `aria-hidden` decorative emoji ("❤ Support us", "🚩 Flag")                                                              | `@/frontend/src/app/`                                                         | 0.5 day  |
+| LSA-A11     | [ ] Mobile: collapsible filter panel + legend toggle (they cover ~60% of the map at 390 px)                                                                   | `@/frontend/src/app/map/map.html`, `map.scss`                                 | 0.5 day  |
+| LSA-A12     | [ ] Rename draw tools ("Add a place" / "Draw a district" instead of "circlemarker"); add a visible "+ Add place" button                                      | `@/frontend/src/app/map/map.ts`                                               | 2 hours  |
+
+### Live Site Audit — SEO, Privacy & Polish
+
+| ID      | Task                                                                                                                                                  | Files                                                            | Effort  |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------- |
+| LSA-B14 | [ ] Don't load GTM until consent is accepted (currently loads before and after *Reject*); list Sentry as processor in privacy policy; fix banner copy ("cookies" → local storage) | `@/frontend/src/index.html`, `@/frontend/src/main.ts`, `@/frontend/src/app/privacy/` | 0.5 day |
+| LSA-B10 | [ ] Real 404 page (`noindex`) instead of `**` → map redirect; nginx 404 for missing static files                                                      | `@/frontend/src/app/app.routes.ts`, `@/frontend/nginx.conf`      | 2 hours |
+| LSA-B11 | [ ] Guard UX — redirect logged-out `/review` & `/admin` to login; preserve `returnUrl` after login; add `/my-edits` to robots Disallow                  | `@/frontend/src/app/core/guards.ts`, `@/frontend/public/robots.txt` | 2 hours |
+| LSA-B13 | [ ] Add missing `logo.png` (JSON-LD), `apple-touch-icon.png`, web manifest; shrink 134 KB favicon + add SVG icon                                        | `@/frontend/public/`                                             | 2 hours |
+| LSA-B16 | [ ] Remove test accounts (`Tester …`, `Devin Evidence`) from prod DB, point e2e at staging; hide (not just disable) self role/ban controls; check duplicate "Ixelles" edit | prod DB, `@/test/`, `@/frontend/src/app/admin/`                  | 2 hours |
 
 ### SEO (Phase 2 — High Impact)
 
@@ -94,7 +162,7 @@
 | [x] Meta tags, OG, Twitter Cards | `@/frontend/src/index.html`                    | ✅       |
 | [x] robots.txt + sitemap.xml     | `@/frontend/public/`                           | ✅       |
 | [x] SeoService + resolver        | `@/frontend/src/app/core/`                     | ✅       |
-| [x] Angular SSR                  | `ng add @angular/ssr` — Node version fix       | 1–2 days |
+| [ ] Angular SSR — **⚠ Reopened 2026-09-29**: prod serves an empty `<app-root>` shell via nginx | `ng add @angular/ssr` — Node version fix       | 1–2 days |
 | [x] Google Search Console        | Manual setup — see instructions below          | 2 hours  |
 | [x] GA4 analytics                | `@/frontend/src/app/core/analytics.service.ts` | ✅       |
 | [~] Performance audit            | Lighthouse + WebPageTest — manual              | 1 day    |
@@ -140,7 +208,7 @@
 | ----------------------------------------------------------- | ---------------------------------------------------------------------------- | -------- |
 | [x] User profile page — view/edit display name, avatar, bio | `@/frontend/src/app/profile/`, `@/backend/src/users/`                        | 1–2 days |
 | [x] Change password with current-password confirmation      | `@/frontend/src/app/profile/`, `@/backend/src/auth/`                         | 0.5 day  |
-| [x] Update email address with verification flow             | `@/frontend/src/app/profile/`, `@/backend/src/users/`, `@/backend/src/auth/` | 1 day    |
+| [ ] Update email address with verification flow — **⚠ Reopened 2026-09-29** (LSA-B4b): no email sent | `@/frontend/src/app/profile/`, `@/backend/src/users/`, `@/backend/src/auth/` | 1 day    |
 | [x] Notification preferences toggle                         | `@/frontend/src/app/profile/`, `@/backend/src/users/user.entity.ts`          | 0.5 day  |
 | [x] Account deletion (GDPR Art. 17)                         | `@/frontend/src/app/profile/`, `@/backend/src/users/`                        | 1 day    |
 
@@ -158,18 +226,30 @@
 
 | Task                                  | Source                       | Files                                                |
 | ------------------------------------- | ---------------------------- | ---------------------------------------------------- | --- |
-| [x] Social proof counter on legend    | BEHAVIORAL_NUDGES §2.1       | `@/frontend/src/app/map/map.html`                    |
+| [ ] Social proof counter on legend — **⚠ Reopened 2026-09-29** (LSA-B7): always shows 0 | BEHAVIORAL_NUDGES §2.1       | `@/frontend/src/app/map/map.html`                    |
 | [x] Enhanced submission toast         | BEHAVIORAL_NUDGES §2.2       | `@/frontend/src/app/map/map.ts`                      |
 | [x] Post-reg "add first place" prompt | BEHAVIORAL_NUDGES §2.1       | `@/frontend/src/app/auth/register.ts`                |
 | [x] Contribution count on `/mine`     | BEHAVIORAL_NUDGES §2.3       | `@/frontend/src/app/submissions/my-submissions.html` |
 | [x] Cluster markers                   | TREND_RESEARCH §1.2 → PRD P0 | `@/frontend/src/app/map/map.ts`                      | ✅  |
 | [x] User location detection           | TREND_RESEARCH §1.3          | Geolocation API in map component                     |
-| [x] Report/flag button on popup       | TREND_RESEARCH §2.2          | Marker popup template                                |
+| [ ] Report/flag button on popup — **⚠ Reopened 2026-09-29** (LSA-B5, LSA-F4): mailto target domain does not exist | TREND_RESEARCH §2.2          | Marker popup template                                |
 | [x] Geographic search                 | TREND_RESEARCH §1.1          | Add search input to map                              |
 
 ---
 
 ## P2 — Nice to Have (Growth)
+
+### Live Site Audit — Missing Features
+
+| ID      | Task                                                                                                              | Files                                              | Effort   |
+| ------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | -------- |
+| LSA-F9  | [ ] "Quick exit" / panic button + discreet mode (neutral tab title), which is standard on safety resources for at-risk users | `@/frontend/src/app/app.html`                      | 0.5 day  |
+| LSA-F7  | [ ] Map state in URL (`?lat=&lng=&z=&category=&rating=`) so views are shareable, bookmarkable and Back works      | `@/frontend/src/app/map/map.ts`                    | 1 day    |
+| LSA-F8  | [ ] Search autocomplete + search by place *name* (currently only geocodes cities/addresses)                       | `@/frontend/src/app/map/`, `@/backend/src/pois/`   | 2 days   |
+| LSA-F12 | [ ] Favourites / saved places for travellers                                                                      | `@/backend/src/users/`, `@/frontend/src/app/`      | 2 days   |
+| LSA-F14 | [ ] Proper 404 page (tracked as LSA-B10 in P1)                                                                    | —                                                  | —        |
+
+> LSA-F10 (i18n) and LSA-F11 (PWA/offline) are already planned in P3. The worldwide dataset (Vietnam, Brazil, Ukraine…) argues for pulling i18n forward once P1 is done.
 
 ### Marketing (Month 1)
 
@@ -177,7 +257,7 @@
 - [ ] Build press kit — founder story, screenshots, demo video
 - [ ] Seed Reddit — 3 value posts in r/lgbt, r/solotravel
 - [ ] Outreach to 10 LGBTQ organisations
-- [ ] Shareable place links — `/place/:id` routes with per-POI OG images
+- [ ] Shareable place links — `/place/:id` routes with per-POI OG images (blocked by LSA-B3)
 
 ### Engagement (1–2 weeks dev)
 
@@ -187,18 +267,18 @@
 | [ ] "Recently approved" indicator                  | `@/frontend/src/app/map/map.ts`                             |
 | [ ] Share button on marker                         | Marker popup                                                |
 | [ ] Soft-gate drawing for guests                   | `@/frontend/src/app/map/map.ts`                             |
-| [ ] Email notifications                            | Backend + email provider                                    |
+| [ ] Email notifications (depends on LSA-B4b mail provider) | Backend + email provider                                    |
 | [x] Cookie consent banner                          | `@/frontend/src/app/core/cookie-consent.component.ts`       |
 | [x] High contrast mode / colour-blind safe palette | `@/frontend/src/app/map/map.scss`, `@/frontend/src/styles/` |
 | [x] `prefers-reduced-motion` — toast + animations  | `@/frontend/src/app/map/map.scss`                           |
-| [x] Email verification                             | Backend + frontend flow                                     |
+| [ ] Email verification — **⚠ Reopened 2026-09-29** (LSA-B4b): tokens only logged, never emailed | Backend + frontend flow                                     |
 
 ### Moderation & Content
 
 - [x] Bulk approve/reject in queue
 - [x] Edit suggestions for approved POIs → promoted to P1; see PRD §2 P1 / §3
-- [x] `/place/:id` individual pages
-- [x] Dynamic sitemap generation
+- [ ] `/place/:id` individual pages — **⚠ Reopened 2026-09-29** (LSA-B3): backend route missing, every page errors
+- [ ] Dynamic sitemap generation — **⚠ Reopened 2026-09-29**: live sitemap is a static 5-URL file, no place pages, no `lastmod`
 
 ### Legal & Licensing
 
@@ -252,14 +332,14 @@
 ### Rich Content
 
 - [ ] Photo uploads with moderation
-- [ ] Operating hours, website links per POI
+- [ ] Operating hours, website links per POI (part of LSA-F2 place detail page)
 - [ ] Tags/attributes ("Trans-owned", "BIPOC-welcoming", "Youth-friendly")
-- [ ] User reviews on places
-- [ ] "Verify" system — confirm place still safe
+- [ ] User reviews on places → **promoted to P1** (LSA-F5, Trust)
+- [ ] "Verify" system — confirm place still safe (pairs with LSA-F13 "last verified" date)
 
 ### Inclusivity — Phase 3 (LGBTQIA_INCLUSIVITY_REPORT + UI-DESIGN)
 
-- [ ] i18n framework + priority languages: Spanish, Portuguese, French, Arabic (language selector in topbar/footer, dynamic `lang` on `<html>`)
+- [ ] (LSA-F10) i18n framework + priority languages: Spanish, Portuguese, French, Arabic (language selector in topbar/footer, dynamic `lang` on `<html>`)
 - [ ] Community symbols — Progress Pride, Transgender, Intersex, Asexual flags in relevant category contexts (youth centers, trans services, etc.) in topbar + map markers
 - [ ] User-configurable default map centre (remove Brussels hardcode; auto-locate already planned in P0)
 - [ ] COPPA review — age verification / youth safety policy
@@ -270,11 +350,11 @@
 
 | Task                       | Files                                |
 | -------------------------- | ------------------------------------ |
-| [ ] PWA support            | `ng add @angular/pwa`                |
+| [ ] PWA support + web manifest (LSA-F11, LSA-B13) | `ng add @angular/pwa`                |
 | [ ] Redis caching          | Backend `CacheModule`                |
-| [ ] API pagination         | `@/backend/src/common/pagination.ts` |
+| [ ] API pagination (also admin users list, LSA-B16) | `@/backend/src/common/pagination.ts` |
 | [ ] Audit logging          | Backend interceptor                  |
-| [ ] Sentry error tracking  | `Sentry.init()`                      |
+| [x] Sentry error tracking — implemented; consent gating tracked in LSA-B14 | `@/frontend/src/main.ts` |
 | [ ] Health check endpoints | `@/backend/src/health/`              |
 
 ---

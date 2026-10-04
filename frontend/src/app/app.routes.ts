@@ -33,6 +33,48 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'forgot-password',
+    loadComponent: () => import('./auth/forgot-password').then((m) => m.ForgotPasswordComponent),
+    resolve: { seo: seoResolver },
+    data: {
+      title: 'Reset Password | Colours of Safety',
+      description: 'Request a link to reset your Colours of Safety password.',
+      robots: 'noindex,nofollow',
+    },
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./auth/reset-password').then((m) => m.ResetPasswordComponent),
+    resolve: { seo: seoResolver },
+    data: {
+      title: 'Choose a New Password | Colours of Safety',
+      description: 'Choose a new password for your Colours of Safety account.',
+      robots: 'noindex,nofollow',
+    },
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () => import('./auth/email-link').then((m) => m.EmailLinkComponent),
+    resolve: { seo: seoResolver },
+    data: {
+      mode: 'verify',
+      title: 'Confirm Email | Colours of Safety',
+      description: 'Confirm the email address for your Colours of Safety account.',
+      robots: 'noindex,nofollow',
+    },
+  },
+  {
+    path: 'confirm-email',
+    loadComponent: () => import('./auth/email-link').then((m) => m.EmailLinkComponent),
+    resolve: { seo: seoResolver },
+    data: {
+      mode: 'email-change',
+      title: 'Confirm New Email | Colours of Safety',
+      description: 'Confirm the new email address for your Colours of Safety account.',
+      robots: 'noindex,nofollow',
+    },
+  },
+  {
     path: 'mine',
     canActivate: [authGuard],
     loadComponent: () =>
