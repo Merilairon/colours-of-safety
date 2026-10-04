@@ -8,6 +8,8 @@ import {
   POI_CATEGORIES,
   POI_CATEGORY_LABELS,
   safetySymbolColor,
+  displayRating,
+  ratingLabel,
 } from './safety';
 
 describe('Safety Utilities', () => {
@@ -140,6 +142,31 @@ describe('Safety Utilities', () => {
 
     it.each([1, 2, 3, 4, 5])('symbol on rating %i fill has at least 3:1 contrast', (rating) => {
       expect(contrast(safetySymbolColor(rating), safetyColor(rating))).toBeGreaterThanOrEqual(3);
+    });
+  });
+
+  describe('displayRating (LSA-B12)', () => {
+    const base = { safetyRating: 4, ratingCount: 0, communityRating: null };
+
+    it('shows the submitted rating for community entries', () => {
+      expect(displayRating({ ...base, source: 'community' })).toBe(4);
+    });
+
+    it('hides the seeder placeholder on unconfirmed imports', () => {
+      expect(displayRating({ ...base, source: 'wikidata', lastVerifiedAt: null })).toBeNull();
+      expect(ratingLabel(null)).toBe('Not yet rated');
+    });
+
+    it('shows an import rating once a person confirmed it', () => {
+      expect(
+        displayRating({ ...base, source: 'openstreetmap', lastVerifiedAt: '2026-10-01' }),
+      ).toBe(4);
+    });
+
+    it('prefers the rounded community average when ratings exist', () => {
+      expect(
+        displayRating({ ...base, source: 'wikidata', ratingCount: 3, communityRating: 2.6 }),
+      ).toBe(3);
     });
   });
 });

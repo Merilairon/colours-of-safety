@@ -222,6 +222,14 @@ describe('AC-4 My Submissions', () => {
   let http: HttpTestingController;
 
   const mockPoi: Poi = {
+    source: 'community',
+    sourceUrl: null,
+    lastVerifiedAt: null,
+    address: null,
+    website: null,
+    openingHours: null,
+    ratingCount: 0,
+    communityRating: null,
     id: 'p1',
     name: 'Rainbow Cafe',
     description: 'Nice cafe',
@@ -236,6 +244,9 @@ describe('AC-4 My Submissions', () => {
     isAnonymous: false,
   };
   const mockDistrict: District = {
+    source: 'community',
+    sourceUrl: null,
+    lastVerifiedAt: null,
     id: 'd1',
     name: 'Safe Zone',
     description: 'Safe area',
@@ -389,6 +400,14 @@ describe('AC-5 Review Queue', () => {
   let http: HttpTestingController;
 
   const mockPoi: Poi = {
+    source: 'community',
+    sourceUrl: null,
+    lastVerifiedAt: null,
+    address: null,
+    website: null,
+    openingHours: null,
+    ratingCount: 0,
+    communityRating: null,
     id: 'p1',
     name: 'Pending Bar',
     description: 'A bar',
@@ -409,6 +428,9 @@ describe('AC-5 Review Queue', () => {
     isAnonymous: false,
   };
   const mockDistrict: District = {
+    source: 'community',
+    sourceUrl: null,
+    lastVerifiedAt: null,
     id: 'd1',
     name: 'Pending District',
     description: 'An area',

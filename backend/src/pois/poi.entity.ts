@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { PlaceSource } from '../common/place-source.enum';
 import { ReviewStatus } from '../common/review-status.enum';
 import { User } from '../users/user.entity';
 
@@ -55,6 +56,40 @@ export class Poi {
 
   @Column({ type: 'text', nullable: true })
   reviewNote: string | null;
+
+  @Column({ type: 'varchar', length: 300, nullable: true })
+  address: string | null;
+
+  /** http(s) URL only; validated on input. */
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  website: string | null;
+
+  /** Free text, typically in OSM `opening_hours` syntax (e.g. "Mo-Fr 10:00-18:00"). */
+  @Column({ type: 'varchar', length: 300, nullable: true })
+  openingHours: string | null;
+
+  /** Origin of the record; see {@link PlaceSource}. */
+  @Column({ type: 'varchar', length: 20, default: PlaceSource.COMMUNITY })
+  source: PlaceSource;
+
+  /** Link to the upstream record (OSM element, Wikidata item) for imports. */
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  sourceUrl: string | null;
+
+  /**
+   * Last time a person confirmed this entry: a reviewer approval, an
+   * approved edit or a community rating. Null for unconfirmed imports.
+   */
+  @Column({ type: 'timestamptz', nullable: true })
+  lastVerifiedAt: Date | null;
+
+  /** Number of community ratings (LSA-F5); kept in sync by RatingsService. */
+  @Column({ type: 'int', default: 0 })
+  ratingCount: number;
+
+  /** Mean community rating 1–5, null until someone rates the place. */
+  @Column({ type: 'real', nullable: true })
+  communityRating: number | null;
 
   @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'createdById' })

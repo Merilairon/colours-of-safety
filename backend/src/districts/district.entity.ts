@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { PlaceSource } from '../common/place-source.enum';
 import { ReviewStatus } from '../common/review-status.enum';
 import { User } from '../users/user.entity';
 
@@ -56,6 +57,21 @@ export class District {
 
   @Column({ type: 'text', nullable: true })
   reviewNote: string | null;
+
+  /** Origin of the record; see {@link PlaceSource}. */
+  @Column({ type: 'varchar', length: 20, default: PlaceSource.COMMUNITY })
+  source: PlaceSource;
+
+  /** Link to the upstream record (OSM element, Wikidata item) for imports. */
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  sourceUrl: string | null;
+
+  /**
+   * Last time a person confirmed this entry: a reviewer approval, an
+   * approved edit or a community rating. Null for unconfirmed imports.
+   */
+  @Column({ type: 'timestamptz', nullable: true })
+  lastVerifiedAt: Date | null;
 
   @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'createdById' })

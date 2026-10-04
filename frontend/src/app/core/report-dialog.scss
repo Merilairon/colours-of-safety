@@ -1,0 +1,112 @@
+.report-dialog {
+  width: min(440px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  border: none;
+  border-radius: 12px;
+  padding: 1.25rem 1.25rem 1rem;
+  color: #1d1f2b;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+
+  &::backdrop {
+    background: rgba(29, 31, 43, 0.55);
+  }
+}
+
+h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+fieldset {
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: none;
+
+  legend {
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+}
+
+.reason {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: #c2185b;
+  }
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  textarea {
+    padding: 0.5rem 0.6rem;
+    border: 1px solid #d4d6e0;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 400;
+  }
+}
+
+.hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: #4a4e5e;
+}
+
+.error {
+  margin: 0.6rem 0 0;
+  color: #a3162b;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+
+  button {
+    padding: 0.55rem 0.9rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &.primary {
+      background: #c2185b;
+      color: #fff;
+    }
+
+    &.secondary {
+      background: #eceef4;
+      color: #1d1f2b;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: progress;
+    }
+  }
+}
+
+input:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 2px solid #c2185b;
+  outline-offset: 2px;
+}

@@ -194,6 +194,33 @@
     }
   }
 
+  .more-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    summary {
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #3a3d4d;
+    }
+
+    &[open] summary {
+      margin-bottom: 0.6rem;
+    }
+
+    label + label {
+      margin-top: 0.6rem;
+    }
+  }
+
+  .field-error {
+    color: #a3162b;
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+
   .anon-hint {
     margin: -0.5rem 0 0;
     font-size: 0.75rem;

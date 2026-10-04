@@ -3,140 +3,174 @@
   <p class="sub">Approve or reject submissions. Only approved markings appear on the public map.</p>
 
   <!-- Filter buttons -->
-  <div class="filter-bar">
-    <button type="button" [class.active]="filterType() === 'all'" (click)="setFilter('all')">
+  <div class="filter-bar" role="group" aria-label="Show">
+    <button
+      type="button"
+      [class.active]="filterType() === 'all'"
+      [attr.aria-pressed]="filterType() === 'all'"
+      (click)="setFilter('all')"
+    >
       All
     </button>
-    <button type="button" [class.active]="filterType() === 'poi'" (click)="setFilter('poi')">
+    <button
+      type="button"
+      [class.active]="filterType() === 'poi'"
+      [attr.aria-pressed]="filterType() === 'poi'"
+      (click)="setFilter('poi')"
+    >
       Places
     </button>
     <button
       type="button"
       [class.active]="filterType() === 'district'"
+      [attr.aria-pressed]="filterType() === 'district'"
       (click)="setFilter('district')"
     >
       Districts
     </button>
+    <button
+      type="button"
+      [class.active]="filterType() === 'reports'"
+      [attr.aria-pressed]="filterType() === 'reports'"
+      (click)="setFilter('reports')"
+    >
+      Reports
+    </button>
   </div>
 
-  <!-- Bulk actions -->
-  @if (filteredItems().length > 0) {
-    <div class="bulk-actions">
-      <div class="bulk-select">
-        <input
-          type="checkbox"
-          id="select-all"
-          [checked]="selectedIds().size === filteredItems().length && filteredItems().length > 0"
-          [indeterminate]="selectedIds().size > 0 && selectedIds().size < filteredItems().length"
-          (change)="selectAll()"
-        />
-        <label for="select-all">Select all ({{ selectedIds().size }})</label>
-      </div>
-
-      @if (selectedIds().size > 0) {
-        <div class="bulk-buttons">
-          <button type="button" class="bulk-reject" [disabled]="bulkBusy()" (click)="bulkReject()">
-            Reject selected ({{ selectedIds().size }})
-          </button>
-          <button
-            type="button"
-            class="bulk-approve"
-            [disabled]="bulkBusy()"
-            (click)="bulkApprove()"
-          >
-            Approve selected ({{ selectedIds().size }})
-          </button>
-        </div>
-      }
-    </div>
-  }
-
-  @if (error()) {
-    <p class="error">{{ error() }}</p>
-  }
-
-  @if (loading()) {
-    <p class="muted">Loading…</p>
-  } @else if (filteredItems().length === 0) {
-    <p class="muted">Nothing to review right now.</p>
+  @if (filterType() === 'reports') {
+    <app-reports-queue />
   } @else {
-    <ul class="queue">
-      @for (item of filteredItems(); track item.id) {
-        <li class="card" [class.selected]="selectedIds().has(item.id)">
-          <div class="card-head">
-            <input
-              type="checkbox"
-              class="item-checkbox"
-              [checked]="selectedIds().has(item.id)"
-              (change)="toggleSelection(item.id)"
-            />
-            <span class="kind">{{
-              item.isEdit ? 'Edit' : item.kind === 'poi' ? 'Place' : 'District'
-            }}</span>
-            <span class="rating" [style.background]="colorFor(item.safetyRating)">{{
-              safetyLabel(item.safetyRating)
-            }}</span>
-          </div>
+    <!-- Bulk actions -->
+    @if (filteredItems().length > 0) {
+      <div class="bulk-actions">
+        <div class="bulk-select">
+          <input
+            type="checkbox"
+            id="select-all"
+            [checked]="selectedIds().size === filteredItems().length && filteredItems().length > 0"
+            [indeterminate]="selectedIds().size > 0 && selectedIds().size < filteredItems().length"
+            (change)="selectAll()"
+          />
+          <label for="select-all">Select all ({{ selectedIds().size }})</label>
+        </div>
 
-          <h2>{{ item.isEdit ? 'Proposed edit for ' + item.name : item.name }}</h2>
-          <p class="meta">
-            @if (item.category) {
-              <span>{{ item.category }}</span> ·
-            }
-            <span>by {{ item.author }}</span>
-            @if (!item.isEdit) {
-              · <span class="vote-badge">{{ item.voteCount }} {{ item.voteCount === 1 ? 'upvote' : 'upvotes' }}</span>
-            }
-          </p>
-          @if (item.isEdit) {
-            <div class="diff">
-              @for (change of diff(item); track change.label) {
-                <div class="diff-row">
-                  <span class="diff-label">{{ change.label }}</span>
-                  <span class="diff-before" [title]="'Before: ' + change.before">{{
-                    change.before
-                  }}</span>
-                  <span class="diff-arrow">→</span>
-                  <span class="diff-after" [title]="'After: ' + change.after">{{
-                    change.after
-                  }}</span>
-                </div>
-              } @empty {
-                <p class="muted">No changes detected.</p>
-              }
+        @if (selectedIds().size > 0) {
+          <div class="bulk-buttons">
+            <button
+              type="button"
+              class="bulk-reject"
+              [disabled]="bulkBusy()"
+              (click)="bulkReject()"
+            >
+              Reject selected ({{ selectedIds().size }})
+            </button>
+            <button
+              type="button"
+              class="bulk-approve"
+              [disabled]="bulkBusy()"
+              (click)="bulkApprove()"
+            >
+              Approve selected ({{ selectedIds().size }})
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    @if (loading()) {
+      <p class="muted">Loading…</p>
+    } @else if (filteredItems().length === 0) {
+      <p class="muted">Nothing to review right now.</p>
+    } @else {
+      <ul class="queue">
+        @for (item of filteredItems(); track item.id) {
+          <li class="card" [class.selected]="selectedIds().has(item.id)">
+            <div class="card-head">
+              <input
+                type="checkbox"
+                class="item-checkbox"
+                [checked]="selectedIds().has(item.id)"
+                (change)="toggleSelection(item.id)"
+              />
+              <span class="kind">{{
+                item.isEdit ? 'Edit' : item.kind === 'poi' ? 'Place' : 'District'
+              }}</span>
+              <span
+                class="rating"
+                [style.background]="colorFor(item.safetyRating)"
+                [style.color]="symbolColorFor(item.safetyRating)"
+                >{{ safetyLabel(item.safetyRating) }}</span
+              >
             </div>
-          } @else if (item.description) {
-            <p class="desc">{{ item.description }}</p>
-          }
 
-          <textarea
-            rows="2"
-            placeholder="Optional review note…"
-            [attr.aria-label]="'Optional review note for ' + item.name"
-            [value]="item.note"
-            (input)="setNote(item, $any($event.target).value)"
-          ></textarea>
+            <h2>{{ item.isEdit ? 'Proposed edit for ' + item.name : item.name }}</h2>
+            <p class="meta">
+              @if (item.category) {
+                <span>{{ item.category }}</span> ·
+              }
+              <span>by {{ item.author }}</span>
+              @if (!item.isEdit) {
+                ·
+                <span class="vote-badge"
+                  >{{ item.voteCount }} {{ item.voteCount === 1 ? 'upvote' : 'upvotes' }}</span
+                >
+              }
+            </p>
+            @if (item.isEdit) {
+              <div class="diff">
+                @for (change of diff(item); track change.label) {
+                  <div class="diff-row">
+                    <span class="diff-label">{{ change.label }}</span>
+                    <span class="diff-before" [title]="'Before: ' + change.before">{{
+                      change.before
+                    }}</span>
+                    <span class="diff-arrow">→</span>
+                    <span class="diff-after" [title]="'After: ' + change.after">{{
+                      change.after
+                    }}</span>
+                  </div>
+                } @empty {
+                  <p class="muted">No changes detected.</p>
+                }
+              </div>
+            } @else if (item.description) {
+              <p class="desc">{{ item.description }}</p>
+            }
 
-          <div class="actions">
-            <button
-              type="button"
-              class="reject"
-              [disabled]="item.busy"
-              (click)="decide(item, 'rejected')"
-            >
-              Reject
-            </button>
-            <button
-              type="button"
-              class="approve"
-              [disabled]="item.busy"
-              (click)="decide(item, 'approved')"
-            >
-              Approve
-            </button>
-          </div>
-        </li>
-      }
-    </ul>
+            <textarea
+              rows="2"
+              placeholder="Optional review note…"
+              [attr.aria-label]="'Optional review note for ' + item.name"
+              [value]="item.note"
+              (input)="setNote(item, $any($event.target).value)"
+            ></textarea>
+
+            <div class="actions">
+              <button
+                type="button"
+                class="reject"
+                [disabled]="item.busy"
+                (click)="decide(item, 'rejected')"
+              >
+                Reject
+              </button>
+              <button
+                type="button"
+                class="approve"
+                [disabled]="item.busy"
+                (click)="decide(item, 'approved')"
+              >
+                Approve
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
   }
 </div>

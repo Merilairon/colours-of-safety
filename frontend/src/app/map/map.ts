@@ -9,15 +9,15 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import * as L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet.markercluster';
 import { AuthService } from '../core/auth.service';
-import { SUPPORT_EMAIL } from '../core/contact';
 import { IconComponent, iconSvg } from '../core/icons';
 import { PlaceListComponent, PlaceListItem } from './place-list/place-list';
 import { MarkingsService } from '../core/markings.service';
+import { ReportDialogComponent } from '../core/report-dialog';
 import {
   CreateDistrictPayload,
   CreateEditProposalPayload,
@@ -30,6 +30,13 @@ import {
 import {
   POI_CATEGORIES,
   POI_CATEGORY_LABELS,
+  SOURCE_LABELS,
+  displayRating,
+  isCommunityVerified,
+  ratingColor,
+  ratingLabel,
+  ratingSymbol,
+  ratingSymbolColor,
   safetyColor,
   safetyIndicator,
   safetyLabel,
@@ -71,17 +78,25 @@ function formatDistance(meters: number): string {
 
 @Component({
   selector: 'app-map',
-  imports: [ReactiveFormsModule, RouterLink, IconComponent, PlaceListComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    IconComponent,
+    PlaceListComponent,
+    ReportDialogComponent,
+  ],
   templateUrl: './map.html',
   styleUrl: './map.scss',
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapEl', { static: true }) mapEl!: ElementRef<HTMLDivElement>;
+  @ViewChild(ReportDialogComponent, { static: true }) reportDialog!: ReportDialogComponent;
 
   private readonly auth = inject(AuthService);
   private readonly markings = inject(MarkingsService);
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   protected readonly isLoggedIn = this.auth.isLoggedIn;
   protected readonly isAdmin = this.auth.isAdmin;
@@ -107,6 +122,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     wheelchairAccessible?: boolean;
     location?: { type: 'Point'; coordinates: [number, number] };
     area?: GeoPolygon;
+    address?: string | null;
+    website?: string | null;
+    openingHours?: string | null;
   } | null>(null);
   protected readonly editSubmitting = signal(false);
   protected readonly editGeometry = signal<{
@@ -189,6 +207,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     safetyRating: [5, [Validators.required]],
     wheelchairAccessible: [false],
     isAnonymous: [false],
+    ...this.detailControls(),
   });
 
   protected readonly editForm = this.fb.nonNullable.group({
@@ -197,6 +216,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     category: ['other'],
     safetyRating: [5, [Validators.required]],
     wheelchairAccessible: [false],
+    ...this.detailControls(),
   });
 
   private map!: L.Map;
@@ -269,7 +289,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     this.map.on('draw:created', (e) => this.onShapeCreated(e as L.DrawEvents.Created));
     this.map.on('draw:drawstart', (e) =>
-      this.drawMode.set((e as unknown as { layerType: string }).layerType === 'polygon' ? 'district' : 'poi'),
+      this.drawMode.set(
+        (e as unknown as { layerType: string }).layerType === 'polygon' ? 'district' : 'poi',
+      ),
     );
     this.map.on('draw:drawstop', () => {
       this.drawMode.set(null);
@@ -494,6 +516,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         wheelchairAccessible: value.wheelchairAccessible,
         location: { type: 'Point', coordinates: draft.location },
         isAnonymous: value.isAnonymous,
+        address: value.address.trim() || undefined,
+        website: value.website.trim() || undefined,
+        openingHours: value.openingHours.trim() || undefined,
       };
       this.markings.createPoi(payload).subscribe({
         next: () => this.onSubmitted(),
@@ -564,6 +589,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     wheelchairAccessible?: boolean;
     location?: { type: 'Point'; coordinates: [number, number] };
     area?: GeoPolygon;
+    address?: string | null;
+    website?: string | null;
+    openingHours?: string | null;
   }): void {
     this.clearEditGeometry();
     this.editingTarget.set(target);
@@ -573,6 +601,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       category: target.category ?? 'other',
       safetyRating: target.safetyRating,
       wheelchairAccessible: target.wheelchairAccessible ?? false,
+      address: target.address ?? '',
+      website: target.website ?? '',
+      openingHours: target.openingHours ?? '',
     });
     if (target.kind === 'poi' && target.location) {
       this.editGeometry.set({
@@ -607,6 +638,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     };
     if (target.kind === 'poi') {
       proposedData.category = value.category;
+      // Only send details that changed, so the review diff stays readable.
+      for (const field of ['address', 'website', 'openingHours'] as const) {
+        const next = value[field].trim() || null;
+        if (next !== (target[field] ?? null)) proposedData[field] = next;
+      }
       if (geometry?.location) {
         proposedData.location = { type: 'Point', coordinates: geometry.location };
       }
@@ -692,7 +728,19 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       safetyRating: 5,
       wheelchairAccessible: false,
       isAnonymous: false,
+      address: '',
+      website: '',
+      openingHours: '',
     });
+  }
+
+  /** Optional place details (LSA-F2); the backend accepts only http(s) websites. */
+  private detailControls() {
+    return {
+      address: ['', [Validators.maxLength(300)]],
+      website: ['', [Validators.maxLength(500), Validators.pattern(/^\s*(https?:\/\/\S+)?\s*$/i)]],
+      openingHours: ['', [Validators.maxLength(300)]],
+    };
   }
 
   private showToast(message: string, duration = 4000): void {
@@ -716,7 +764,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     // Filter POIs
     const filteredPois = this.allPois.filter((poi) => {
       if (category !== 'all' && poi.category !== category) return false;
-      if (poi.safetyRating < minRating) return false;
+      // Unrated imports only show when no minimum rating is set.
+      if ((displayRating(poi) ?? 0) < minRating && minRating > 1) return false;
       if (wheelchairOnly && !poi.wheelchairAccessible) return false;
       return true;
     });
@@ -728,6 +777,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       const marker = this.placeMarker(poi);
       this.markerIndex.set(poi.id, marker);
       marker.bindPopup(this.poiPopup(poi.name, poi, poi.id));
+      marker.on('popupopen', () => this.attachPopupLinks(poi.id, 'poi', poi.name));
       if (this.isLoggedIn()) {
         marker.on('popupopen', () => this.attachEditHandler(marker, poi, 'poi'));
       }
@@ -747,29 +797,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     // Filter Districts
     const filteredDistricts = this.allDistricts.filter((district) => {
-      if (district.safetyRating < minRating) return false;
+      if ((displayRating(district) ?? 0) < minRating && minRating > 1) return false;
       if (wheelchairOnly && !district.wheelchairAccessible) return false;
       return true;
     });
 
     for (const district of filteredDistricts) {
       const ring = district.area.coordinates[0].map(([lng, lat]): [number, number] => [lat, lng]);
+      const color = ratingColor(displayRating(district));
       const polygon = L.polygon(ring, {
-        color: safetyColor(district.safetyRating),
-        fillColor: safetyColor(district.safetyRating),
+        color,
+        fillColor: color,
         fillOpacity: 0.55,
         weight: 0,
         pane: 'blendedDistricts',
       });
-      polygon.bindPopup(
-        this.districtPopup(
-          district.name,
-          district.description,
-          district.safetyRating,
-          district.wheelchairAccessible,
-          district.id,
-        ),
-      );
+      polygon.bindPopup(this.districtPopup(district));
+      polygon.on('popupopen', () => this.attachPopupLinks(district.id, 'district', district.name));
       if (this.isLoggedIn()) {
         polygon.on('popupopen', () => this.attachEditHandler(polygon, district, 'district'));
       }
@@ -785,10 +829,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   /** Round marker with the rating symbol inside, so it never relies on colour alone (LSA-A2). */
-  private placeIcon(rating: number, pending = false): L.DivIcon {
+  private placeIcon(rating: number | null, pending = false): L.DivIcon {
     return L.divIcon({
       className: 'place-marker-icon',
-      html: `<span class="place-marker${pending ? ' pending' : ''}" style="background:${safetyColor(rating)};color:${safetySymbolColor(rating)}">${safetyIndicator(rating)}</span>`,
+      html: `<span class="place-marker${pending ? ' pending' : ''}" style="background:${ratingColor(rating)};color:${ratingSymbolColor(rating)}">${ratingSymbol(rating)}</span>`,
       iconSize: [26, 26],
       iconAnchor: [13, 13],
       popupAnchor: [0, -12],
@@ -797,14 +841,16 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private placeMarker(poi: Poi, pending = false): L.Marker {
     const [lng, lat] = poi.location.coordinates;
+    // Pending entries are always community submissions with their own rating.
+    const rating = pending ? poi.safetyRating : displayRating(poi);
     const label = [
       poi.name,
       this.categoryLabels[poi.category] || poi.category,
-      safetyLabel(poi.safetyRating),
+      ratingLabel(rating),
       ...(pending ? ['pending review'] : []),
     ].join(', ');
     const marker = L.marker([lat, lng], {
-      icon: this.placeIcon(poi.safetyRating, pending),
+      icon: this.placeIcon(rating, pending),
       title: poi.name,
       keyboard: true,
       riseOnHover: true,
@@ -839,17 +885,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     inView.sort((a, b) => a.meters - b.meters);
     this.visibleTotal.set(inView.length);
     this.visiblePlaces.set(
-      inView.slice(0, PLACE_LIST_LIMIT).map(({ poi, meters }) => ({
-        id: poi.id,
-        name: poi.name,
-        category: this.categoryLabels[poi.category] || poi.category,
-        ratingLabel: safetyLabel(poi.safetyRating),
-        symbol: safetyIndicator(poi.safetyRating),
-        color: safetyColor(poi.safetyRating),
-        symbolColor: safetySymbolColor(poi.safetyRating),
-        wheelchairAccessible: poi.wheelchairAccessible,
-        distance: formatDistance(meters),
-      })),
+      inView.slice(0, PLACE_LIST_LIMIT).map(({ poi, meters }) => {
+        const rating = displayRating(poi);
+        return {
+          id: poi.id,
+          name: poi.name,
+          category: this.categoryLabels[poi.category] || poi.category,
+          ratingLabel: ratingLabel(rating),
+          symbol: ratingSymbol(rating),
+          color: ratingColor(rating),
+          symbolColor: ratingSymbolColor(rating),
+          wheelchairAccessible: poi.wheelchairAccessible,
+          distance: formatDistance(meters),
+        };
+      }),
     );
   }
 
@@ -1147,6 +1196,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         wheelchairAccessible: target.wheelchairAccessible,
         location: (target as Poi).location,
         area: (target as District).area,
+        address: (target as Poi).address,
+        website: (target as Poi).website,
+        openingHours: (target as Poi).openingHours,
       });
     });
   }
@@ -1199,49 +1251,69 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     `;
   }
 
-  private poiPopup(
-    name: string,
-    poi: {
-      id?: string;
-      description: string;
-      category: string;
-      safetyRating: number;
-      wheelchairAccessible?: boolean;
-    },
-    id?: string,
-  ): string {
+  private poiPopup(name: string, poi: Poi, id?: string): string {
+    const rating = displayRating(poi);
     return `
       <strong>${this.escape(name)}${this.wheelchairBadge(poi.wheelchairAccessible)}</strong>
-      ${this.ratingMeta(this.categoryLabels[poi.category] || poi.category, poi.safetyRating)}
+      ${this.ratingMeta(this.categoryLabels[poi.category] || poi.category, rating, poi.ratingCount)}
       ${poi.description ? `<p>${this.escape(poi.description)}</p>` : ''}
+      ${this.provenance(poi)}
+      ${this.detailsLink(id)}
       ${this.editProposalButton(id)}
       ${this.removeButton(id)}
-      ${this.reportLink(name, id)}
+      ${this.reportButton(id)}
     `;
   }
 
-  private districtPopup(
-    name: string,
-    description: string,
-    rating: number,
-    wheelchairAccessible?: boolean,
-    id?: string,
-  ): string {
+  private districtPopup(district: District): string {
     return `
-      <strong>${this.escape(name)}${this.wheelchairBadge(wheelchairAccessible)}</strong>
-      ${this.ratingMeta('District', rating)}
-      ${description ? `<p>${this.escape(description)}</p>` : ''}
-      ${this.editProposalButton(id)}
-      ${this.removeButton(id)}
-      ${this.reportLink(name, id)}
+      <strong>${this.escape(district.name)}${this.wheelchairBadge(district.wheelchairAccessible)}</strong>
+      ${this.ratingMeta('District', displayRating(district))}
+      ${district.description ? `<p>${this.escape(district.description)}</p>` : ''}
+      ${this.provenance(district)}
+      ${this.detailsLink(district.id)}
+      ${this.editProposalButton(district.id)}
+      ${this.removeButton(district.id)}
+      ${this.reportButton(district.id)}
     `;
   }
 
-  private ratingMeta(kindLabel: string, rating: number): string {
+  /** "Community · checked …" or "Imported from Wikidata · not yet verified" (LSA-F13). */
+  private provenance(place: Poi | District): string {
+    const verified = isCommunityVerified(place);
+    const when = verified
+      ? ` · checked ${new Date(place.lastVerifiedAt!).toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        })}`
+      : '';
+    if (place.source === 'community' || !place.source) {
+      return `<div class="pop-source">Added by the community${when}</div>`;
+    }
+    const label = SOURCE_LABELS[place.source] ?? 'an import';
+    const from = place.sourceUrl
+      ? `<a href="${this.escape(place.sourceUrl)}" target="_blank" rel="noopener noreferrer">${label}</a>`
+      : label;
+    return `<div class="pop-source">Imported from ${from}${
+      verified ? when : ' · <strong>not yet community-verified</strong>'
+    }</div>`;
+  }
+
+  private detailsLink(id?: string): string {
+    return id
+      ? `<a class="pop-details" id="details-${id}" href="/place/${id}">Details and ratings</a>`
+      : '';
+  }
+
+  private ratingMeta(kindLabel: string, rating: number | null, ratingCount = 0): string {
+    const count = ratingCount
+      ? ` (${ratingCount} ${ratingCount === 1 ? 'rating' : 'ratings'})`
+      : '';
     return `
       <div class="pop-meta">
-        <span class="safety-indicator" aria-hidden="true" style="background:${safetyColor(rating)};color:${safetySymbolColor(rating)}">${safetyIndicator(rating)}</span>
-        ${this.escape(kindLabel)} · ${safetyLabel(rating)}
+        <span class="safety-indicator" aria-hidden="true" style="background:${ratingColor(rating)};color:${ratingSymbolColor(rating)}">${ratingSymbol(rating)}</span>
+        ${this.escape(kindLabel)} · ${ratingLabel(rating)}${count}
       </div>`;
   }
 
@@ -1273,12 +1345,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return `<button type="button" class="remove-btn" id="remove-${id}">${iconSvg('trash')} Remove</button>`;
   }
 
-  /** Mail-based until the in-app report flow (LSA-F4) replaces it. */
-  private reportLink(name: string, id?: string): string {
-    const subject = `Report: ${name}${id ? ` (${id})` : ''}`;
-    const body = `Place: ${name}\nID: ${id ?? 'unknown'}\n\nWhat is wrong with this listing?\n`;
-    const href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    return `<div class="pop-report"><a href="${this.escape(href)}">${iconSvg('flag')} Flag</a></div>`;
+  private reportButton(id?: string): string {
+    if (!id) return '';
+    return `<div class="pop-report"><button type="button" id="report-${id}">${iconSvg('flag')} Report a problem</button></div>`;
+  }
+
+  /** Wires the in-app links in an approved popup: details page and Report (LSA-F4). */
+  private attachPopupLinks(id: string, kind: 'poi' | 'district', name: string): void {
+    document.getElementById(`details-${id}`)?.addEventListener('click', (event) => {
+      event.preventDefault();
+      void this.router.navigate(['/place', id]);
+    });
+    document.getElementById(`report-${id}`)?.addEventListener('click', () => {
+      this.map.closePopup();
+      this.reportDialog.open({ type: kind, id, name });
+    });
   }
 
   private escape(value: string): string {

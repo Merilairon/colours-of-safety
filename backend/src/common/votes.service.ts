@@ -131,11 +131,13 @@ export class VotesService {
         await this.pois.update(targetId, {
           voteCount: newVoteCount,
           status: ReviewStatus.APPROVED,
+          lastVerifiedAt: new Date(),
         });
       } else {
         await this.districts.update(targetId, {
           voteCount: newVoteCount,
           status: ReviewStatus.APPROVED,
+          lastVerifiedAt: new Date(),
         });
       }
       autoApproved = true;

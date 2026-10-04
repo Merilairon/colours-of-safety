@@ -21,6 +21,9 @@ export interface EditProposalData {
   location?: { type: 'Point'; coordinates: [number, number] };
   area?: { type: 'Polygon'; coordinates: number[][][] };
   blendEdges?: boolean;
+  address?: string | null;
+  website?: string | null;
+  openingHours?: string | null;
 }
 
 @Entity('edit_proposals')

@@ -3,6 +3,7 @@ import type { Point } from 'geojson';
 import { DataSource, Repository } from 'typeorm';
 import { District } from '../districts/district.entity';
 import { Poi } from '../pois/poi.entity';
+import { PlaceSource } from '../common/place-source.enum';
 import { ReviewStatus } from '../common/review-status.enum';
 import { User, UserRole } from '../users/user.entity';
 import {
@@ -19,6 +20,11 @@ interface PoiInsertRow {
   safetyRating: number;
   location: Point;
   wheelchairAccessible: boolean;
+  source: PlaceSource;
+  sourceUrl?: string | null;
+  address?: string | null;
+  website?: string | null;
+  openingHours?: string | null;
 }
 
 // Mirrors: https://overpass-api.de/api/interpreter (2 slots)
@@ -350,10 +356,15 @@ const CITY_BBOXES: Array<{
 
 /**
  * Wikidata class QIDs to query → maps to app category.
- * `requireLgbtqAudience: true` adds a SPARQL filter so generic venue classes
- * (clinics, hotels, museums) only match items explicitly tagged for an LGBTQ
- * audience (P2596=Q6636) or operated by an LGBTQ organisation (P137 subclass
- * of Q17145). Classes that are LGBTQ-specific by definition don't need this.
+ *
+ * Every QID here was checked against wikidata.org (2026-10 re-audit). The
+ * previous list was largely wrong (e.g. Q207694 is "art museum", which
+ * imported 500 general museums as community spaces), so verify the label
+ * of any QID before adding it.
+ *
+ * `requireLgbtqAudience: true` adds a SPARQL filter so generic classes
+ * (clinics) only match items whose intended public (P2360) or culture
+ * (P2596) is LGBTQ (Q17884). LGBTQ-specific classes don't need it.
  */
 const WIKIDATA_CLASSES: Array<{
   qid: string;
@@ -361,52 +372,40 @@ const WIKIDATA_CLASSES: Array<{
   label: string;
   requireLgbtqAudience?: boolean;
 }> = [
-  // Bars & nightlife — inherently LGBTQ+ by class definition
-  { qid: 'Q1412694', category: 'bar', label: 'gay bar' },
-  { qid: 'Q1378312', category: 'club', label: 'gay nightclub' },
-  { qid: 'Q56076827', category: 'bar', label: 'lesbian bar' },
-  { qid: 'Q117253659', category: 'club', label: 'LGBTQ nightclub' },
-  // Community & organisations — inherently LGBTQ+
-  { qid: 'Q1628398', category: 'community', label: 'LGBTQ community center' },
+  // Bars & nightlife
+  { qid: 'Q1043639', category: 'bar', label: 'gay bar' },
+  { qid: 'Q30324198', category: 'bar', label: 'lesbian bar' },
+  { qid: 'Q51167626', category: 'club', label: 'LGBTQ nightclub' },
+  // Community & organisations
+  { qid: 'Q2945640', category: 'community', label: 'LGBT community center' },
   {
-    qid: 'Q15249553',
+    qid: 'Q6458277',
     category: 'support_group',
-    label: 'LGBTQ rights organisation',
+    label: 'LGBTQ+ rights organization',
   },
-  { qid: 'Q15249558', category: 'support_group', label: 'LGBT organisation' },
+  { qid: 'Q64606659', category: 'support_group', label: 'LGBTQ+ organization' },
   {
-    qid: 'Q97498871',
-    category: 'support_group',
-    label: 'transgender organisation',
+    qid: 'Q125888609',
+    category: 'transgender_services',
+    label: 'transgender organization',
   },
-  // Health — generic classes: filter to LGBTQ-audience items only
+  // Health: generic classes, LGBTQ audience only
   {
-    qid: 'Q1076486',
+    qid: 'Q7458780',
     category: 'sexual_health_clinic',
     label: 'sexual health clinic',
     requireLgbtqAudience: true,
   },
   {
-    qid: 'Q1060791',
+    qid: 'Q4651900',
     category: 'hiv_sti_testing',
-    label: 'HIV/AIDS service organisation',
+    label: 'AIDS service organization',
     requireLgbtqAudience: true,
   },
-  // Culture & memorials — inherently LGBTQ+
-  { qid: 'Q20671774', category: 'community', label: 'LGBTQ memorial' },
-  { qid: 'Q207694', category: 'community', label: 'LGBTQ museum' },
-  { qid: 'Q1191680', category: 'community', label: 'gay sauna' },
-  // Accommodation — generic: filter to LGBTQ-audience items only
-  {
-    qid: 'Q1146519',
-    category: 'community',
-    label: 'gay-friendly hotel',
-    requireLgbtqAudience: true,
-  },
-  // Books & media — inherently LGBTQ+
-  { qid: 'Q2735359', category: 'community', label: 'LGBT bookshop' },
-  // Pride events — inherently LGBTQ+
-  { qid: 'Q83371', category: 'community', label: 'pride parade' },
+  // Culture & books
+  { qid: 'Q61696039', category: 'bookstore', label: 'LGBTQ+ bookshop' },
+  { qid: 'Q61710650', category: 'community', label: 'LGBTQ museum' },
+  { qid: 'Q136703445', category: 'community', label: 'LGBT memorial' },
 ];
 
 interface OverpassElement {
@@ -445,8 +444,8 @@ export class GeoDataSeedService {
   private districtRepo: Repository<District>;
   private userRepo: Repository<User>;
   private seederId: string;
-  /** In-memory set of existing POI names — avoids per-row DB reads. */
-  private existingPoiNames = new Set<string>();
+  /** Name + ~100 m grid keys of existing POIs — avoids per-row DB reads. */
+  private existingPoiKeys = new Set<string>();
 
   constructor(private readonly dataSource: DataSource) {
     this.poiRepo = dataSource.getRepository(Poi);
@@ -459,11 +458,18 @@ export class GeoDataSeedService {
 
     this.seederId = await this.ensureSeederAccount();
 
-    // Load all existing POI names once — O(1) lookups during seeding.
-    const existing = await this.poiRepo.find({ select: ['name'] });
-    this.existingPoiNames = new Set(existing.map((p) => p.name));
+    // Load existing POIs once — O(1) duplicate checks during seeding.
+    // Rejected rows count too, so unpublished imports are not re-added.
+    const existing = await this.poiRepo.find({
+      select: ['name', 'location'],
+    });
+    for (const p of existing) {
+      this.existingPoiKeys.add(
+        this.poiKey(p.name, p.location.coordinates as [number, number]),
+      );
+    }
     this.logger.log(
-      `Loaded ${this.existingPoiNames.size} existing POI names into cache.`,
+      `Loaded ${this.existingPoiKeys.size} existing POI keys into cache.`,
     );
 
     await this.seedStaticDistricts();
@@ -511,6 +517,7 @@ export class GeoDataSeedService {
           safetyRating: d.safetyRating,
           blendEdges: d.blendEdges,
           area: d.area,
+          source: PlaceSource.CURATED,
           status: ReviewStatus.APPROVED,
           isAnonymous: false,
           wheelchairAccessible: false,
@@ -528,8 +535,8 @@ export class GeoDataSeedService {
   }
 
   private async seedStaticPois(): Promise<void> {
-    const toInsert = KNOWN_POIS.filter(
-      (p) => !this.existingPoiNames.has(p.name),
+    const toInsert = KNOWN_POIS.filter((p) =>
+      this.claimKey(p.name, p.location.coordinates),
     );
     await this.bulkInsertPois(
       toInsert.map((p) => ({
@@ -539,6 +546,7 @@ export class GeoDataSeedService {
         safetyRating: p.safetyRating,
         location: p.location,
         wheelchairAccessible: p.wheelchairAccessible,
+        source: PlaceSource.CURATED,
       })),
     );
     this.logger.log(
@@ -588,13 +596,12 @@ export class GeoDataSeedService {
           const coords = this.extractCoords(el);
 
           if (!coords) continue;
-          if (this.existingPoiNames.has(name)) {
+          // Claiming the key also prevents duplicates within this batch.
+          if (!this.claimKey(name, coords)) {
             totalSkipped++;
             continue;
           }
 
-          // Mark in cache immediately to avoid duplicates within this batch.
-          this.existingPoiNames.add(name);
           poisToInsert.push({
             name,
             description,
@@ -602,6 +609,11 @@ export class GeoDataSeedService {
             safetyRating,
             location: { type: 'Point', coordinates: coords },
             wheelchairAccessible: wheelchair,
+            source: PlaceSource.OPENSTREETMAP,
+            sourceUrl: `https://www.openstreetmap.org/${el.type}/${el.id}`,
+            address: this.osmAddress(tags),
+            website: this.httpUrl(tags['website'] ?? tags['contact:website']),
+            openingHours: tags['opening_hours']?.slice(0, 300) ?? null,
           });
           cityInserted++;
         }
@@ -713,18 +725,21 @@ out center body;`;
           if (!name) continue;
           const coords = this.parseWktPoint(b.coord?.value);
           if (!coords) continue;
-          if (this.existingPoiNames.has(name)) {
+          if (!this.claimKey(name, coords)) {
             totalSkipped++;
             continue;
           }
-          this.existingPoiNames.add(name);
           poisToInsert.push({
             name,
-            description: `Sourced from Wikidata: ${b.item.value}`,
+            description: '',
             category: cls.category,
+            // Placeholder only: the UI shows imports as unrated until the
+            // community rates them (LSA-B12).
             safetyRating: 4,
             location: { type: 'Point', coordinates: coords },
             wheelchairAccessible: false,
+            source: PlaceSource.WIKIDATA,
+            sourceUrl: b.item.value,
           });
           clsInserted++;
         }
@@ -748,11 +763,9 @@ out center body;`;
     classQid: string,
     requireLgbtqAudience = false,
   ): Promise<WikidataBinding[]> {
-    // P2596 = «culture» / target audience; Q6636 = LGBT
-    // P137  = operator; Q17145 = LGBT (broader superclass)
+    // P2360 = intended public, P2596 = culture; Q17884 = LGBTQ
     const lgbtqFilter = requireLgbtqAudience
-      ? `{ ?item wdt:P2596 wd:Q6636. } UNION
-         { ?item wdt:P137 ?op. ?op wdt:P31/wdt:P279* wd:Q17145. }`
+      ? `{ ?item wdt:P2360 wd:Q17884. } UNION { ?item wdt:P2596 wd:Q17884. }`
       : '';
     const sparql = `
       SELECT ?item ?itemLabel ?coord WHERE {
@@ -791,9 +804,46 @@ out center body;`;
   // ---------------------------------------------------------------------------
 
   /**
-   * Bulk-inserts POI rows in batches and returns the count inserted.
-   * Skips rows whose name is already in existingPoiNames.
+   * Duplicate key: normalised name plus a ~100 m grid cell, so the same
+   * venue is skipped but same-named places in different cities are kept.
    */
+  private poiKey(name: string, [lng, lat]: [number, number]): string {
+    return `${name.trim().toLowerCase()}|${lat.toFixed(3)}|${lng.toFixed(3)}`;
+  }
+
+  /** Returns false if the POI already exists; otherwise records it. */
+  private claimKey(name: string, coords: [number, number]): boolean {
+    const key = this.poiKey(name, coords);
+    if (this.existingPoiKeys.has(key)) return false;
+    this.existingPoiKeys.add(key);
+    return true;
+  }
+
+  private osmAddress(tags: Record<string, string>): string | null {
+    const street = [tags['addr:street'], tags['addr:housenumber']]
+      .filter(Boolean)
+      .join(' ');
+    const city = [tags['addr:postcode'], tags['addr:city']]
+      .filter(Boolean)
+      .join(' ');
+    const address = [street, city].filter(Boolean).join(', ');
+    return address ? address.slice(0, 300) : null;
+  }
+
+  /** Only http(s) links are stored, so a crafted tag can't inject `javascript:`. */
+  private httpUrl(value: string | undefined): string | null {
+    if (!value) return null;
+    try {
+      const url = new URL(value.trim());
+      return url.protocol === 'http:' || url.protocol === 'https:'
+        ? url.href.slice(0, 500)
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Bulk-inserts POI rows in batches and returns the count inserted. */
   private async bulkInsertPois(rows: PoiInsertRow[]): Promise<number> {
     if (rows.length === 0) return 0;
     let inserted = 0;
@@ -806,6 +856,11 @@ out center body;`;
           safetyRating: r.safetyRating,
           location: r.location,
           wheelchairAccessible: r.wheelchairAccessible,
+          source: r.source,
+          sourceUrl: r.sourceUrl ?? null,
+          address: r.address ?? null,
+          website: r.website ?? null,
+          openingHours: r.openingHours ?? null,
           status: ReviewStatus.APPROVED,
           isAnonymous: false,
           voteCount: 0,

@@ -148,4 +148,40 @@ describe('PoisService', () => {
       },
     );
   });
+
+  it('stores optional contact details, blank as null', async () => {
+    const poi = await service.create(
+      {
+        name: 'Safe Cafe',
+        safetyRating: 5,
+        location: { type: 'Point', coordinates: [4.35, 50.85] },
+        address: ' Rue Haute 1, 1000 Brussels ',
+        website: '',
+        openingHours: 'Mo-Fr 10:00-18:00',
+      },
+      'user-1',
+    );
+
+    expect(poi.address).toBe('Rue Haute 1, 1000 Brussels');
+    expect(poi.website).toBeNull();
+    expect(poi.openingHours).toBe('Mo-Fr 10:00-18:00');
+  });
+
+  it('marks a place as verified when a reviewer approves it, not when rejected', async () => {
+    repo.findOne.mockResolvedValue({ id: 'poi-1' } as Poi);
+
+    await service.review('poi-1', { status: ReviewStatus.APPROVED }, 'rev-1');
+    expect(repo.update).toHaveBeenLastCalledWith(
+      'poi-1',
+      expect.objectContaining({ lastVerifiedAt: expect.any(Date) as unknown }),
+    );
+
+    await service.review('poi-1', { status: ReviewStatus.REJECTED }, 'rev-1');
+    expect(repo.update).toHaveBeenLastCalledWith(
+      'poi-1',
+      expect.not.objectContaining({
+        lastVerifiedAt: expect.anything() as unknown,
+      }),
+    );
+  });
 });

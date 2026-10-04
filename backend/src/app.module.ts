@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { DistrictsModule } from './districts/districts.module';
 import { EditsModule } from './edits/edits.module';
 import { PoisModule } from './pois/pois.module';
+import { RatingsModule } from './ratings/ratings.module';
+import { ReportsModule } from './reports/reports.module';
 import { AppController } from './app.controller';
 import { SeedService } from './seed/seed.service';
 import { UsersModule } from './users/users.module';
@@ -53,6 +55,8 @@ import { VotesModule } from './common/votes.module';
     DistrictsModule,
     VotesModule,
     EditsModule,
+    RatingsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

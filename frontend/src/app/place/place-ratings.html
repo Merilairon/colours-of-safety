@@ -1,0 +1,105 @@
+<section class="ratings" aria-labelledby="ratings-heading">
+  <h2 id="ratings-heading">Community ratings</h2>
+
+  <p class="live" role="status">{{ message() }}</p>
+
+  @if (isLoggedIn()) {
+    <form class="rate-form" [formGroup]="form" (ngSubmit)="submit()">
+      <fieldset>
+        <legend>
+          {{ mine() ? 'Update your rating' : 'How safe did ' + placeName() + ' feel?' }}
+        </legend>
+        <div class="scale">
+          @for (r of scale; track r) {
+            <label class="scale-option">
+              <input type="radio" formControlName="rating" [value]="r" />
+              <span
+                class="symbol"
+                aria-hidden="true"
+                [style.background]="color(r)"
+                [style.color]="symbolColor(r)"
+                >{{ symbol(r) }}</span
+              >
+              {{ label(r) }}
+            </label>
+          }
+        </div>
+      </fieldset>
+      <label class="comment">
+        Short review (optional)
+        <textarea
+          formControlName="comment"
+          rows="3"
+          maxlength="500"
+          placeholder="What made it feel safe or unsafe?"
+        ></textarea>
+      </label>
+      <label class="anon">
+        <input type="checkbox" formControlName="isAnonymous" />
+        Post without my name
+      </label>
+      @if (formError()) {
+        <p class="error" role="alert">{{ formError() }}</p>
+      }
+      <button type="submit" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : mine() ? 'Update rating' : 'Save rating' }}
+      </button>
+    </form>
+  } @else {
+    <p class="login-hint">
+      <a routerLink="/login" [queryParams]="loginReturn()">Log in</a> to rate this place and help
+      others know what to expect.
+    </p>
+  }
+
+  @if (loading()) {
+    <p class="muted">Loading ratings…</p>
+  } @else if (loadError()) {
+    <p class="error" role="alert">{{ loadError() }}</p>
+  } @else if (ratings().length === 0) {
+    <p class="muted">No ratings yet. Be the first to share how it felt.</p>
+  } @else {
+    <ul class="rating-list">
+      @for (r of ratings(); track r.id) {
+        <li>
+          <div class="rating-head">
+            <span
+              class="symbol"
+              aria-hidden="true"
+              [style.background]="color(r.rating)"
+              [style.color]="symbolColor(r.rating)"
+              >{{ symbol(r.rating) }}</span
+            >
+            <strong>{{ label(r.rating) }}</strong>
+            <span class="by">
+              by {{ r.author?.displayName ?? 'Anonymous' }}
+              @if (r.isMine) {
+                (you)
+              }
+              · <time [attr.datetime]="r.updatedAt">{{ r.updatedAt | date: 'mediumDate' }}</time>
+            </span>
+          </div>
+          @if (r.comment) {
+            <p class="comment-text">{{ r.comment }}</p>
+          }
+          <div class="rating-actions">
+            @if (r.isMine || isReviewer()) {
+              <button type="button" class="link" (click)="remove(r)">
+                {{ r.isMine ? 'Delete my rating' : 'Remove' }}
+              </button>
+            }
+            @if (!r.isMine) {
+              <button
+                type="button"
+                class="link"
+                (click)="reportRating.emit({ id: r.id, name: 'a rating of ' + placeName() })"
+              >
+                Report
+              </button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

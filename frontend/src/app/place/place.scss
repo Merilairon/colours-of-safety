@@ -110,7 +110,6 @@
 }
 
 .rating {
-  color: #fff;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
   font-size: 0.8rem;
@@ -191,7 +190,6 @@ section {
 
   .safety-indicator {
     font-size: 2rem;
-    color: #fff;
     font-weight: bold;
 
     @media (max-width: 768px) {
@@ -280,10 +278,13 @@ section {
     }
   }
 
-  a {
+  a,
+  button {
     display: inline-block;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
+    font: inherit;
+    cursor: pointer;
     text-decoration: none;
     font-weight: 600;
     text-align: center;
@@ -306,7 +307,7 @@ section {
 
   .secondary-action {
     background: #fff;
-    color: #6b6f80;
+    color: #4a4e5e;
     border: 2px solid #e8e9ef;
 
     &:hover {
@@ -314,4 +315,62 @@ section {
       color: #c2185b;
     }
   }
+}
+
+.provenance-banner {
+  margin: 0 0 2rem;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  background: #fff4e5;
+  border: 1px solid #f0d9b5;
+  color: #5c4300;
+  line-height: 1.5;
+
+  a {
+    color: inherit;
+    font-weight: 600;
+  }
+}
+
+.details {
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.5rem 1.25rem;
+    margin: 0;
+  }
+
+  dt {
+    font-weight: 600;
+    color: #2c3e50;
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  a {
+    color: #c2185b;
+  }
+
+  @media (max-width: 480px) {
+    dl {
+      grid-template-columns: 1fr;
+    }
+
+    dd {
+      margin-bottom: 0.5rem;
+    }
+  }
+}
+
+.muted,
+.rating-basis {
+  color: #4a4e5e;
+}
+
+.rating-basis {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
 }

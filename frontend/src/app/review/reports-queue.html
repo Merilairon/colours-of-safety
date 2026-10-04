@@ -1,0 +1,89 @@
+<p class="visually-hidden" role="status">{{ announcement() }}</p>
+
+<div class="status-bar" role="group" aria-label="Report status">
+  @for (s of ['open', 'resolved', 'dismissed']; track s) {
+    <button
+      type="button"
+      [class.active]="status() === s"
+      [attr.aria-pressed]="status() === s"
+      (click)="show($any(s))"
+    >
+      {{ s === 'open' ? 'Open' : s === 'resolved' ? 'Resolved' : 'Dismissed' }}
+    </button>
+  }
+</div>
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="muted">Loading…</p>
+} @else if (rows().length === 0) {
+  <p class="muted">
+    {{ status() === 'open' ? 'No open reports.' : 'Nothing here yet.' }}
+  </p>
+} @else {
+  <ul class="reports">
+    @for (row of rows(); track row.id) {
+      <li class="card">
+        <div class="card-head">
+          <span class="kind">{{ kindLabels[row.targetType] }}</span>
+          <span class="reason">{{ reasons[row.reason] }}</span>
+          <time class="when" [attr.datetime]="row.createdAt">{{
+            row.createdAt | date: 'medium'
+          }}</time>
+        </div>
+        <h2>
+          @if (row.placeId) {
+            <a [routerLink]="['/place', row.placeId]">{{ row.targetName ?? 'Removed item' }}</a>
+          } @else {
+            {{ row.targetName ?? 'Removed item' }}
+          }
+        </h2>
+        @if (row.excerpt) {
+          <blockquote>{{ row.excerpt }}</blockquote>
+        }
+        @if (row.details) {
+          <p class="details">{{ row.details }}</p>
+        }
+        <p class="meta">
+          Reported by {{ row.reporter?.displayName ?? 'a guest' }}
+          @if (row.resolvedBy) {
+            · handled by {{ row.resolvedBy.displayName }}
+          }
+          @if (row.resolutionNote) {
+            · “{{ row.resolutionNote }}”
+          }
+        </p>
+        @if (status() === 'open') {
+          <textarea
+            rows="2"
+            placeholder="Optional note on what you did…"
+            [attr.aria-label]="'Note for the report about ' + (row.targetName ?? 'removed item')"
+            [value]="row.note"
+            (input)="setNote(row, $any($event.target).value)"
+          ></textarea>
+          <div class="actions">
+            <button
+              type="button"
+              class="dismiss"
+              [disabled]="row.busy"
+              (click)="decide(row, 'dismissed')"
+            >
+              Dismiss
+            </button>
+            <button
+              type="button"
+              class="resolve"
+              [disabled]="row.busy"
+              (click)="decide(row, 'resolved')"
+            >
+              Mark resolved
+            </button>
+          </div>
+        }
+      </li>
+    }
+  </ul>
+}

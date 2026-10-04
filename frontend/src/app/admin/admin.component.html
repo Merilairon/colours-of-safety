@@ -79,7 +79,9 @@
           <p class="meta">{{ user.email }}</p>
 
           @if (isCurrentUser(user)) {
-            <p class="self-note">This is your account. Another admin has to change your role or ban status.</p>
+            <p class="self-note">
+              This is your account. Another admin has to change your role or ban status.
+            </p>
           } @else {
             <div class="actions">
               <select
@@ -102,7 +104,9 @@
                 <span class="spinner">Saving…</span>
               }
               @if (user.saved) {
-                <span class="saved-feedback" role="status">Saved<span aria-hidden="true"> ✓</span></span>
+                <span class="saved-feedback" role="status"
+                  >Saved<span aria-hidden="true"> ✓</span></span
+                >
               }
               <button
                 type="button"

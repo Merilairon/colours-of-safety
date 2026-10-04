@@ -16,6 +16,14 @@ import { District, Poi } from '../core/models';
 const ID = '0b6c1e9e-3a2f-4f7e-9d7a-1c2b3d4e5f60';
 
 const poi: Poi = {
+  source: 'community',
+  sourceUrl: null,
+  lastVerifiedAt: null,
+  address: null,
+  website: null,
+  openingHours: null,
+  ratingCount: 0,
+  communityRating: null,
   id: ID,
   name: 'Rainbow Cafe',
   description: 'A cosy, welcoming cafe.',
@@ -31,6 +39,9 @@ const poi: Poi = {
 };
 
 const district: District = {
+  source: 'community',
+  sourceUrl: null,
+  lastVerifiedAt: null,
   id: ID,
   name: 'Safe Quarter',
   description: '',
@@ -82,7 +93,11 @@ describe('PlaceComponent (LSA-B3)', () => {
   const robots = () => document.querySelector('meta[name="robots"]')?.getAttribute('content');
   const canonical = () => document.querySelector('link[rel="canonical"]')?.getAttribute('href');
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    // Approved places also load their community ratings (LSA-F5).
+    http.match((req) => req.url.endsWith('/ratings')).forEach((req) => req.flush([]));
+    http.verify();
+  });
 
   describe('with a place id', () => {
     beforeEach(async () => {
@@ -93,7 +108,7 @@ describe('PlaceComponent (LSA-B3)', () => {
     it('renders the place', () => {
       const page = render();
       expect(page.querySelector('h1')?.textContent).toContain('Rainbow Cafe');
-      expect(page.textContent).toContain('Added by: Alex');
+      expect(page.textContent).toContain('Community submission by Alex');
     });
 
     it('sets a per-place title, description and canonical URL', () => {
@@ -118,7 +133,7 @@ describe('PlaceComponent (LSA-B3)', () => {
 
     const page = render();
     expect(page.querySelector('h1')?.textContent).toContain('Safe Quarter');
-    expect(page.textContent).toContain('Added by: Anonymous');
+    expect(page.textContent).toContain('Community submission by Anonymous');
   });
 
   it('shows a not-found state (not an error) and noindex for unknown ids', async () => {
@@ -146,5 +161,51 @@ describe('PlaceComponent (LSA-B3)', () => {
     const page = render();
     expect(page.querySelector('h1')?.textContent).toContain('Place unavailable');
     expect(page.querySelector('[role="alert"]')).not.toBeNull();
+  });
+
+  describe('provenance and details (LSA-B12, LSA-F2, LSA-F13)', () => {
+    it('flags an unconfirmed import and hides its placeholder rating', async () => {
+      await open(ID);
+      http.expectOne(`/api/pois/${ID}`).flush({
+        ...poi,
+        source: 'wikidata',
+        sourceUrl: 'https://www.wikidata.org/wiki/Q1',
+        lastVerifiedAt: null,
+      });
+      const page = render();
+
+      expect(page.querySelector('.provenance-banner')?.textContent).toContain(
+        'not yet community-verified',
+      );
+      expect(page.querySelector('.provenance-banner a')?.getAttribute('href')).toBe(
+        'https://www.wikidata.org/wiki/Q1',
+      );
+      expect(page.querySelector('.rating')?.textContent).toContain('Not yet rated');
+    });
+
+    it('shows contact details and an OpenStreetMap directions link', async () => {
+      await open(ID);
+      http.expectOne(`/api/pois/${ID}`).flush({
+        ...poi,
+        address: 'Rue Haute 1, 1000 Brussels',
+        website: 'https://rainbow.example',
+        openingHours: 'Tu-Su 10:00-18:00',
+        lastVerifiedAt: '2026-09-30T12:00:00Z',
+      });
+      const page = render();
+      const details = page.querySelector('.details')!;
+
+      expect(details.textContent).toContain('Rue Haute 1, 1000 Brussels');
+      expect(details.textContent).toContain('Tu-Su 10:00-18:00');
+      expect(
+        details.querySelector('a[href="https://rainbow.example"]')?.getAttribute('rel'),
+      ).toContain('noopener');
+      expect(
+        details.querySelector('a[href^="https://www.openstreetmap.org/directions"]'),
+      ).not.toBeNull();
+      expect(page.querySelector('.provenance-banner')).toBeNull();
+      const verified = page.querySelector('.contribution time[datetime="2026-09-30T12:00:00Z"]');
+      expect(verified?.textContent).toContain('2026');
+    });
   });
 });

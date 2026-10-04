@@ -2,7 +2,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { MarkingsService } from '../core/markings.service';
 import { District, EditProposal, EditProposalData, Poi, ReviewStatus } from '../core/models';
-import { safetyColor, safetyLabel } from '../core/safety';
+import { safetyColor, safetyLabel, safetySymbolColor } from '../core/safety';
+import { ReportsQueueComponent } from './reports-queue';
 
 interface QueueItem {
   id: string;
@@ -22,7 +23,7 @@ interface QueueItem {
 
 @Component({
   selector: 'app-review',
-  imports: [],
+  imports: [ReportsQueueComponent],
   templateUrl: './review.html',
   styleUrl: './review.scss',
 })
@@ -34,9 +35,10 @@ export class ReviewComponent implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly safetyLabel = safetyLabel;
   protected readonly colorFor = safetyColor;
+  protected readonly symbolColorFor = safetySymbolColor;
 
   // Filter
-  protected readonly filterType = signal<'all' | 'poi' | 'district'>('all');
+  protected readonly filterType = signal<'all' | 'poi' | 'district' | 'reports'>('all');
   protected readonly filteredItems = signal<QueueItem[]>([]);
 
   // Bulk actions
@@ -66,7 +68,7 @@ export class ReviewComponent implements OnInit {
       });
   }
 
-  protected setFilter(type: 'all' | 'poi' | 'district'): void {
+  protected setFilter(type: 'all' | 'poi' | 'district' | 'reports'): void {
     this.filterType.set(type);
     this.applyFilter();
   }
@@ -74,7 +76,9 @@ export class ReviewComponent implements OnInit {
   private applyFilter(): void {
     const type = this.filterType();
     let all = this.items();
-    if (type !== 'all') {
+    if (type === 'reports') {
+      all = [];
+    } else if (type !== 'all') {
       all = all.filter((item) => item.kind === type);
     }
     // Sort by vote count descending (highest voted first)
@@ -204,6 +208,16 @@ export class ReviewComponent implements OnInit {
     }
     if (p.area !== undefined && JSON.stringify(p.area) !== JSON.stringify(o.area)) {
       changes.push({ label: 'Area', before: 'changed', after: 'changed' });
+    }
+    const details = [
+      ['address', 'Address'],
+      ['website', 'Website'],
+      ['openingHours', 'Opening hours'],
+    ] as const;
+    for (const [field, label] of details) {
+      if (p[field] !== undefined && (p[field] ?? '') !== (o[field] ?? '')) {
+        changes.push({ label, before: o[field] ?? '', after: p[field] ?? '(removed)' });
+      }
     }
     if (p.blendEdges !== undefined && p.blendEdges !== o.blendEdges) {
       changes.push({

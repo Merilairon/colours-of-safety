@@ -111,3 +111,61 @@ export const POI_CATEGORY_LABELS: Record<string, string> = {
   youth_center: 'Youth Center',
   other: 'Other',
 };
+
+/** Neutral look for places nobody has rated yet (unconfirmed imports). */
+export const UNRATED_COLOR = '#8a8d9c';
+export const UNRATED_SYMBOL = '?';
+
+interface Rated {
+  source?: string;
+  lastVerifiedAt?: string | null;
+  safetyRating: number;
+  ratingCount?: number;
+  communityRating?: number | null;
+}
+
+/**
+ * The rating to show for a place: the community average once people have
+ * rated it, otherwise the stored rating if a person set or confirmed it
+ * (community entries, imports with an approved edit). An unconfirmed
+ * import's rating is the seeder's placeholder and is never shown (LSA-B12).
+ */
+export function displayRating(place: Rated): number | null {
+  if (place.ratingCount && place.communityRating != null) {
+    return Math.min(5, Math.max(1, Math.round(place.communityRating)));
+  }
+  const personSet = !place.source || place.source === 'community' || !!place.lastVerifiedAt;
+  return personSet ? place.safetyRating : null;
+}
+
+export function ratingColor(rating: number | null): string {
+  return rating == null ? UNRATED_COLOR : safetyColor(rating);
+}
+
+export function ratingSymbol(rating: number | null): string {
+  return rating == null ? UNRATED_SYMBOL : safetyIndicator(rating);
+}
+
+export function ratingSymbolColor(rating: number | null): string {
+  return rating == null ? '#ffffff' : safetySymbolColor(rating);
+}
+
+export function ratingLabel(rating: number | null): string {
+  return rating == null ? 'Not yet rated' : safetyLabel(rating);
+}
+
+export const SOURCE_LABELS: Record<string, string> = {
+  community: 'Community',
+  openstreetmap: 'OpenStreetMap',
+  wikidata: 'Wikidata',
+  curated: 'Curated list',
+  imported: 'an earlier bulk import',
+};
+
+/** Imports stay "not yet community-verified" until a person confirms them. */
+export function isCommunityVerified(place: {
+  source?: string;
+  lastVerifiedAt?: string | null;
+}): boolean {
+  return !!place.lastVerifiedAt;
+}

@@ -109,21 +109,49 @@
   fill-opacity: 0.12;
 }
 
+.pop-source {
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: #4a4e5e;
+
+  a {
+    color: #1d1f2b;
+  }
+}
+
+.pop-details {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #c2185b;
+}
+
 .pop-report {
   margin-top: 0.5rem;
   padding-top: 0.5rem;
   border-top: 1px solid #eee;
   font-size: 0.75rem;
 
-  a {
+  button {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+    padding: 0;
+    border: none;
+    background: none;
     color: #4a4e5e;
+    font: inherit;
     text-decoration: underline;
+    cursor: pointer;
 
     &:hover {
       color: #a3162b;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #c2185b;
+      outline-offset: 2px;
     }
   }
 }

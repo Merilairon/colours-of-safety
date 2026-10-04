@@ -1,13 +1,23 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Observable, catchError, of, switchMap, throwError } from 'rxjs';
 import { MarkingsService } from '../core/markings.service';
-import { Poi, District } from '../core/models';
+import { Poi, District, RatingSummary } from '../core/models';
+import { ReportDialogComponent } from '../core/report-dialog';
 import { SeoService } from '../core/seo.service';
-import { safetyColor, safetyLabel, safetyIndicator } from '../core/safety';
-import { POI_CATEGORY_LABELS } from '../core/safety';
+import {
+  POI_CATEGORY_LABELS,
+  SOURCE_LABELS,
+  displayRating,
+  isCommunityVerified,
+  ratingColor,
+  ratingLabel,
+  ratingSymbol,
+  ratingSymbolColor,
+} from '../core/safety';
+import { PlaceRatingsComponent } from './place-ratings';
 
 type Place = Poi | District;
 
@@ -25,7 +35,7 @@ function nullIfNotFound<T>(request: Observable<T | null>): Observable<T | null> 
 
 @Component({
   selector: 'app-place',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, PlaceRatingsComponent, ReportDialogComponent],
   templateUrl: './place.html',
   styleUrl: './place.scss',
 })
@@ -39,10 +49,20 @@ export class PlaceComponent implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly notFound = signal(false);
 
-  protected readonly safetyLabel = safetyLabel;
-  protected readonly colorFor = safetyColor;
-  protected readonly indicatorFor = safetyIndicator;
+  @ViewChild(ReportDialogComponent, { static: true }) reportDialog!: ReportDialogComponent;
+
+  protected readonly ratingLabel = ratingLabel;
+  protected readonly colorFor = ratingColor;
+  protected readonly symbolFor = ratingSymbol;
+  protected readonly symbolColorFor = ratingSymbolColor;
   protected readonly categoryLabels = POI_CATEGORY_LABELS;
+  protected readonly sourceLabels = SOURCE_LABELS;
+  protected readonly isVerified = isCommunityVerified;
+  /** Shown rating: community average, a confirmed rating, or null (LSA-B12). */
+  protected readonly rating = computed(() => {
+    const place = this.place();
+    return place ? displayRating(place) : null;
+  });
 
   ngOnInit(): void {
     this.route.paramMap
@@ -82,6 +102,31 @@ export class PlaceComponent implements OnInit {
       });
   }
 
+  protected onRatingsChanged({
+    verified,
+    ...summary
+  }: RatingSummary & { verified: boolean }): void {
+    this.place.update((place) =>
+      place && this.isPoi(place)
+        ? {
+            ...place,
+            ...summary,
+            lastVerifiedAt: verified ? new Date().toISOString() : place.lastVerifiedAt,
+          }
+        : place,
+    );
+  }
+
+  protected report(type: 'poi' | 'district' | 'rating', id: string, name: string): void {
+    this.reportDialog.open({ type, id, name });
+  }
+
+  /** Walking/transit routing on OpenStreetMap; no Google tracking. */
+  protected directionsUrl(place: Place): string {
+    const [lat, lng] = this.getCoordinates(place);
+    return `https://www.openstreetmap.org/directions?route=%3B${lat.toFixed(6)}%2C${lng.toFixed(6)}`;
+  }
+
   protected isPoi(place: Place): place is Poi {
     return 'category' in place;
   }
@@ -118,7 +163,7 @@ export class PlaceComponent implements OnInit {
     const kind = this.isPoi(place) ? (this.categoryLabels[place.category] ?? 'Place') : 'District';
     const summary = place.description?.trim()
       ? place.description.trim()
-      : `${kind} rated "${safetyLabel(place.safetyRating)}" for LGBTQIA+ safety on the Colours of Safety community map.`;
+      : `${kind} rated "${ratingLabel(displayRating(place))}" for LGBTQIA+ safety on the Colours of Safety community map.`;
     this.seo.updateSeo({
       title: `${place.name} · ${kind} | Colours of Safety`,
       description: summary.length > 160 ? `${summary.slice(0, 157)}…` : summary,

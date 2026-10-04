@@ -7,8 +7,14 @@ import {
   CreatePoiPayload,
   District,
   EditProposal,
+  ModeratorReport,
+  PlaceRating,
   Poi,
+  RatingSummary,
+  ReportStatus,
+  CreateReportPayload,
   ReviewPayload,
+  UpsertRatingPayload,
 } from './models';
 
 export interface VoteResponse {
@@ -123,5 +129,41 @@ export class MarkingsService {
 
   reviewEdit(id: string, payload: ReviewPayload): Observable<EditProposal> {
     return this.http.patch<EditProposal>(`/api/edits/${id}/review`, payload);
+  }
+
+  // ----- Community ratings (LSA-F5) -----
+  getRatings(poiId: string): Observable<PlaceRating[]> {
+    return this.http.get<PlaceRating[]>(`/api/pois/${poiId}/ratings`);
+  }
+
+  rate(
+    poiId: string,
+    payload: UpsertRatingPayload,
+  ): Observable<{ rating: PlaceRating; summary: RatingSummary }> {
+    return this.http.put<{ rating: PlaceRating; summary: RatingSummary }>(
+      `/api/pois/${poiId}/ratings/mine`,
+      payload,
+    );
+  }
+
+  deleteRating(poiId: string, ratingId: string): Observable<RatingSummary> {
+    return this.http.delete<RatingSummary>(`/api/pois/${poiId}/ratings/${ratingId}`);
+  }
+
+  // ----- Reports (LSA-F4) -----
+  createReport(payload: CreateReportPayload): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>('/api/reports', payload);
+  }
+
+  getReports(status: ReportStatus = 'open'): Observable<ModeratorReport[]> {
+    return this.http.get<ModeratorReport[]>('/api/reports', { params: { status } });
+  }
+
+  resolveReport(
+    id: string,
+    status: 'resolved' | 'dismissed',
+    note?: string,
+  ): Observable<ModeratorReport> {
+    return this.http.patch<ModeratorReport>(`/api/reports/${id}`, { status, note });
   }
 }

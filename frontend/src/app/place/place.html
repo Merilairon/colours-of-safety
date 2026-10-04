@@ -22,13 +22,32 @@
           @if (isPoi(place) && place.category) {
             <span class="category">{{ categoryLabels[place.category] || place.category }}</span>
           }
-          <span class="rating" [style.background]="colorFor(place.safetyRating)">
-            {{ safetyLabel(place.safetyRating) }}
+          <span
+            class="rating"
+            [style.background]="colorFor(rating())"
+            [style.color]="symbolColorFor(rating())"
+          >
+            {{ ratingLabel(rating()) }}
           </span>
         </div>
       </div>
       <a routerLink="/" [queryParams]="mapQueryParams(place)" class="view-on-map">View on map →</a>
     </div>
+
+    @if (!isVerified(place) && place.source !== 'community') {
+      <p class="provenance-banner">
+        <strong>Imported, not yet community-verified.</strong>
+        This entry was added automatically from
+        @if (place.sourceUrl) {
+          <a [href]="place.sourceUrl" target="_blank" rel="noopener noreferrer">{{
+            sourceLabels[place.source] || 'another source'
+          }}</a>
+        } @else {
+          {{ sourceLabels[place.source] || 'another source' }}
+        }
+        and nobody has confirmed it yet. If you know this place, rate it below.
+      </p>
+    }
 
     <div class="place-content">
       @if (place.description) {
@@ -38,16 +57,56 @@
         </section>
       }
 
+      @if (isPoi(place)) {
+        <section class="details" aria-labelledby="details-heading">
+          <h2 id="details-heading">Details</h2>
+          <dl>
+            @if (place.address) {
+              <dt>Address</dt>
+              <dd>{{ place.address }}</dd>
+            }
+            @if (place.openingHours) {
+              <dt>Opening hours</dt>
+              <dd>{{ place.openingHours }}</dd>
+            }
+            @if (place.website) {
+              <dt>Website</dt>
+              <dd>
+                <a [href]="place.website" target="_blank" rel="noopener noreferrer nofollow ugc">{{
+                  place.website
+                }}</a>
+              </dd>
+            }
+            <dt>Directions</dt>
+            <dd>
+              <a [href]="directionsUrl(place)" target="_blank" rel="noopener noreferrer"
+                >Get directions on OpenStreetMap</a
+              >
+            </dd>
+          </dl>
+          @if (!place.address && !place.openingHours && !place.website) {
+            <p class="muted">
+              No address, opening hours or website yet. Logged-in members can suggest them from the
+              map with “Suggest edit”.
+            </p>
+          }
+        </section>
+      }
+
       <section class="safety-details">
         <h2>Safety rating</h2>
         <div class="safety-display">
-          <div class="safety-circle" [style.background]="colorFor(place.safetyRating)">
-            <span class="safety-indicator">{{ indicatorFor(place.safetyRating) }}</span>
+          <div
+            class="safety-circle"
+            [style.background]="colorFor(rating())"
+            [style.color]="symbolColorFor(rating())"
+          >
+            <span class="safety-indicator" aria-hidden="true">{{ symbolFor(rating()) }}</span>
           </div>
           <div class="safety-text">
-            <div class="rating-label">{{ safetyLabel(place.safetyRating) }}</div>
+            <div class="rating-label">{{ ratingLabel(rating()) }}</div>
             <p class="rating-description">
-              @switch (place.safetyRating) {
+              @switch (rating()) {
                 @case (5) {
                   Explicitly welcoming - actively safe and affirming for LGBTQIA+ people
                 }
@@ -63,8 +122,19 @@
                 @case (1) {
                   Unsafe - avoid if possible, known discrimination issues
                 }
+                @default {
+                  Nobody from the community has rated this place yet.
+                }
               }
             </p>
+            @if (isPoi(place) && place.ratingCount > 0) {
+              <p class="rating-basis">
+                Average of {{ place.ratingCount }} community
+                {{ place.ratingCount === 1 ? 'rating' : 'ratings' }} ({{
+                  place.communityRating
+                }}/5).
+              </p>
+            }
           </div>
         </div>
       </section>
@@ -73,30 +143,71 @@
         <section class="accessibility">
           <h2>Accessibility</h2>
           <div class="accessibility-info">
-            <span class="wheelchair-badge"><span aria-hidden="true">♿</span> Wheelchair accessible</span>
+            <span class="wheelchair-badge"
+              ><span aria-hidden="true">♿</span> Wheelchair accessible</span
+            >
             <p>This place has confirmed wheelchair accessibility.</p>
           </div>
         </section>
       }
 
+      @if (isPoi(place) && place.status === 'approved') {
+        <app-place-ratings
+          [poiId]="place.id"
+          [placeName]="place.name"
+          (summaryChange)="onRatingsChanged($event)"
+          (reportRating)="report('rating', $event.id, $event.name)"
+        />
+      }
+
       <section class="contribution">
         <h2>Contribution details</h2>
         <div class="contribution-info">
-          <p><strong>Added by:</strong> {{ place.createdBy?.displayName || 'Anonymous' }}</p>
+          <p>
+            <strong>Source: </strong
+            ><span>
+              @if (place.source === 'community') {
+                Community submission by {{ place.createdBy?.displayName || 'Anonymous' }}
+              } @else {
+                Imported from
+                @if (place.sourceUrl) {
+                  <a [href]="place.sourceUrl" target="_blank" rel="noopener noreferrer">{{
+                    sourceLabels[place.source] || 'another source'
+                  }}</a>
+                } @else {
+                  {{ sourceLabels[place.source] || 'another source' }}
+                }
+              }
+            </span>
+          </p>
           <p><strong>Date added:</strong> {{ place.createdAt | date: 'mediumDate' }}</p>
           <p>
-            <strong>Status:</strong>
-            @switch (place.status) {
-              @case ('approved') {
-                <span class="status-approved">Approved</span>
+            <strong>Last verified: </strong
+            ><span>
+              @if (place.lastVerifiedAt) {
+                <time [attr.datetime]="place.lastVerifiedAt">{{
+                  place.lastVerifiedAt | date: 'mediumDate'
+                }}</time>
+              } @else {
+                Not yet verified by the community
               }
-              @case ('pending') {
-                <span class="status-pending">Pending review</span>
+            </span>
+          </p>
+          <p>
+            <strong>Status: </strong
+            ><span>
+              @switch (place.status) {
+                @case ('approved') {
+                  <span class="status-approved">Approved</span>
+                }
+                @case ('pending') {
+                  <span class="status-pending">Pending review</span>
+                }
+                @default {
+                  <span class="status-rejected">Not published</span>
+                }
               }
-              @default {
-                <span class="status-rejected">Not published</span>
-              }
-            }
+            </span>
           </p>
         </div>
       </section>
@@ -108,8 +219,18 @@
             >View on map</a
           >
           <a routerLink="/" class="secondary-action">Browse other places</a>
+          @if (place.status === 'approved') {
+            <button
+              type="button"
+              class="secondary-action"
+              (click)="report(isPoi(place) ? 'poi' : 'district', place.id, place.name)"
+            >
+              Report a problem
+            </button>
+          }
         </div>
       </section>
     </div>
   }
+  <app-report-dialog />
 </div>

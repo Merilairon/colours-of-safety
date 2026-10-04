@@ -121,6 +121,9 @@ export class EditsService {
           type: 'Point';
           coordinates: [number, number];
         },
+        address: poi.address,
+        website: poi.website,
+        openingHours: poi.openingHours,
       };
     }
     const district = target as District;
@@ -146,6 +149,25 @@ export class EditsService {
     }
     if (data.name !== undefined && data.name.length < 2) {
       throw new BadRequestException('Name must be at least 2 characters');
+    }
+    if (data.website) {
+      let protocol = '';
+      try {
+        protocol = new URL(data.website).protocol;
+      } catch {
+        // falls through to the error below
+      }
+      if (protocol !== 'http:' && protocol !== 'https:') {
+        throw new BadRequestException('Website must be an http(s) URL');
+      }
+    }
+    for (const field of ['address', 'openingHours'] as const) {
+      const value = data[field];
+      if (value != null && (typeof value !== 'string' || value.length > 300)) {
+        throw new BadRequestException(
+          `${field} must be at most 300 characters`,
+        );
+      }
     }
     if (type === 'poi' && data.location !== undefined) {
       const coords = data.location.coordinates;
@@ -191,6 +213,13 @@ export class EditsService {
           coordinates: proposedData.location.coordinates,
         };
       }
+      for (const field of ['address', 'website', 'openingHours'] as const) {
+        if (proposedData[field] !== undefined) {
+          update[field] = proposedData[field]?.trim() || null;
+        }
+      }
+      // An approved edit means a person has checked the entry (LSA-F13).
+      update.lastVerifiedAt = new Date();
       await this.pois.update(poi.id, update);
     } else {
       const district = target as District;
@@ -211,6 +240,7 @@ export class EditsService {
       }
       if (proposedData.blendEdges !== undefined)
         update.blendEdges = proposedData.blendEdges;
+      update.lastVerifiedAt = new Date();
       await this.districts.update(district.id, update);
     }
   }

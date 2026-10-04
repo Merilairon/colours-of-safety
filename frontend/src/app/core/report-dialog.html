@@ -1,0 +1,45 @@
+<dialog #dialog class="report-dialog" aria-labelledby="report-title" (close)="target.set(null)">
+  @if (target(); as t) {
+    @if (sent()) {
+      <h2 id="report-title">Thanks for letting us know</h2>
+      <p role="status">A moderator will look at your report about {{ t.name }}.</p>
+      <div class="actions">
+        <button type="button" class="primary" (click)="close()">Close</button>
+      </div>
+    } @else {
+      <h2 id="report-title">Report a problem with {{ t.name }}</h2>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <fieldset>
+          <legend>What is wrong?</legend>
+          @for (r of reasons(); track r) {
+            <label class="reason">
+              <input type="radio" formControlName="reason" [value]="r" />
+              {{ labels[r] }}
+            </label>
+          }
+        </fieldset>
+        <label class="details">
+          Details (optional)
+          <textarea
+            formControlName="details"
+            rows="3"
+            maxlength="1000"
+            placeholder="Anything that helps moderators check it"
+          ></textarea>
+        </label>
+        <p class="hint">
+          Reports go to the moderators only. If you are in danger, contact local emergency services.
+        </p>
+        @if (error()) {
+          <p class="error" role="alert">{{ error() }}</p>
+        }
+        <div class="actions">
+          <button type="button" class="secondary" (click)="close()">Cancel</button>
+          <button type="submit" class="primary" [disabled]="submitting()">
+            {{ submitting() ? 'Sending…' : 'Send report' }}
+          </button>
+        </div>
+      </form>
+    }
+  }
+</dialog>

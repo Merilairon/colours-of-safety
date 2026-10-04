@@ -27,6 +27,7 @@ export class PoisService {
       safetyRating: dto.safetyRating,
       wheelchairAccessible: dto.wheelchairAccessible ?? false,
       location: { type: 'Point', coordinates: dto.location.coordinates },
+      ...PoisService.details(dto),
       status: ReviewStatus.PENDING,
       createdById: userId,
       isAnonymous: dto.isAnonymous ?? false,
@@ -75,6 +76,10 @@ export class PoisService {
       status: dto.status,
       reviewNote: dto.reviewNote ?? null,
       reviewedById: reviewerId,
+      // A reviewer approving the entry counts as a confirmation (LSA-F13).
+      ...(dto.status === ReviewStatus.APPROVED
+        ? { lastVerifiedAt: new Date() }
+        : {}),
     });
     return this.pois.findOneOrFail({ where: { id } });
   }
@@ -97,9 +102,21 @@ export class PoisService {
       safetyRating: dto.safetyRating,
       wheelchairAccessible: dto.wheelchairAccessible ?? false,
       location: { type: 'Point', coordinates: dto.location.coordinates },
+      ...PoisService.details(dto),
       isAnonymous: dto.isAnonymous ?? false,
     });
     return this.pois.findOneOrFail({ where: { id } });
+  }
+
+  /** Optional contact details (LSA-F2); blank strings are stored as null. */
+  private static details(
+    dto: CreatePoiDto,
+  ): Pick<Poi, 'address' | 'website' | 'openingHours'> {
+    return {
+      address: dto.address?.trim() || null,
+      website: dto.website?.trim() || null,
+      openingHours: dto.openingHours?.trim() || null,
+    };
   }
 
   private static readonly ELEVATED_ROLES: UserRole[] = [

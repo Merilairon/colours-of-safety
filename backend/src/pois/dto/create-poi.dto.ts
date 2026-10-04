@@ -1,6 +1,8 @@
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsUrl,
+  ValidateIf,
   IsInt,
   IsOptional,
   IsString,
@@ -44,4 +46,21 @@ export class CreatePoiDto {
   @IsOptional()
   @IsBoolean()
   isAnonymous?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  address?: string;
+
+  /** Rendered as a link, so only absolute http(s) URLs are accepted. */
+  @IsOptional()
+  @ValidateIf((_, value) => value !== '')
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true })
+  @MaxLength(500)
+  website?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  openingHours?: string;
 }

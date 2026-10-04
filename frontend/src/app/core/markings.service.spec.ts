@@ -33,6 +33,14 @@ describe('MarkingsService', () => {
 
   describe('POIs', () => {
     const mockPoi: Poi = {
+      source: 'community',
+      sourceUrl: null,
+      lastVerifiedAt: null,
+      address: null,
+      website: null,
+      openingHours: null,
+      ratingCount: 0,
+      communityRating: null,
       id: 'poi-1',
       name: 'Test POI',
       description: 'Description',
@@ -153,6 +161,9 @@ describe('MarkingsService', () => {
 
   describe('Districts', () => {
     const mockDistrict: District = {
+      source: 'community',
+      sourceUrl: null,
+      lastVerifiedAt: null,
       id: 'district-1',
       name: 'Test District',
       description: 'Description',

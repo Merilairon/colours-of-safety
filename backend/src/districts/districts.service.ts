@@ -79,6 +79,10 @@ export class DistrictsService {
       status: dto.status,
       reviewNote: dto.reviewNote ?? null,
       reviewedById: reviewerId,
+      // A reviewer approving the entry counts as a confirmation (LSA-F13).
+      ...(dto.status === ReviewStatus.APPROVED
+        ? { lastVerifiedAt: new Date() }
+        : {}),
     });
     return this.districts.findOneOrFail({ where: { id } });
   }

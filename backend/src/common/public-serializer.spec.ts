@@ -1,5 +1,6 @@
 import type { Poi } from '../pois/poi.entity';
 import { Pronouns, User, UserRole } from '../users/user.entity';
+import { PlaceSource } from './place-source.enum';
 import { ReviewStatus } from './review-status.enum';
 import {
   serializeEditProposal,
@@ -52,6 +53,14 @@ function poi(overrides: Partial<Poi> = {}): Poi {
     banned: false,
     voteCount: 0,
     reviewNote: 'private moderator feedback',
+    address: null,
+    website: null,
+    openingHours: null,
+    source: PlaceSource.COMMUNITY,
+    sourceUrl: null,
+    lastVerifiedAt: null,
+    ratingCount: 0,
+    communityRating: null,
     createdBy: author,
     createdById: author.id,
     reviewedBy: reviewer,

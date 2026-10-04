@@ -207,6 +207,38 @@
               }
             </select>
           </label>
+          <details class="more-details" [open]="false">
+            <summary>Address, website and opening hours (optional)</summary>
+            <label>
+              Address
+              <input type="text" formControlName="address" autocomplete="street-address" />
+            </label>
+            <label>
+              Website
+              <input
+                type="url"
+                formControlName="website"
+                placeholder="https://"
+                [attr.aria-invalid]="form.controls.website.invalid || null"
+                [attr.aria-describedby]="
+                  form.controls.website.invalid ? 'draft-website-error' : null
+                "
+              />
+              @if (form.controls.website.invalid) {
+                <span id="draft-website-error" class="field-error"
+                  >Use a full link starting with https://</span
+                >
+              }
+            </label>
+            <label>
+              Opening hours
+              <input
+                type="text"
+                formControlName="openingHours"
+                placeholder="e.g. Tu-Su 17:00-01:00"
+              />
+            </label>
+          </details>
         }
 
         <label class="checkbox-label">
@@ -273,6 +305,38 @@
               }
             </select>
           </label>
+          <details class="more-details" [open]="!!(t.address || t.website || t.openingHours)">
+            <summary>Address, website and opening hours (optional)</summary>
+            <label>
+              Address
+              <input type="text" formControlName="address" autocomplete="street-address" />
+            </label>
+            <label>
+              Website
+              <input
+                type="url"
+                formControlName="website"
+                placeholder="https://"
+                [attr.aria-invalid]="editForm.controls.website.invalid || null"
+                [attr.aria-describedby]="
+                  editForm.controls.website.invalid ? 'edit-website-error' : null
+                "
+              />
+              @if (editForm.controls.website.invalid) {
+                <span id="edit-website-error" class="field-error"
+                  >Use a full link starting with https://</span
+                >
+              }
+            </label>
+            <label>
+              Opening hours
+              <input
+                type="text"
+                formControlName="openingHours"
+                placeholder="e.g. Tu-Su 17:00-01:00"
+              />
+            </label>
+          </details>
         }
 
         <label class="checkbox-label">
@@ -343,4 +407,6 @@
       </form>
     </div>
   }
+
+  <app-report-dialog />
 </div>
