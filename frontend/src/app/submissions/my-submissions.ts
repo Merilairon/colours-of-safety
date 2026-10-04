@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { IconComponent } from '../core/icons';
 import { Observable } from 'rxjs';
 import { MarkingsService } from '../core/markings.service';
 import {
@@ -28,7 +29,7 @@ interface SubmissionRow {
 
 @Component({
   selector: 'app-my-submissions',
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, IconComponent],
   templateUrl: './my-submissions.html',
   styleUrl: './my-submissions.scss',
 })

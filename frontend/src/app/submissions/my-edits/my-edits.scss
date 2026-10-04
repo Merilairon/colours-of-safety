@@ -54,7 +54,7 @@ h1 {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9498a8;
+    color: #6b6f80;
     font-weight: 700;
   }
 
@@ -67,17 +67,17 @@ h1 {
 
     &.status-pending {
       background: #fff4e5;
-      color: #b07d00;
+      color: #8a6100;
     }
 
     &.status-approved {
       background: #e8f5e9;
-      color: #2e933c;
+      color: #1b5e20;
     }
 
     &.status-rejected {
       background: #f3e3e6;
-      color: #d7263d;
+      color: #a3162b;
     }
   }
 
@@ -107,7 +107,7 @@ h1 {
   a {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #e84393;
+    color: #c2185b;
     text-decoration: none;
 
     &:hover {

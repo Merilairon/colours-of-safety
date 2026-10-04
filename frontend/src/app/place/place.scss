@@ -27,7 +27,7 @@
 
 .not-found {
   h1 {
-    color: #9498a8;
+    color: #6b6f80;
   }
 }
 
@@ -43,16 +43,16 @@
 
 .back-link {
   display: inline-block;
-  color: #e84393;
+  color: #c2185b;
   text-decoration: none;
   font-weight: 600;
   padding: 0.5rem 1rem;
-  border: 1px solid #e84393;
+  border: 1px solid #c2185b;
   border-radius: 6px;
   transition: all 0.2s ease;
 
   &:hover {
-    background: #e84393;
+    background: #c2185b;
     color: #fff;
   }
 }
@@ -118,7 +118,7 @@
 }
 
 .view-on-map {
-  background: #e84393;
+  background: #c2185b;
   color: #fff;
   text-decoration: none;
   padding: 0.75rem 1.5rem;
@@ -128,7 +128,7 @@
   white-space: nowrap;
 
   &:hover {
-    background: #d73682;
+    background: #ad1457;
     transform: translateY(-1px);
   }
 
@@ -254,7 +254,7 @@ section {
   }
 
   .status-approved {
-    color: #2e933c;
+    color: #1e7b2e;
     font-weight: 600;
   }
 
@@ -295,11 +295,11 @@ section {
   }
 
   .primary-action {
-    background: #e84393;
+    background: #c2185b;
     color: #fff;
 
     &:hover {
-      background: #d73682;
+      background: #ad1457;
       transform: translateY(-1px);
     }
   }
@@ -310,8 +310,8 @@ section {
     border: 2px solid #e8e9ef;
 
     &:hover {
-      border-color: #e84393;
-      color: #e84393;
+      border-color: #c2185b;
+      color: #c2185b;
     }
   }
 }

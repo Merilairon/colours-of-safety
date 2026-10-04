@@ -4,7 +4,7 @@ import {
   ElementRef,
   OnDestroy,
   ViewChild,
-  effect,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -15,6 +15,8 @@ import 'leaflet-draw';
 import 'leaflet.markercluster';
 import { AuthService } from '../core/auth.service';
 import { SUPPORT_EMAIL } from '../core/contact';
+import { IconComponent, iconSvg } from '../core/icons';
+import { PlaceListComponent, PlaceListItem } from './place-list/place-list';
 import { MarkingsService } from '../core/markings.service';
 import {
   CreateDistrictPayload,
@@ -31,6 +33,7 @@ import {
   safetyColor,
   safetyIndicator,
   safetyLabel,
+  safetySymbolColor,
 } from '../core/safety';
 
 type DraftKind = 'poi' | 'district';
@@ -42,9 +45,33 @@ interface Draft {
   area?: GeoPolygon; // for districts
 }
 
+const BRAND_COLOR = '#c2185b';
+/** The list renders the nearest places only; the rest are reachable by zooming in. */
+const PLACE_LIST_LIMIT = 50;
+
+/**
+ * The global `L` that UMD plugins (leaflet-draw, leaflet.markercluster) patch;
+ * see leaflet-setup.ts. Top-level plugin additions (`markerClusterGroup`,
+ * `Draw`, `drawLocal`) must be read from here: the bundler resolves `L.x` on
+ * the `import * as L` namespace at build time, so names Leaflet itself does not
+ * export come out undefined. That is why production rendered every place
+ * unclustered (LSA-F6).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function leafletGlobal(): any {
+  return (window as unknown as { L?: unknown }).L;
+}
+
+function formatDistance(meters: number): string {
+  if (meters < 1000) {
+    return `${Math.max(10, Math.round(meters / 10) * 10)} m`;
+  }
+  return `${(meters / 1000).toFixed(meters < 10_000 ? 1 : 0)} km`;
+}
+
 @Component({
   selector: 'app-map',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, IconComponent, PlaceListComponent],
   templateUrl: './map.html',
   styleUrl: './map.scss',
 })
@@ -62,6 +89,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   protected readonly safetyLabel = safetyLabel;
   protected readonly colorFor = safetyColor;
   protected readonly indicatorFor = safetyIndicator;
+  protected readonly symbolColorFor = safetySymbolColor;
   protected readonly categoryLabels = POI_CATEGORY_LABELS;
 
   protected readonly draft = signal<Draft | null>(null);
@@ -102,10 +130,51 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   // Search
   protected readonly searchQuery = signal<string>('');
   protected readonly searching = signal<boolean>(false);
+  protected readonly locating = signal(false);
+  /** [lat, lng] once the visitor shared their location; used for list distances. */
+  protected readonly userLocation = signal<[number, number] | null>(null);
+
+  // Panels (filters and legend collapse on small screens, LSA-A11)
+  protected readonly filtersOpen = signal(false);
+  protected readonly legendOpen = signal(false);
+  protected readonly listOpen = signal(false);
+
+  // Accessible place list (LSA-A1) and screen-reader announcements (LSA-A9)
+  protected readonly visiblePlaces = signal<PlaceListItem[]>([]);
+  protected readonly visibleTotal = signal(0);
+  protected readonly announcement = signal('');
+  /** Context for the next "Showing N places …" announcement after the map moves. */
+  private pendingAnnouncement: string | null = null;
+
+  // Drawing (LSA-A12)
+  protected readonly drawMode = signal<DraftKind | null>(null);
+  protected readonly drawHint = computed(() => {
+    if (!this.isLoggedIn() || this.draft() || this.editingTarget()) return null;
+    switch (this.drawMode()) {
+      case 'poi':
+        return 'Click the map where the place is. Press Esc to cancel.';
+      case 'district':
+        return 'Click to add corners, then click the first corner to finish. Press Esc to cancel.';
+      default:
+        return 'Use “Add place” or “Draw district” to contribute.';
+    }
+  });
+  private activeDrawHandler: { disable(): void } | null = null;
 
   // Data storage for filtering
   private allPois: Poi[] = [];
   private allDistricts: District[] = [];
+  private filteredPois: Poi[] = [];
+  private readonly markerIndex = new Map<string, L.Marker>();
+
+  // Popup focus management (LSA-A7)
+  private popupReturnFocus: HTMLElement | null = null;
+  private readonly onPopupKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      this.map.closePopup();
+    }
+  };
 
   // Pending layer (logged-in users only)
   private pendingLayer!: L.LayerGroup;
@@ -145,7 +214,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.map = L.map(this.mapEl.nativeElement, {
       center: [50.8503, 4.3517], // Brussels fallback
       zoom: 12,
+      zoomControl: false,
     });
+    // Bottom-right keeps the zoom buttons clear of the search panel and place list.
+    L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -154,14 +226,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     this.configureLeafletIcons();
 
+    const markerClusterGroup = leafletGlobal()?.markerClusterGroup;
     this.poiClusterLayer = (
-      typeof (L as any).markerClusterGroup === 'function'
-        ? (L as any).markerClusterGroup({
+      typeof markerClusterGroup === 'function'
+        ? markerClusterGroup({
             maxClusterRadius: 120, // Fixed large radius for aggressive clustering
             spiderfyOnMaxZoom: true,
             showCoverageOnHover: false,
             zoomToBoundsOnClick: true,
-            iconCreateFunction: (cluster: any) => {
+            iconCreateFunction: (cluster: { getChildCount(): number }) => {
               const count = cluster.getChildCount();
               let size = 40;
               let fontSize = 14;
@@ -176,7 +249,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
               }
 
               return L.divIcon({
-                html: `<div class="cluster-icon" style="width: ${size}px; height: ${size}px; font-size: ${fontSize}px;"><span>${count}</span></div>`,
+                html: `<div class="cluster-icon" style="width: ${size}px; height: ${size}px; font-size: ${fontSize}px;"><span>${count}</span><span class="sr-only"> places here, select to zoom in</span></div>`,
                 className: 'marker-cluster',
                 iconSize: L.point(size, size),
               });
@@ -190,13 +263,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.editGeometryLayer = L.layerGroup().addTo(this.map);
     this.initBlendedPane();
 
-    console.log('Map init - isLoggedIn:', this.isLoggedIn(), 'user:', this.auth.user());
     if (this.isLoggedIn()) {
-      console.log('Adding draw controls');
       this.addDrawControls();
     }
 
     this.map.on('draw:created', (e) => this.onShapeCreated(e as L.DrawEvents.Created));
+    this.map.on('draw:drawstart', (e) =>
+      this.drawMode.set((e as unknown as { layerType: string }).layerType === 'polygon' ? 'district' : 'poi'),
+    );
+    this.map.on('draw:drawstop', () => {
+      this.drawMode.set(null);
+      this.activeDrawHandler = null;
+    });
+    this.map.on('moveend', () => this.onMapMoved());
+    this.map.on('popupopen', (e) => this.onPopupOpen((e as L.PopupEvent).popup));
+    this.map.on('popupclose', (e) => this.onPopupClose((e as L.PopupEvent).popup));
 
     this.loadData();
 
@@ -286,22 +367,61 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private addDrawControls(): void {
+    // Plain-language names instead of "circlemarker" / "polygon" (LSA-A12).
+    // Must be set before the toolbar is created, which reads them once.
+    const local = leafletGlobal()?.drawLocal;
+    if (local) {
+      local.draw.toolbar.buttons.circlemarker = 'Add a place';
+      local.draw.toolbar.buttons.polygon = 'Draw a district';
+      local.draw.handlers.circlemarker.tooltip.start = 'Click the map to add a place.';
+      local.draw.handlers.polygon.tooltip.start = 'Click to start drawing a district.';
+    }
     const drawControl = new L.Control.Draw({
       position: 'topright',
       draw: {
         marker: false,
         circle: false,
-        circlemarker: { color: '#e84393' },
+        circlemarker: { color: BRAND_COLOR },
         polyline: false,
         rectangle: false,
         polygon: {
           allowIntersection: false,
-          shapeOptions: { color: '#e84393' },
+          shapeOptions: { color: BRAND_COLOR },
         },
       },
       edit: undefined,
     });
     this.map.addControl(drawControl);
+  }
+
+  protected startAddPlace(): void {
+    this.startDrawing('poi');
+  }
+
+  protected startDrawDistrict(): void {
+    this.startDrawing('district');
+  }
+
+  /** Starts the same leaflet-draw handlers as the toolbar, from a visible button. */
+  private startDrawing(kind: DraftKind): void {
+    const Draw = leafletGlobal()?.Draw;
+    if (!Draw) return;
+    this.activeDrawHandler?.disable();
+    const handler =
+      kind === 'poi'
+        ? new Draw.CircleMarker(this.map, { color: BRAND_COLOR })
+        : new Draw.Polygon(this.map, {
+            allowIntersection: false,
+            shapeOptions: { color: BRAND_COLOR },
+          });
+    handler.enable();
+    this.activeDrawHandler = handler;
+    this.drawMode.set(kind);
+    this.announce(
+      kind === 'poi'
+        ? 'Adding a place. Click the map where the place is, or press Escape to cancel.'
+        : 'Drawing a district. Click the map to add corners, or press Escape to cancel.',
+    );
   }
 
   private onShapeCreated(event: L.DrawEvents.Created): void {
@@ -328,10 +448,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     if (event.layerType === 'circlemarker' && layer instanceof L.CircleMarker) {
       const { lat, lng } = layer.getLatLng();
-      layer.setStyle({ color: '#e84393', fillColor: '#e84393' });
+      layer.setStyle({ color: '#c2185b', fillColor: '#c2185b' });
       this.draftLayer.addLayer(layer);
       this.resetForm();
       this.draft.set({ kind: 'poi', layer, location: [lng, lat] });
+      this.focusSoon('draft-name');
     } else if (event.layerType === 'polygon' && layer instanceof L.Polygon) {
       const area = this.polygonToGeoJson(layer);
       if (!area) {
@@ -341,6 +462,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.resetForm();
       this.form.controls.category.setValue('other');
       this.draft.set({ kind: 'district', layer, area });
+      this.focusSoon('draft-name');
     }
   }
 
@@ -459,6 +581,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     } else if (target.kind === 'district' && target.area) {
       this.editGeometry.set({ area: target.area });
     }
+    this.map.closePopup();
+    this.focusSoon('edit-name');
+  }
+
+  /** Moves focus to a panel field once Angular has rendered it. */
+  private focusSoon(id: string): void {
+    setTimeout(() => document.getElementById(id)?.focus());
   }
 
   protected submitEditProposal(): void {
@@ -591,16 +720,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       if (wheelchairOnly && !poi.wheelchairAccessible) return false;
       return true;
     });
+    this.filteredPois = filteredPois;
+    this.markerIndex.clear();
 
+    const markers: L.Marker[] = [];
     for (const poi of filteredPois) {
-      const [lng, lat] = poi.location.coordinates;
-      const marker = L.circleMarker([lat, lng], {
-        radius: 9,
-        color: safetyColor(poi.safetyRating),
-        fillColor: safetyColor(poi.safetyRating),
-        fillOpacity: 0.85,
-        weight: 2,
-      });
+      const marker = this.placeMarker(poi);
+      this.markerIndex.set(poi.id, marker);
       marker.bindPopup(this.poiPopup(poi.name, poi, poi.id));
       if (this.isLoggedIn()) {
         marker.on('popupopen', () => this.attachEditHandler(marker, poi, 'poi'));
@@ -610,7 +736,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           this.attachRemoveHandler(marker, poi.id, 'poi', this.poiClusterLayer),
         );
       }
-      this.poiClusterLayer.addLayer(marker);
+      markers.push(marker);
+    }
+    // One bulk add lets markercluster cluster everything in a single pass.
+    if (typeof this.poiClusterLayer.addLayers === 'function') {
+      this.poiClusterLayer.addLayers(markers);
+    } else {
+      markers.forEach((m) => this.poiClusterLayer.addLayer(m));
     }
 
     // Filter Districts
@@ -648,45 +780,202 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
       this.districtLayer.addLayer(polygon);
     }
+
+    this.updateVisiblePlaces();
+  }
+
+  /** Round marker with the rating symbol inside, so it never relies on colour alone (LSA-A2). */
+  private placeIcon(rating: number, pending = false): L.DivIcon {
+    return L.divIcon({
+      className: 'place-marker-icon',
+      html: `<span class="place-marker${pending ? ' pending' : ''}" style="background:${safetyColor(rating)};color:${safetySymbolColor(rating)}">${safetyIndicator(rating)}</span>`,
+      iconSize: [26, 26],
+      iconAnchor: [13, 13],
+      popupAnchor: [0, -12],
+    });
+  }
+
+  private placeMarker(poi: Poi, pending = false): L.Marker {
+    const [lng, lat] = poi.location.coordinates;
+    const label = [
+      poi.name,
+      this.categoryLabels[poi.category] || poi.category,
+      safetyLabel(poi.safetyRating),
+      ...(pending ? ['pending review'] : []),
+    ].join(', ');
+    const marker = L.marker([lat, lng], {
+      icon: this.placeIcon(poi.safetyRating, pending),
+      title: poi.name,
+      keyboard: true,
+      riseOnHover: true,
+    });
+    // Leaflet gives keyboard markers role="button"; the title alone is not a reliable name.
+    marker.on('add', () => marker.getElement()?.setAttribute('aria-label', label));
+    return marker;
+  }
+
+  private onMapMoved(): void {
+    this.updateVisiblePlaces();
+    if (this.pendingAnnouncement !== null) {
+      const context = this.pendingAnnouncement;
+      this.pendingAnnouncement = null;
+      this.announce(`Showing ${this.placeCount(this.visibleTotal())} ${context}.`);
+    }
+  }
+
+  /** Recomputes the approved places inside the current view, nearest first. */
+  private updateVisiblePlaces(): void {
+    if (!this.map) return;
+    const bounds = this.map.getBounds();
+    const origin = this.userLocation() ? L.latLng(this.userLocation()!) : this.map.getCenter();
+    const inView: { poi: Poi; meters: number }[] = [];
+    for (const poi of this.filteredPois) {
+      const [lng, lat] = poi.location.coordinates;
+      const latLng = L.latLng(lat, lng);
+      if (bounds.contains(latLng)) {
+        inView.push({ poi, meters: origin.distanceTo(latLng) });
+      }
+    }
+    inView.sort((a, b) => a.meters - b.meters);
+    this.visibleTotal.set(inView.length);
+    this.visiblePlaces.set(
+      inView.slice(0, PLACE_LIST_LIMIT).map(({ poi, meters }) => ({
+        id: poi.id,
+        name: poi.name,
+        category: this.categoryLabels[poi.category] || poi.category,
+        ratingLabel: safetyLabel(poi.safetyRating),
+        symbol: safetyIndicator(poi.safetyRating),
+        color: safetyColor(poi.safetyRating),
+        symbolColor: safetySymbolColor(poi.safetyRating),
+        wheelchairAccessible: poi.wheelchairAccessible,
+        distance: formatDistance(meters),
+      })),
+    );
+  }
+
+  protected toggleList(): void {
+    this.listOpen.update((open) => !open);
+    if (this.listOpen()) {
+      this.updateVisiblePlaces();
+    }
+  }
+
+  /** Opens a place's popup from the list, unclustering it first if needed. */
+  protected openPlace(id: string, trigger: HTMLElement | null): void {
+    const marker = this.markerIndex.get(id);
+    if (!marker) return;
+    const open = () => {
+      marker.openPopup();
+      // Return focus to the list row, not wherever focus was mid-animation.
+      if (trigger) this.popupReturnFocus = trigger;
+    };
+    if (typeof this.poiClusterLayer.zoomToShowLayer === 'function') {
+      this.poiClusterLayer.zoomToShowLayer(marker, open);
+    } else {
+      open();
+    }
+  }
+
+  private onPopupOpen(popup: L.Popup): void {
+    const active = document.activeElement as HTMLElement | null;
+    this.popupReturnFocus = active && active !== document.body ? active : null;
+    const container = popup.getElement();
+    if (!container) return;
+    const content = container.querySelector<HTMLElement>('.leaflet-popup-content');
+    // Name the dialog after the place, without decorative or screen-reader-only extras.
+    const heading = content?.querySelector('strong')?.cloneNode(true) as HTMLElement | undefined;
+    heading?.querySelectorAll('[aria-hidden="true"], .sr-only').forEach((n) => n.remove());
+    const title = heading?.textContent?.trim();
+    container.setAttribute('role', 'dialog');
+    if (title) container.setAttribute('aria-label', title);
+    container.addEventListener('keydown', this.onPopupKeydown);
+    if (content) {
+      content.tabIndex = -1;
+      content.focus({ preventScroll: true });
+    }
+  }
+
+  private onPopupClose(popup: L.Popup): void {
+    const container = popup.getElement();
+    container?.removeEventListener('keydown', this.onPopupKeydown);
+    const active = document.activeElement;
+    const focusWasInPopup = !active || active === document.body || !!container?.contains(active);
+    const target = this.popupReturnFocus;
+    this.popupReturnFocus = null;
+    if (!focusWasInPopup) return;
+    if (target?.isConnected) {
+      target.focus({ preventScroll: true });
+    } else if (this.listOpen()) {
+      document.getElementById('place-list')?.focus();
+    }
+  }
+
+  private placeCount(n: number): string {
+    return `${n} ${n === 1 ? 'place' : 'places'}`;
+  }
+
+  /** Re-setting the text guarantees a repeat message is read again. */
+  private announce(message: string): void {
+    this.announcement.set('');
+    setTimeout(() => this.announcement.set(message), 100);
+  }
+
+  private announceFilterResult(): void {
+    this.announce(
+      `${this.placeCount(this.filteredPois.length)} match your filters, ${this.visibleTotal()} in view.`,
+    );
   }
 
   protected onCategoryChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     this.selectedCategory.set(value);
     this.applyFilters();
+    this.announceFilterResult();
   }
 
   protected onRatingChange(event: Event): void {
     const value = parseInt((event.target as HTMLSelectElement).value, 10);
     this.minSafetyRating.set(value);
     this.applyFilters();
+    this.announceFilterResult();
   }
 
   protected onWheelchairChange(event: Event): void {
     const value = (event.target as HTMLInputElement).checked;
     this.wheelchairFilter.set(value);
     this.applyFilters();
+    this.announceFilterResult();
   }
 
   protected detectUserLocation(): void {
     if (!navigator.geolocation) {
-      this.loadError.set('Geolocation is not supported by your browser.');
-      setTimeout(() => this.loadError.set(null), 3000);
+      this.showError('Geolocation is not supported by your browser.');
       return;
     }
 
-    this.loadError.set('Detecting your location...');
+    this.locating.set(true);
+    this.announce('Finding your location…');
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
+        this.locating.set(false);
+        this.userLocation.set([latitude, longitude]);
+        this.pendingAnnouncement = 'near your location';
         this.map.setView([latitude, longitude], 14);
-        this.loadError.set(null);
       },
       () => {
-        this.loadError.set('Could not detect your location.');
-        setTimeout(() => this.loadError.set(null), 3000);
+        this.locating.set(false);
+        this.showError('Could not detect your location.');
       },
     );
+  }
+
+  /** Errors render in the role="alert" region so they are announced (LSA-A9). */
+  private showError(message: string, duration = 4000): void {
+    this.loadError.set(message);
+    setTimeout(() => {
+      if (this.loadError() === message) this.loadError.set(null);
+    }, duration);
   }
 
   /** Centres the map on `?lat=&lng=&z=` when present and valid. */
@@ -716,6 +1005,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
+        this.userLocation.set([latitude, longitude]);
         this.map.setView([latitude, longitude], 14);
       },
       () => {
@@ -738,16 +1028,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.searching.set(false);
         if (data && data.length > 0) {
           const { lat, lon } = data[0];
+          this.pendingAnnouncement = `near ${query}`;
           this.map.setView([parseFloat(lat), parseFloat(lon)], 14);
         } else {
-          this.loadError.set('Location not found.');
-          setTimeout(() => this.loadError.set(null), 3000);
+          this.showError('Location not found.');
         }
       })
       .catch(() => {
         this.searching.set(false);
-        this.loadError.set('Search failed. Please try again.');
-        setTimeout(() => this.loadError.set(null), 3000);
+        this.showError('Search failed. Please try again.');
       });
   }
 
@@ -765,15 +1054,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.markings.getPendingPois().subscribe({
       next: (pois) => {
         for (const poi of pois) {
-          const [lng, lat] = poi.location.coordinates;
-          const marker = L.circleMarker([lat, lng], {
-            radius: 9,
-            color: safetyColor(poi.safetyRating),
-            fillColor: safetyColor(poi.safetyRating),
-            fillOpacity: 0.4,
-            weight: 2,
-            dashArray: '4 3',
-          });
+          const marker = this.placeMarker(poi, true);
           marker.bindPopup(this.pendingPoiPopup(poi));
           marker.on('popupopen', () => this.attachVoteHandler(marker, poi.id, 'poi'));
           if (this.isAdmin()) {
@@ -826,11 +1107,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           // Update vote count in popup
           const countEl = document.getElementById(`vote-count-${id}`);
           if (countEl) {
-            countEl.textContent = `${res.voteCount} 👍`;
+            countEl.textContent = this.upvoteLabel(res.voteCount);
           }
           // Disable button
           btn.setAttribute('disabled', 'true');
-          btn.textContent = 'Voted 👍';
+          btn.textContent = 'Voted';
           if (res.autoApproved) {
             this.showToast('This submission has been auto-approved!');
             // Remove from pending layer after delay
@@ -897,41 +1178,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private pendingPoiPopup(poi: Poi): string {
-    const indicator = safetyIndicator(poi.safetyRating);
-    const wheelchairBadge = poi.wheelchairAccessible ? ' ♿' : '';
-    const voteCount = poi.voteCount || 0;
     return `
-      <strong>${this.escape(poi.name)}${wheelchairBadge}</strong>
-      <div class="pop-meta pop-pending">⏳ Pending — awaiting review</div>
-      <div class="pop-meta">
-        <span class="safety-indicator" aria-hidden="true">${indicator}</span>
-        ${this.escape(this.categoryLabels[poi.category] || poi.category)}
-        · ${safetyLabel(poi.safetyRating)}
-      </div>
+      <strong>${this.escape(poi.name)}${this.wheelchairBadge(poi.wheelchairAccessible)}</strong>
+      <div class="pop-meta pop-pending">${iconSvg('clock')} Pending: awaiting review</div>
+      ${this.ratingMeta(this.categoryLabels[poi.category] || poi.category, poi.safetyRating)}
       ${poi.description ? `<p>${this.escape(poi.description)}</p>` : ''}
-      <div class="vote-section">
-        <span class="vote-count" id="vote-count-${poi.id}">${voteCount} 👍</span>
-        <button class="vote-btn" id="vote-btn-${poi.id}">Upvote 👍</button>
-      </div>
+      ${this.voteSection(poi.id, poi.voteCount)}
       ${this.removeButton(poi.id)}
     `;
   }
 
   private pendingDistrictPopup(district: District): string {
-    const indicator = safetyIndicator(district.safetyRating);
-    const voteCount = district.voteCount || 0;
     return `
       <strong>${this.escape(district.name)}</strong>
-      <div class="pop-meta pop-pending">⏳ Pending — awaiting review</div>
-      <div class="pop-meta">
-        <span class="safety-indicator" aria-hidden="true">${indicator}</span>
-        District · ${safetyLabel(district.safetyRating)}
-      </div>
+      <div class="pop-meta pop-pending">${iconSvg('clock')} Pending: awaiting review</div>
+      ${this.ratingMeta('District', district.safetyRating)}
       ${district.description ? `<p>${this.escape(district.description)}</p>` : ''}
-      <div class="vote-section">
-        <span class="vote-count" id="vote-count-${district.id}">${voteCount} 👍</span>
-        <button class="vote-btn" id="vote-btn-${district.id}">Upvote 👍</button>
-      </div>
+      ${this.voteSection(district.id, district.voteCount)}
       ${this.removeButton(district.id)}
     `;
   }
@@ -947,15 +1210,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     },
     id?: string,
   ): string {
-    const indicator = safetyIndicator(poi.safetyRating);
-    const wheelchairBadge = poi.wheelchairAccessible ? ' ♿' : '';
     return `
-      <strong>${this.escape(name)}${wheelchairBadge}</strong>
-      <div class="pop-meta">
-        <span class="safety-indicator" aria-hidden="true">${indicator}</span>
-        ${this.escape(this.categoryLabels[poi.category] || poi.category)}
-        · ${safetyLabel(poi.safetyRating)}
-      </div>
+      <strong>${this.escape(name)}${this.wheelchairBadge(poi.wheelchairAccessible)}</strong>
+      ${this.ratingMeta(this.categoryLabels[poi.category] || poi.category, poi.safetyRating)}
       ${poi.description ? `<p>${this.escape(poi.description)}</p>` : ''}
       ${this.editProposalButton(id)}
       ${this.removeButton(id)}
@@ -970,14 +1227,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     wheelchairAccessible?: boolean,
     id?: string,
   ): string {
-    const indicator = safetyIndicator(rating);
-    const wheelchairBadge = wheelchairAccessible ? ' ♿' : '';
     return `
-      <strong>${this.escape(name)}${wheelchairBadge}</strong>
-      <div class="pop-meta">
-        <span class="safety-indicator" aria-hidden="true">${indicator}</span>
-        District · ${safetyLabel(rating)}
-      </div>
+      <strong>${this.escape(name)}${this.wheelchairBadge(wheelchairAccessible)}</strong>
+      ${this.ratingMeta('District', rating)}
       ${description ? `<p>${this.escape(description)}</p>` : ''}
       ${this.editProposalButton(id)}
       ${this.removeButton(id)}
@@ -985,14 +1237,40 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     `;
   }
 
+  private ratingMeta(kindLabel: string, rating: number): string {
+    return `
+      <div class="pop-meta">
+        <span class="safety-indicator" aria-hidden="true" style="background:${safetyColor(rating)};color:${safetySymbolColor(rating)}">${safetyIndicator(rating)}</span>
+        ${this.escape(kindLabel)} · ${safetyLabel(rating)}
+      </div>`;
+  }
+
+  private wheelchairBadge(accessible?: boolean): string {
+    return accessible
+      ? ' <span aria-hidden="true">♿</span><span class="sr-only"> (wheelchair accessible)</span>'
+      : '';
+  }
+
+  private upvoteLabel(count: number): string {
+    return `${count} ${count === 1 ? 'upvote' : 'upvotes'}`;
+  }
+
+  private voteSection(id: string, voteCount: number | undefined): string {
+    return `
+      <div class="vote-section">
+        <span class="vote-count" id="vote-count-${id}">${this.upvoteLabel(voteCount || 0)}</span>
+        <button type="button" class="vote-btn" id="vote-btn-${id}">${iconSvg('thumbs-up')} Upvote</button>
+      </div>`;
+  }
+
   private editProposalButton(id?: string): string {
     if (!id || !this.isLoggedIn()) return '';
-    return `<button class="edit-proposal-btn" id="edit-proposal-${id}">✎ Suggest edit</button>`;
+    return `<button type="button" class="edit-proposal-btn" id="edit-proposal-${id}">${iconSvg('edit')} Suggest edit</button>`;
   }
 
   private removeButton(id?: string): string {
     if (!id || !this.isAdmin()) return '';
-    return `<button class="remove-btn" id="remove-${id}" aria-label="Remove submission">🗑 Remove</button>`;
+    return `<button type="button" class="remove-btn" id="remove-${id}">${iconSvg('trash')} Remove</button>`;
   }
 
   /** Mail-based until the in-app report flow (LSA-F4) replaces it. */
@@ -1000,7 +1278,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const subject = `Report: ${name}${id ? ` (${id})` : ''}`;
     const body = `Place: ${name}\nID: ${id ?? 'unknown'}\n\nWhat is wrong with this listing?\n`;
     const href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    return `<div class="pop-report"><a href="${this.escape(href)}"><span aria-hidden="true">🚩</span> Flag</a></div>`;
+    return `<div class="pop-report"><a href="${this.escape(href)}">${iconSvg('flag')} Flag</a></div>`;
   }
 
   private escape(value: string): string {

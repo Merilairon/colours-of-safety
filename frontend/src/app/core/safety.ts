@@ -34,6 +34,14 @@ export function safetyIndicator(rating: number): string {
   }
 }
 
+/**
+ * Colour for the symbol drawn on top of a `safetyColor` fill. Yellow, orange and
+ * light green are too light for white (under 3:1), so those get dark ink.
+ */
+export function safetySymbolColor(rating: number): string {
+  return rating === 2 || rating === 3 || rating === 4 ? '#1d1f2b' : '#ffffff';
+}
+
 /** CSS pattern class for high-contrast / color-blind modes. */
 export function safetyPatternClass(rating: number): string {
   switch (rating) {

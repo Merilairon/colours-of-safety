@@ -58,7 +58,7 @@
   @if (loading()) {
     <p class="muted">Loading…</p>
   } @else if (filteredItems().length === 0) {
-    <p class="muted">Nothing to review right now. 🎉</p>
+    <p class="muted">Nothing to review right now.</p>
   } @else {
     <ul class="queue">
       @for (item of filteredItems(); track item.id) {
@@ -85,7 +85,7 @@
             }
             <span>by {{ item.author }}</span>
             @if (!item.isEdit) {
-              · <span class="vote-badge">{{ item.voteCount }} 👍</span>
+              · <span class="vote-badge">{{ item.voteCount }} {{ item.voteCount === 1 ? 'upvote' : 'upvotes' }}</span>
             }
           </p>
           @if (item.isEdit) {

@@ -56,10 +56,10 @@
     color: inherit;
 
     &:focus {
-      outline: 2px solid #e84393;
+      outline: 2px solid #c2185b;
       outline-offset: 2px;
-      border-color: #e84393;
-      box-shadow: 0 0 0 3px rgba(232, 67, 147, 0.15);
+      border-color: #c2185b;
+      box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.15);
 
       @media (forced-colors: active) {
         outline: 2px solid ButtonText;
@@ -75,7 +75,7 @@
   small {
     font-size: 0.8rem;
     font-weight: 400;
-    // #5f6373 on white is 5.9:1 (the previous #9498a8 was 2.87:1, LSA-A4).
+    // #5f6373 on white is 5.9:1 (the previous #6b6f80 was 2.87:1, LSA-A4).
     color: #5f6373;
   }
 
@@ -126,7 +126,7 @@
     padding: 0.7rem;
     border: none;
     border-radius: 8px;
-    background: #e84393;
+    background: #c2185b;
     color: #fff;
     font-size: 1rem;
     font-weight: 600;
@@ -160,7 +160,7 @@
     color: #6b6f80;
 
     a {
-      color: #e84393;
+      color: #c2185b;
     }
   }
 }

@@ -39,17 +39,17 @@ h1 {
     font-size: 0.85rem;
 
     &:hover {
-      border-color: #e84393;
+      border-color: #c2185b;
     }
 
     &.active {
-      background: #e84393;
-      border-color: #e84393;
+      background: #c2185b;
+      border-color: #c2185b;
       color: #fff;
     }
 
     &:focus-visible {
-      outline: 2px solid #e84393;
+      outline: 2px solid #c2185b;
       outline-offset: 2px;
     }
   }
@@ -101,7 +101,7 @@ h1 {
       }
 
       &.bulk-approve {
-        background: #2e933c;
+        background: #1e7b2e;
         color: #fff;
       }
 
@@ -130,7 +130,7 @@ h1 {
   transition: border-color 0.2s ease;
 
   &.selected {
-    border-color: #e84393;
+    border-color: #c2185b;
     background: #fdf2f7;
   }
 
@@ -155,7 +155,7 @@ h1 {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9498a8;
+    color: #6b6f80;
     font-weight: 700;
   }
 
@@ -174,7 +174,7 @@ h1 {
   }
 
   .vote-badge {
-    color: #2e933c;
+    color: #1e7b2e;
     font-weight: 600;
   }
 
@@ -225,7 +225,7 @@ h1 {
 
     .diff-after {
       background: #e8f5e9;
-      color: #2e933c;
+      color: #1e7b2e;
     }
 
     .diff-arrow {
@@ -244,10 +244,10 @@ h1 {
     resize: vertical;
 
     &:focus {
-      outline: 2px solid #e84393;
+      outline: 2px solid #c2185b;
       outline-offset: 2px;
-      border-color: #e84393;
-      box-shadow: 0 0 0 3px rgba(232, 67, 147, 0.15);
+      border-color: #c2185b;
+      box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.15);
 
       @media (forced-colors: active) {
         outline: 2px solid ButtonText;
@@ -274,7 +274,7 @@ h1 {
       }
 
       &.approve {
-        background: #2e933c;
+        background: #1e7b2e;
         color: #fff;
       }
 

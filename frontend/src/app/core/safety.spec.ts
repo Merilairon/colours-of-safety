@@ -7,6 +7,7 @@ import {
   safetyLabel,
   POI_CATEGORIES,
   POI_CATEGORY_LABELS,
+  safetySymbolColor,
 } from './safety';
 
 describe('Safety Utilities', () => {
@@ -120,6 +121,25 @@ describe('Safety Utilities', () => {
       POI_CATEGORIES.forEach((cat) => {
         expect(POI_CATEGORY_LABELS[cat]).toBeDefined();
       });
+    });
+  });
+
+  describe('safetySymbolColor', () => {
+    // WCAG 1.4.11: the marker symbol needs 3:1 against its fill.
+    const luminance = (hex: string) => {
+      const [r, g, b] = [1, 3, 5].map((i) => {
+        const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const contrast = (a: string, b: string) => {
+      const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+      return (hi + 0.05) / (lo + 0.05);
+    };
+
+    it.each([1, 2, 3, 4, 5])('symbol on rating %i fill has at least 3:1 contrast', (rating) => {
+      expect(contrast(safetySymbolColor(rating), safetyColor(rating))).toBeGreaterThanOrEqual(3);
     });
   });
 });

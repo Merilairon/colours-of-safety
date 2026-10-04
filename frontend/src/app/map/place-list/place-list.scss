@@ -1,0 +1,147 @@
+:host {
+  display: contents;
+}
+
+.place-list {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 550;
+  width: 320px;
+  max-height: calc(100% - 2rem);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.75rem 0.5rem 1rem;
+  border-bottom: 1px solid #e8e9ef;
+
+  h2 {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.note {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  color: #4a4e5e;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 1rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  color: #1d1f2b;
+
+  &:hover {
+    background: #f4f5f9;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #c2185b;
+    outline-offset: -2px;
+  }
+}
+
+.symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 0 0 1px rgba(29, 31, 43, 0.4);
+
+  @media (forced-colors: active) {
+    forced-color-adjust: none;
+  }
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta,
+.distance {
+  font-size: 0.75rem;
+  color: #4a4e5e;
+}
+
+.distance {
+  flex-shrink: 0;
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #1d1f2b;
+  cursor: pointer;
+
+  &:hover {
+    background: #eceef4;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #c2185b;
+    outline-offset: 2px;
+  }
+}
+
+@media (max-width: 768px) {
+  .place-list {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 55%;
+    border-radius: 12px 12px 0 0;
+  }
+}

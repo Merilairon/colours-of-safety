@@ -34,7 +34,7 @@ h1 {
 .stat-card {
   flex: 1;
   min-width: 140px;
-  background: linear-gradient(135deg, #e84393 0%, #d6307a 100%);
+  background: linear-gradient(135deg, #c2185b 0%, #d6307a 100%);
   color: #fff;
   padding: 1rem 1.25rem;
   border-radius: 10px;
@@ -57,7 +57,7 @@ h1 {
   color: #6b6f80;
 
   a {
-    color: #e84393;
+    color: #c2185b;
   }
 }
 
@@ -94,7 +94,7 @@ h1 {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #9498a8;
+    color: #6b6f80;
     font-weight: 700;
     width: 64px;
   }
@@ -135,12 +135,12 @@ h1 {
 
     &.approved {
       background: #d8f0dc;
-      color: #2e933c;
+      color: #1b5e20;
     }
 
     &.rejected {
       background: #f8d7da;
-      color: #d7263d;
+      color: #a3162b;
     }
   }
 
@@ -175,7 +175,7 @@ h1 {
 
     &.danger {
       background: #f8d7da;
-      color: #d7263d;
+      color: #a3162b;
 
       &:hover {
         background: #d7263d;
@@ -185,13 +185,13 @@ h1 {
 
     &.disabled {
       background: #eceef4;
-      color: #9498a8;
+      color: #6b6f80;
       cursor: not-allowed;
       opacity: 0.5;
 
       &:hover {
         background: #eceef4;
-        color: #9498a8;
+        color: #6b6f80;
       }
     }
   }
@@ -243,7 +243,7 @@ h1 {
 
     &:focus {
       outline: none;
-      border-color: #e84393;
+      border-color: #c2185b;
     }
   }
 
@@ -272,7 +272,7 @@ h1 {
 
       &[type='submit'],
       &:not(.secondary):not(.danger) {
-        background: #e84393;
+        background: #c2185b;
         color: #fff;
       }
 

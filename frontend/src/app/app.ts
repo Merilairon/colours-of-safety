@@ -3,11 +3,12 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import * as Sentry from '@sentry/angular';
 import { AuthService } from './core/auth.service';
 import { CookieConsentComponent } from './core/cookie-consent.component';
+import { IconComponent } from './core/icons';
 import { ThemeService } from './core/theme.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CookieConsentComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CookieConsentComponent, IconComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

@@ -1,0 +1,48 @@
+<section id="place-list" class="place-list" tabindex="-1" aria-labelledby="place-list-heading">
+  <div class="head">
+    <h2 id="place-list-heading">Places in view ({{ total() }})</h2>
+    <button type="button" class="close" aria-label="Close place list" (click)="closed.emit()">
+      <app-icon name="close" />
+    </button>
+  </div>
+  @if (total() === 0) {
+    <p class="note">No places match here. Zoom out, move the map or change the filters.</p>
+  } @else {
+    @if (total() > places().length) {
+      <p class="note">
+        Showing the {{ places().length }} closest to
+        {{ nearUser() ? 'your location' : 'the map centre' }}. Zoom in to see the rest.
+      </p>
+    }
+    <ul>
+      @for (p of places(); track p.id) {
+        <li>
+          <button
+            #row
+            type="button"
+            class="item"
+            (click)="selectPlace.emit({ id: p.id, trigger: row })"
+          >
+            <span
+              class="symbol"
+              aria-hidden="true"
+              [style.background]="p.color"
+              [style.color]="p.symbolColor"
+              >{{ p.symbol }}</span
+            >
+            <span class="text">
+              <span class="name">{{ p.name }}</span>
+              <span class="meta">
+                {{ p.category }} · {{ p.ratingLabel }}
+                @if (p.wheelchairAccessible) {
+                  · wheelchair accessible
+                }
+              </span>
+            </span>
+            <span class="distance">{{ p.distance }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>

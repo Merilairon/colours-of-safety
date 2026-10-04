@@ -61,7 +61,7 @@
                   (click)="startEdit(row)"
                   title="Edit"
                 >
-                  ✎
+                  <app-icon name="edit" />
                 </button>
               }
               @if (row.status === 'pending') {
@@ -72,7 +72,7 @@
                   (click)="startDelete(row.id)"
                   title="Delete"
                 >
-                  ✕
+                  <app-icon name="trash" />
                 </button>
               } @else {
                 <button
@@ -82,7 +82,7 @@
                   title="Only pending submissions can be deleted"
                   disabled
                 >
-                  ✕
+                  <app-icon name="trash" />
                 </button>
               }
             </div>

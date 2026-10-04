@@ -698,7 +698,7 @@ describe('AC-7 Accessibility Visual Evidence', () => {
     expect(qsa(fixture, 'span.swatch[aria-hidden="true"]').length).toBe(5);
   });
 
-  it('toast has role="status" aria-live="polite"', async () => {
+  it('toast renders inside a persistent role="status" aria-live="polite" region', async () => {
     const { MapComponent } = await import('./map/map');
     await TestBed.configureTestingModule({
       imports: [MapComponent, HttpClientTestingModule],
@@ -709,10 +709,11 @@ describe('AC-7 Accessibility Visual Evidence', () => {
     comp['showToast']('Test message');
     fixture.detectChanges();
 
-    const toast = qs(fixture, 'div.toast');
-    expect(toast).not.toBeNull();
-    expect(toast?.getAttribute('role')).toBe('status');
-    expect(toast?.getAttribute('aria-live')).toBe('polite');
+    // The region exists before the message so screen readers announce the change.
+    const region = qs(fixture, 'div.toast-region');
+    expect(region?.getAttribute('role')).toBe('status');
+    expect(region?.getAttribute('aria-live')).toBe('polite');
+    expect(region?.querySelector('div.toast')?.textContent).toContain('Test message');
   });
 
   it('close-hint button has aria-label', async () => {

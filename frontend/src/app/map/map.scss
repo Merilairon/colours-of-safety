@@ -24,9 +24,13 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   font-size: 0.8rem;
 
-  h3 {
+  h2 {
     margin: 0 0 0.5rem;
     font-size: 0.85rem;
+  }
+
+  .legend-toggle {
+    display: none;
   }
 
   .legend-row {
@@ -47,8 +51,7 @@
 
     .indicator {
       font-size: 10px;
-      color: #fff;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      font-weight: 700;
       line-height: 1;
     }
   }
@@ -67,7 +70,7 @@
     max-width: 180px;
 
     &.pending-note {
-      color: #b07d00;
+      color: #8a6100;
       font-weight: 600;
     }
   }
@@ -75,7 +78,7 @@
 
 .hint {
   position: absolute;
-  top: 10rem;
+  top: 12rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 400;
@@ -87,7 +90,7 @@
   text-align: center;
 
   &.welcome {
-    background: #e84393;
+    background: #c2185b;
     color: #fff;
     display: flex;
     align-items: center;
@@ -108,13 +111,18 @@
   }
 }
 
+.toast-region:empty,
+.error-region:empty {
+  display: none;
+}
+
 .toast {
   position: absolute;
   bottom: 1.5rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 600;
-  background: #2e933c;
+  background: #1e7b2e;
   color: #fff;
   padding: 0.7rem 1.25rem;
   border-radius: 8px;
@@ -169,7 +177,7 @@
       input[type='checkbox'] {
         width: 18px;
         height: 18px;
-        accent-color: #e84393;
+        accent-color: #c2185b;
         cursor: pointer;
       }
     }
@@ -203,10 +211,10 @@
     font-family: inherit;
 
     &:focus {
-      outline: 2px solid #e84393;
+      outline: 2px solid #c2185b;
       outline-offset: 2px;
-      border-color: #e84393;
-      box-shadow: 0 0 0 3px rgba(232, 67, 147, 0.15);
+      border-color: #c2185b;
+      box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.15);
 
       @media (forced-colors: active) {
         outline: 2px solid ButtonText;
@@ -215,7 +223,7 @@
   }
 
   input[type='range'] {
-    accent-color: #e84393;
+    accent-color: #c2185b;
   }
 
   .geometry-edit {
@@ -243,8 +251,8 @@
       color: #3a3d4d;
 
       &:hover:not(:disabled) {
-        border-color: #e84393;
-        color: #e84393;
+        border-color: #c2185b;
+        color: #c2185b;
       }
 
       &:disabled {
@@ -259,7 +267,7 @@
     padding: 0.5rem 0.75rem;
     background: #fff4e5;
     border-radius: 6px;
-    color: #b07d00;
+    color: #8a6100;
     font-size: 0.8rem;
   }
 
@@ -276,7 +284,7 @@
       font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
-      background: #e84393;
+      background: #c2185b;
       color: #fff;
 
       &:disabled {
@@ -289,138 +297,6 @@
         color: #3a3d4d;
       }
     }
-  }
-}
-
-:host ::ng-deep .pop-meta {
-  color: #6b6f80;
-  font-size: 0.8rem;
-  margin: 0.15rem 0 0.35rem;
-
-  .safety-indicator {
-    font-weight: bold;
-    margin-right: 0.25rem;
-  }
-}
-
-// Popup safety indicator styles
-:host ::ng-deep .safety-indicator {
-  display: inline-block;
-  font-size: 0.9rem;
-}
-
-:host ::ng-deep .leaflet-popup-content p {
-  margin: 0.25rem 0 0;
-}
-
-:host ::ng-deep .pop-pending {
-  color: #b07d00;
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-bottom: 0.2rem;
-}
-
-:host ::ng-deep .leaflet-interactive.pending-district {
-  fill-opacity: 0.12;
-}
-
-:host ::ng-deep .pop-report {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #eee;
-  font-size: 0.75rem;
-
-  a {
-    color: #6b6f80;
-    text-decoration: none;
-
-    &:hover {
-      color: #d7263d;
-      text-decoration: underline;
-    }
-  }
-}
-
-// Vote section in popups
-:host ::ng-deep .vote-section {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #eee;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-
-  .vote-count {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #2e933c;
-  }
-
-  .vote-btn {
-    padding: 0.35rem 0.75rem;
-    border: none;
-    border-radius: 6px;
-    background: #e84393;
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-
-    &:hover {
-      background: #d73682;
-    }
-
-    &:disabled {
-      background: #6b6f80;
-      cursor: default;
-    }
-  }
-}
-
-// Edit proposal button in approved popups
-:host ::ng-deep .edit-proposal-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  margin-top: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  width: 7rem;
-  min-height: 2rem;
-  border: none;
-  border-radius: 6px;
-  background: #1d1f2b;
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: #343748;
-  }
-}
-
-// Admin remove button in popups
-:host ::ng-deep .remove-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  margin-top: 0.5rem;
-  margin-left: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  width: 7rem;
-  min-height: 2rem;
-  border: none;
-  border-radius: 6px;
-  background: #d7263d;
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: #b51f32;
   }
 }
 
@@ -459,9 +335,9 @@
     width: 200px;
 
     &:focus {
-      outline: 2px solid #e84393;
+      outline: 2px solid #c2185b;
       outline-offset: 2px;
-      border-color: #e84393;
+      border-color: #c2185b;
 
       @media (forced-colors: active) {
         outline: 2px solid ButtonText;
@@ -470,13 +346,21 @@
   }
 
   button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 0.5rem 0.75rem;
     border: none;
-    background: #e84393;
+    background: #c2185b;
     color: #fff;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.9rem;
+
+    &:focus-visible {
+      outline: 2px solid #1d1f2b;
+      outline-offset: 2px;
+    }
 
     &:disabled {
       opacity: 0.6;
@@ -486,6 +370,57 @@
       background: #1d1f2b;
       padding: 0.5rem;
     }
+  }
+}
+
+// Panel action buttons (filters / list / add)
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e8e9ef;
+}
+
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #d4d6e0;
+  border-radius: 999px;
+  background: #fff;
+  color: #1d1f2b;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #c2185b;
+  }
+
+  &.primary {
+    background: #c2185b;
+    border-color: #c2185b;
+    color: #fff;
+
+    &:hover {
+      background: #ad1457;
+    }
+  }
+
+  &[aria-expanded='true'] {
+    border-color: #1d1f2b;
+    background: #eceef4;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #c2185b;
+    outline-offset: 2px;
+  }
+
+  &.filters-toggle {
+    display: none;
   }
 }
 
@@ -514,7 +449,7 @@
       input[type='checkbox'] {
         width: 16px;
         height: 16px;
-        accent-color: #e84393;
+        accent-color: #c2185b;
         cursor: pointer;
       }
     }
@@ -528,9 +463,9 @@
     background: #fff;
 
     &:focus {
-      outline: 2px solid #e84393;
+      outline: 2px solid #c2185b;
       outline-offset: 2px;
-      border-color: #e84393;
+      border-color: #c2185b;
 
       @media (forced-colors: active) {
         outline: 2px solid ButtonText;
@@ -548,7 +483,7 @@
   color: #6b6f80;
 
   strong {
-    color: #e84393;
+    color: #c2185b;
     font-size: 1.1rem;
   }
 }
@@ -568,13 +503,75 @@
 
 // Mobile responsive styles
 @media (max-width: 768px) {
+  .search-panel {
+    left: 0.5rem;
+    right: 0.5rem;
+    top: 0.5rem;
+    transform: none;
+  }
+
+  .search-bar {
+    form {
+      flex: 1;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      flex: 1;
+    }
+  }
+
+  // The visible "Add place" / "Draw district" buttons replace the toolbar here,
+  // which the full-width search panel would otherwise cover.
+  :host ::ng-deep .leaflet-draw {
+    display: none;
+  }
+
+  // Filters and legend fold away so the map stays visible (LSA-A11)
+  .chip-btn.filters-toggle {
+    display: inline-flex;
+  }
+
+  .filters:not(.open) {
+    display: none;
+  }
+
+  .legend {
+    .legend-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: #1d1f2b;
+      cursor: pointer;
+      padding: 0.15rem 0.25rem;
+
+      &:focus-visible {
+        outline: 2px solid #c2185b;
+        outline-offset: 2px;
+      }
+    }
+
+    &:not(.open) .legend-body {
+      display: none;
+    }
+
+    &.open .legend-toggle {
+      margin-bottom: 0.4rem;
+    }
+  }
+
   .legend {
     bottom: 0.75rem;
     left: 0.75rem;
     padding: 0.6rem 0.75rem;
     font-size: 0.75rem;
 
-    h3 {
+    h2 {
       font-size: 0.8rem;
     }
 
@@ -594,7 +591,8 @@
   }
 
   .hint {
-    top: 0.75rem;
+    top: auto;
+    bottom: 4rem;
     padding: 0.4rem 0.75rem;
     font-size: 0.8rem;
     max-width: 90vw;
@@ -624,38 +622,6 @@
       display: none;
     }
   }
-}
-
-// Marker cluster styles
-:host ::ng-deep .marker-cluster {
-  background: transparent;
-
-  .cluster-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #e84393;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    border: 2px solid #fff;
-  }
-}
-
-:host ::ng-deep .marker-cluster-small .cluster-icon {
-  background: #e84393;
-}
-
-:host ::ng-deep .marker-cluster-medium .cluster-icon {
-  background: #d73682;
-}
-
-:host ::ng-deep .marker-cluster-large .cluster-icon {
-  background: #c6286b;
 }
 
 // Reduced motion support

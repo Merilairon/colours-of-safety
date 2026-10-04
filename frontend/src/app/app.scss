@@ -10,7 +10,7 @@
   left: 0;
   z-index: 9999;
   padding: 0.5rem 1rem;
-  background: #e84393;
+  background: #c2185b;
   color: #fff;
   font-weight: 600;
   text-decoration: none;
@@ -54,7 +54,7 @@
   font-weight: 700;
 
   &:focus-visible {
-    outline: 2px solid #e84393;
+    outline: 2px solid #f48fb1;
     outline-offset: 2px;
   }
 }
@@ -83,7 +83,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid #e84393;
+    outline: 2px solid #f48fb1;
     outline-offset: 2px;
   }
 }
@@ -103,11 +103,11 @@
     &.active,
     &:hover {
       color: #fff;
-      border-bottom-color: #e84393;
+      border-bottom-color: #f48fb1;
     }
 
     &:focus-visible {
-      outline: 2px solid #e84393;
+      outline: 2px solid #f48fb1;
       outline-offset: 2px;
     }
   }
@@ -127,7 +127,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid #e84393;
+      outline: 2px solid #f48fb1;
       outline-offset: 2px;
     }
   }
@@ -137,7 +137,7 @@
   }
 
   .badge {
-    background: #e84393;
+    background: #c2185b;
     color: #fff;
     border-radius: 999px;
     padding: 0.1rem 0.55rem;
@@ -155,7 +155,7 @@
   }
 
   .cta {
-    background: #e84393;
+    background: #c2185b;
     color: #fff;
     padding: 0.35rem 0.85rem;
     border-radius: 6px;
@@ -275,7 +275,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid #e84393;
+    outline: 2px solid #f48fb1;
     outline-offset: 2px;
   }
 }
@@ -300,13 +300,13 @@
     }
 
     &:focus-visible {
-      outline: 2px solid #e84393;
+      outline: 2px solid #f48fb1;
       outline-offset: 2px;
     }
   }
 
   .footer-donate {
-    color: #e84393;
+    color: #f48fb1;
     font-weight: 600;
 
     &:hover {

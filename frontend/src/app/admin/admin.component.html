@@ -67,10 +67,10 @@
             </h2>
             <div class="card-badges">
               @if (!user.emailVerified) {
-                <span class="chip unverified">⚠ Unverified</span>
+                <span class="chip unverified"><span aria-hidden="true">⚠ </span>Unverified</span>
               }
               @if (user.banned) {
-                <span class="chip banned">🚫 Banned</span>
+                <span class="chip banned">Banned</span>
               }
               <span class="role-badge" [class]="user.role">{{ roleLabels[user.role] }}</span>
             </div>
@@ -102,7 +102,7 @@
                 <span class="spinner">Saving…</span>
               }
               @if (user.saved) {
-                <span class="saved-feedback">Saved ✓</span>
+                <span class="saved-feedback" role="status">Saved<span aria-hidden="true"> ✓</span></span>
               }
               <button
                 type="button"

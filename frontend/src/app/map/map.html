@@ -1,34 +1,67 @@
 <div class="map-wrap">
-  <div #mapEl class="map" role="application" aria-label="Interactive safety map"></div>
+  <h1 class="visually-hidden">Map of LGBTQIA+ safe spaces</h1>
 
-  <!-- Search + Filters Panel -->
+  <!-- Controls come before the map in the DOM so keyboard users reach them first (LSA-A8). -->
   <div class="search-panel">
     <div class="search-bar">
-      <form (submit)="onSearch($event)">
+      <form role="search" (submit)="onSearch($event)">
         <input
-          type="text"
+          type="search"
           placeholder="Search city or address..."
           aria-label="Search city or address"
           [value]="searchQuery()"
           (input)="searchQuery.set($any($event).target.value)"
         />
         <button type="submit" aria-label="Search" [disabled]="searching()">
-          {{ searching() ? '...' : '🔍' }}
+          @if (searching()) {
+            <span aria-hidden="true">…</span>
+          } @else {
+            <app-icon name="search" />
+          }
         </button>
       </form>
       <button
         type="button"
         class="locate-btn"
         aria-label="Find my location"
-        (click)="detectUserLocation()"
         title="Find my location"
+        [disabled]="locating()"
+        (click)="detectUserLocation()"
       >
-        📍
+        <app-icon name="locate" />
       </button>
     </div>
 
-    <!-- Filters -->
-    <div class="filters">
+    <div class="panel-actions">
+      <button
+        type="button"
+        class="chip-btn filters-toggle"
+        aria-controls="map-filters"
+        [attr.aria-expanded]="filtersOpen()"
+        (click)="filtersOpen.set(!filtersOpen())"
+      >
+        <app-icon name="filter" /> Filters
+      </button>
+      <button
+        type="button"
+        class="chip-btn"
+        aria-controls="place-list"
+        [attr.aria-expanded]="listOpen()"
+        (click)="toggleList()"
+      >
+        <app-icon name="list" /> {{ listOpen() ? 'Hide list' : 'List places' }}
+      </button>
+      @if (isLoggedIn()) {
+        <button type="button" class="chip-btn primary" (click)="startAddPlace()">
+          <app-icon name="plus" /> Add place
+        </button>
+        <button type="button" class="chip-btn primary" (click)="startDrawDistrict()">
+          <app-icon name="polygon" /> Draw district
+        </button>
+      }
+    </div>
+
+    <div id="map-filters" class="filters" [class.open]="filtersOpen()">
       <label>
         Category
         <select [value]="selectedCategory()" (change)="onCategoryChange($event)">
@@ -53,47 +86,84 @@
           [checked]="wheelchairFilter()"
           (change)="onWheelchairChange($event)"
         />
-        ♿ Wheelchair accessible
+        <span aria-hidden="true">♿</span> Wheelchair accessible
       </label>
     </div>
   </div>
 
-  <div class="legend">
-    <h3>Safety rating</h3>
-    @for (r of [5, 4, 3, 2, 1]; track r) {
-      <div class="legend-row">
-        <span class="swatch" aria-hidden="true" [style.background]="colorFor(r)">
-          <span class="indicator">{{ indicatorFor(r) }}</span>
-        </span>
-        <span class="visually-hidden">{{ indicatorFor(r) }}</span>
-        {{ safetyLabel(r) }}
-      </div>
+  <!-- Persistent live regions: content changes are announced, insertions often are not (LSA-A9). -->
+  <p class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+    {{ announcement() }}
+  </p>
+  <div class="error-region" role="alert">
+    @if (loadError()) {
+      <div class="hint error">{{ loadError() }}</div>
     }
-    <p class="legend-note">
-      Symbols help colour-blind users: ✕ unsafe, △ caution, ◆ mixed, ✓ friendly, ★ welcoming
-    </p>
-    <p class="legend-note">
-      Markers = places · Shaded areas = districts · ♿ = wheelchair accessible
-    </p>
-    @if (isLoggedIn()) {
-      <p class="legend-note pending-note">⏳ Faded = pending review</p>
-    }
-    <!-- Social Proof Counter -->
-    <div class="social-proof">
-      <strong>{{ approvedCount().pois + approvedCount().districts }}</strong> safe spaces mapped
-    </div>
   </div>
+
+  @if (listOpen()) {
+    <app-place-list
+      [places]="visiblePlaces()"
+      [total]="visibleTotal()"
+      [nearUser]="!!userLocation()"
+      (selectPlace)="openPlace($event.id, $event.trigger)"
+      (closed)="toggleList()"
+    />
+  }
+
+  <div #mapEl class="map" role="application" aria-label="Interactive safety map"></div>
+
+  <aside class="legend" [class.open]="legendOpen()" aria-labelledby="legend-heading">
+    <button
+      type="button"
+      class="legend-toggle"
+      aria-controls="legend-body"
+      [attr.aria-expanded]="legendOpen()"
+      (click)="legendOpen.set(!legendOpen())"
+    >
+      <app-icon name="layers" /> Legend
+    </button>
+    <div id="legend-body" class="legend-body">
+      <h2 id="legend-heading">Safety rating</h2>
+      @for (r of [5, 4, 3, 2, 1]; track r) {
+        <div class="legend-row">
+          <span
+            class="swatch"
+            aria-hidden="true"
+            [style.background]="colorFor(r)"
+            [style.color]="symbolColorFor(r)"
+          >
+            <span class="indicator">{{ indicatorFor(r) }}</span>
+          </span>
+          {{ safetyLabel(r) }}
+        </div>
+      }
+      <p class="legend-note">
+        Every marker shows its rating symbol: ✕ unsafe, △ caution, ◆ mixed, ✓ friendly, ★ welcoming
+      </p>
+      <p class="legend-note">
+        Markers = places · Shaded areas = districts ·
+        <span aria-hidden="true">♿</span> = wheelchair accessible
+      </p>
+      @if (isLoggedIn()) {
+        <p class="legend-note pending-note">Dashed, faded markers are pending review</p>
+      }
+      <div class="social-proof">
+        <strong>{{ approvedCount().pois + approvedCount().districts }}</strong> safe spaces mapped
+      </div>
+    </div>
+  </aside>
 
   @if (showWelcome()) {
     <div class="hint welcome">
-      <strong>Welcome! 🎉</strong> Add your first queer-friendly place to help the community.
+      <strong>Welcome!</strong> Add your first queer-friendly place to help the community.
       <button
         type="button"
         class="close-hint"
         aria-label="Close welcome message"
         (click)="showWelcome.set(false)"
       >
-        ✕
+        <app-icon name="close" />
       </button>
     </div>
   }
@@ -102,19 +172,15 @@
     <div class="hint">
       <a routerLink="/login">Log in</a> to mark a queer-friendly place or district.
     </div>
-  } @else if (!draft()) {
-    <div class="hint">
-      Use the tools in the top-right to drop a place (●) or draw a district (▱).
-    </div>
+  } @else if (drawHint()) {
+    <div class="hint">{{ drawHint() }}</div>
   }
 
-  @if (loadError()) {
-    <div class="hint error">{{ loadError() }}</div>
-  }
-
-  @if (toast()) {
-    <div class="toast" role="status" aria-live="polite" aria-atomic="true">{{ toast() }}</div>
-  }
+  <div class="toast-region" role="status" aria-live="polite" aria-atomic="true">
+    @if (toast()) {
+      <div class="toast">{{ toast() }}</div>
+    }
+  </div>
 
   @if (draft(); as d) {
     <div class="draft-panel">
@@ -124,7 +190,12 @@
       <form [formGroup]="form" (ngSubmit)="submit()">
         <label>
           Name
-          <input type="text" formControlName="name" placeholder="e.g. Rainbow Cafe" />
+          <input
+            id="draft-name"
+            type="text"
+            formControlName="name"
+            placeholder="e.g. Rainbow Cafe"
+          />
         </label>
 
         @if (d.kind === 'poi') {
@@ -140,7 +211,7 @@
 
         <label class="checkbox-label">
           <input type="checkbox" formControlName="wheelchairAccessible" />
-          ♿ Wheelchair accessible
+          <span aria-hidden="true">♿</span> Wheelchair accessible
         </label>
 
         <label>
@@ -166,7 +237,7 @@
 
         <label class="checkbox-label anonymity-toggle">
           <input type="checkbox" formControlName="isAnonymous" />
-          <span class="anon-icon">🕵️</span> Submit anonymously (hide my name)
+          Submit anonymously (hide my name)
         </label>
         <p class="anon-hint">
           Your safety matters. Anonymous submissions still help the community.
@@ -190,7 +261,7 @@
       <form [formGroup]="editForm" (ngSubmit)="submitEditProposal()">
         <label>
           Name
-          <input type="text" formControlName="name" />
+          <input id="edit-name" type="text" formControlName="name" />
         </label>
 
         @if (t.kind === 'poi') {
@@ -206,7 +277,7 @@
 
         <label class="checkbox-label">
           <input type="checkbox" formControlName="wheelchairAccessible" />
-          ♿ Wheelchair accessible
+          <span aria-hidden="true">♿</span> Wheelchair accessible
         </label>
 
         <label>
